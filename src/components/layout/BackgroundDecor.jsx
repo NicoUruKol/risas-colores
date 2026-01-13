@@ -1,76 +1,109 @@
+// src/components/layout/BackgroundDecor.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useWheelProgress } from "../hooks/useWheelProgress";
 
+/* =========================
+   HELPERS
+========================= */
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 const smoothstep = (a, b, x) => {
-  const t = clamp01((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
+    const t = clamp01((x - a) / (b - a));
+    return t * t * (3 - 2 * t);
 };
 
-function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
-    const startY = -260;
-    const endY = h + 320;
+/* =========================
+   CATMULL-ROM -> BEZIER
+   - más “delicado”: s más bajo
+   - más puntos: step menor
+========================= */
+function catmullRomToBezierPath(points, s = 0.22) {
+    if (!points || points.length < 2) return "";
+    let d = `M ${points[0].x} ${points[0].y}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+        const p0 = points[Math.max(0, i - 1)];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[Math.min(points.length - 1, i + 2)];
+
+        const c1x = p1.x + (p2.x - p0.x) * (s / 6);
+        const c1y = p1.y + (p2.y - p0.y) * (s / 6);
+        const c2x = p2.x - (p3.x - p1.x) * (s / 6);
+        const c2y = p2.y - (p3.y - p1.y) * (s / 6);
+
+        d += ` C ${c1x} ${c1y} ${c2x} ${c2y} ${p2.x} ${p2.y}`;
+    }
+
+    return d;
+    }
+
+    /* =========================
+    PATH GENERATOR
+    - más suave: menos componentes “raras”
+    - más largo: h grande
+    - loops circulares ok
+    ========================= */
+    function buildWormPath({ seed = 1, w = 1200, h = 5200, side = "left", loop }) {
+    const startY = -380;
+    const endY = h + 520;
 
     const baseX =
-        side === "left" ? w * 0.30 : side === "right" ? w * 0.70 : w * 0.52;
+        side === "left" ? w * 0.28 : side === "right" ? w * 0.72 : w * 0.52;
 
-    // Serpenteo redondo (no “río”)
-    const amp = 260 + ((seed * 41) % 120);
-    const period = 560 + ((seed * 31) % 180);
-    const phase = ((seed * 0.77) % 6.28);
+    // Movimiento “serpiente”: 1 seno principal + 1 micro seno MUY suave
+    const amp = 320 + ((seed * 41) % 160);
+    const period = 980 + ((seed * 31) % 320);
+    const phase = ((seed * 0.77) % 6.283);
 
-    const step = 18;
+    const amp2 = amp * 0.08;
+    const period2 = period * 0.62;
+    const phase2 = phase * 1.25;
+
+    const step = 7; // ✅ más puntos = menos quiebres
     const pts = [];
 
     for (let yy = startY; yy <= endY; yy += step) {
         let x =
         baseX +
         Math.sin(yy / period + phase) * amp +
-        Math.sin(yy / (period * 0.58) + phase * 1.8) * (amp * 0.12);
+        Math.sin(yy / period2 + phase2) * amp2;
 
         let y = yy;
 
-        // Loop visible y prolijo (solo donde lo definimos)
         if (loop) {
         const y0 = loop.y - loop.span / 2;
         const y1 = loop.y + loop.span / 2;
 
         if (y >= y0 && y <= y1) {
-            const t = (y - y0) / (y1 - y0); // 0..1
-            const theta = t * Math.PI * 2; // 1 vuelta
+            const t = (y - y0) / (y1 - y0);
+            const theta = t * Math.PI * 2;
 
-            const wIn = smoothstep(0.0, 0.18, t);
-            const wOut = 1 - smoothstep(0.82, 1.0, t);
+            const wIn = smoothstep(0.0, 0.16, t);
+            const wOut = 1 - smoothstep(0.84, 1.0, t);
             const wMix = wIn * wOut;
 
             x = x + Math.cos(theta) * loop.radius * wMix;
-            y = y + Math.sin(theta) * loop.radius * 0.22 * wMix;
+            y = y + Math.sin(theta) * loop.radius * wMix;
         }
         }
 
         pts.push({ x, y });
     }
 
-    // Curva cúbica suave
-    let d = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 1; i < pts.length; i++) {
-        const p0 = pts[i - 1];
-        const p1 = pts[i];
-        const cx1 = p0.x + (p1.x - p0.x) * 0.35;
-        const cy1 = p0.y + (p1.y - p0.y) * 0.35;
-        const cx2 = p0.x + (p1.x - p0.x) * 0.65;
-        const cy2 = p0.y + (p1.y - p0.y) * 0.65;
-        d += ` C ${cx1} ${cy1} ${cx2} ${cy2} ${p1.x} ${p1.y}`;
+    return catmullRomToBezierPath(pts, 0.20);
     }
 
-    return d;
-    }
-
+    /* =========================
+    WORM
+    - maxSeg más largo (0.95)
+    - ciclo más corto => nace/continúa casi sin pausa
+    ========================= */
     function Worm({
-    scrollY,
-    startAt = 0,
-    cycleLen = 4200,
+    progress,
     seed = 1,
-    thickness = 56, // (ya está ~20% más fino vs tus 70 aprox)
+    thickness = 48,
+    maxSeg = 1.95,     // ✅ +50% vs 0.85 y mucho más que 0.35
+    cycleLen = 3.2,    // ✅ alterna rápido => “casi continuo”
     colorVar = "--brand-primary",
     anchorA,
     anchorB,
@@ -79,18 +112,11 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
     loopA,
     loopB,
     }) {
-    if (scrollY < startAt) return null;
-
-    const t = (scrollY - startAt) / cycleLen;
+    // progress es continuo (RAF), así que no “salta”
+    const t = progress / cycleLen;
     const cycle = Math.floor(t);
-    const frac = t - cycle;
+    const u = t - cycle; // 0..1
 
-    // Fade-in/out real (no suma infinitos)
-    const fadeIn = smoothstep(0.00, 0.08, frac);
-    const fadeOut = 1 - smoothstep(0.88, 0.98, frac);
-    const alpha = fadeIn * fadeOut;
-
-    // alterna origen por ciclo => “sale por un lado / nace por otro”
     const alt = cycle % 2 === 1;
     const anchor = alt ? anchorB : anchorA;
     const side = alt ? sideB : sideA;
@@ -105,19 +131,26 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
     const pathRef = useRef(null);
     const [len, setLen] = useState(1);
 
-    // Largo real => el gusano se “dibuja” con el scroll (no aparece completo)
     useEffect(() => {
         if (!pathRef.current) return;
         try {
         const L = pathRef.current.getTotalLength();
         if (Number.isFinite(L) && L > 10) setLen(L);
         } catch {
-        setLen(6000);
+        setLen(20000);
         }
     }, [d]);
 
-    const dash = len;
-    const offset = dash * (1 - frac);
+    // Segmento visible: crece y luego cola persigue
+    const uExt = u * (1 + maxSeg);
+    const head = Math.min(1, uExt);
+    const tail = Math.min(1, Math.max(0, uExt - maxSeg));
+
+    const visible = Math.max(0.0001, head - tail);
+    const visibleLen = visible * len;
+
+    const dasharray = `${visibleLen} ${len}`;
+    const dashoffset = len - tail * len;
 
     return (
         <div
@@ -125,12 +158,11 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
         style={{
             left: anchor.x,
             top: anchor.y,
-            width: "900px",
-            height: "210vh",
-            opacity: alpha,
+            width: "1180px",
+            height: "560vh",
         }}
         >
-        <svg viewBox="0 0 1200 1800" className="h-full w-full overflow-visible" aria-hidden="true">
+        <svg viewBox="0 0 1200 5200" className="h-full w-full overflow-visible" aria-hidden="true">
             <defs>
             <filter id={`glow-${seed}-${alt ? "b" : "a"}`} x="-80%" y="-80%" width="260%" height="260%">
                 <feGaussianBlur stdDeviation="18" result="blur" />
@@ -149,12 +181,12 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
             d={d}
             fill="none"
             stroke={`var(${colorVar})`}
-            strokeWidth={thickness * 1.08}
+            strokeWidth={thickness * 1.06}
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeDasharray={dash}
-            strokeDashoffset={offset}
-            opacity={0.22}
+            strokeDasharray={dasharray}
+            strokeDashoffset={dashoffset}
+            opacity={0.20}
             filter={`url(#halo-${seed}-${alt ? "b" : "a"})`}
             />
 
@@ -167,11 +199,11 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
             strokeWidth={thickness}
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeDasharray={dash}
-            strokeDashoffset={offset}
+            strokeDasharray={dasharray}
+            strokeDashoffset={dashoffset}
             filter={`url(#glow-${seed}-${alt ? "b" : "a"})`}
             style={{
-                filter: `url(#glow-${seed}-${alt ? "b" : "a"}) saturate(2.1) brightness(1.35)`,
+                filter: `url(#glow-${seed}-${alt ? "b" : "a"}) saturate(2.35) brightness(1.38)`,
             }}
             />
         </svg>
@@ -179,66 +211,94 @@ function buildWormPath({ seed = 1, w = 1200, h = 1800, side = "left", loop }) {
     );
     }
 
+    /* =========================
+    BACKGROUND DECOR
+    CLAVE:
+    - wheelRaw puede venir a saltos
+    - acá lo “convertimos” a progresión continua con RAF
+    ========================= */
     export default function BackgroundDecor() {
-    const [y, setY] = useState(0);
+    // el hook existente: lo usamos SOLO como “input”
+    // (subí speed para que al 1er tick aparezca cabeza)
+    const wheelRaw = useWheelProgress({ speed: 0.010, smooth: 0.08 });
+
+    // progresión continua: evita saltos visibles
+    const [p, setP] = useState(0);
+    const targetRef = useRef(0);
+    const pRef = useRef(0);
 
     useEffect(() => {
-        const onScroll = () => setY(window.scrollY || 0);
-        onScroll();
-        window.addEventListener("scroll", onScroll, { passive: true });
-        return () => window.removeEventListener("scroll", onScroll);
+        targetRef.current = wheelRaw;
+    }, [wheelRaw]);
+
+    useEffect(() => {
+        let raf = 0;
+
+        const tick = () => {
+        // easing fuerte => sin escalones
+        const cur = pRef.current;
+        const tgt = targetRef.current;
+
+        // si el wheel “pega saltos”, acá se vuelve continuo
+        const next = cur + (tgt - cur) * 0.12;
+
+        pRef.current = next;
+        setP(next);
+
+        raf = requestAnimationFrame(tick);
+        };
+
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
     }, []);
 
     return (
-        <div
-        className="pointer-events-none fixed inset-0 overflow-hidden"
-        style={{ zIndex: -1 }} // ✅ atrás del Home sin taparlo
-        >
+        <div className="pointer-events-none fixed inset-0 overflow-hidden" style={{ zIndex: -1 }}>
         {/* NARANJA */}
         <Worm
-            scrollY={y}
+            progress={p}
             colorVar="--brand-primary"
             seed={7}
-            thickness={56} // -20% aprox
-            startAt={30}
-            cycleLen={2200}
-            anchorA={{ x: -240, y: -170 }}
-            anchorB={{ x: "calc(100vw - 680px)", y: -170 }}
+            thickness={50}
+            maxSeg={0.95}
+            cycleLen={3.1}
+            anchorA={{ x: -150, y: -220 }}                    // ✅ entra ya
+            anchorB={{ x: "calc(78vw - 650px)", y: -220 }}
             sideA="left"
             sideB="right"
-            loopA={{ y: 720, radius: 220, span: 640 }}
-            loopB={{ y: 560, radius: 180, span: 560 }}
+            loopA={{ y: 1200, radius: 240, span: 700 }}
+            loopB={{ y: 760, radius: 210, span: 640 }}
         />
 
         {/* VIOLETA */}
         <Worm
-            scrollY={y}
+            progress={p}
             colorVar="--brand-accent"
             seed={13}
             thickness={54}
-            startAt={60}
-            cycleLen={2400}
-            anchorA={{ x: "calc(50vw - 320px)", y: -190 }}
-            anchorB={{ x: -220, y: -190 }}
+            maxSeg={0.95}
+            cycleLen={3.25}
+            anchorA={{ x: "calc(52vw - 500px)", y: -260 }}
+            anchorB={{ x: -300, y: -220 }}
             sideA="center"
             sideB="left"
-            loopA={{ y: 980, radius: 240, span: 740 }} // loop grande y visible
-            loopB={{ y: 700, radius: 200, span: 660 }}
+            loopA={{ y: 1500, radius: 290, span: 820 }}
+            loopB={{ y: 980, radius: 240, span: 720 }}
         />
 
         {/* AZUL */}
         <Worm
-            scrollY={y}
+            progress={p}
             colorVar="--brand-secondary"
             seed={21}
-            thickness={55}
-            startAt={90}
-            cycleLen={2100}
-            anchorA={{ x: "calc(100vw - 680px)", y: -175 }}
-            anchorB={{ x: -260, y: -175 }}
+            thickness={44}
+            maxSeg={0.95}
+            cycleLen={2.95}
+            anchorA={{ x: "calc(100vw - 860px)", y: -280 }}
+            anchorB={{ x: 10, y: -280 }}
             sideA="right"
             sideB="left"
-            loopA={{ y: 760, radius: 170, span: 540 }}
+            loopA={{ y: 1200, radius: 200, span: 600 }}
             loopB={null}
         />
         </div>
