@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 const smoothstep = (a, b, x) => {
@@ -6,7 +6,7 @@ const smoothstep = (a, b, x) => {
     return t * t * (3 - 2 * t);
 };
 
-// mide alto real del contenedor (Home o wrapper en AppShell)
+// mide alto real del contenedor (Home o wrapper)
 function useResizeHeight(ref) {
     const [h, setH] = useState(1400);
 
@@ -58,66 +58,67 @@ function useResizeHeight(ref) {
     return t;
     }
 
-    // Gusano recorriendo un path:
-    // - 1) nace desde afuera y CRECE (wormLen = head)
-    // - 2) llega a maxLen y la cola persigue (wormLen fijo)
-    // - 3) no hay “wrap” => no aparece completo ni retrocede
-    function WormPath({
-        t,
-        dA,
-        dB,
+    /**
+     * Gusano sobre un path con dinámica correcta:
+     * - head avanza 0..L
+     * - wormLen = min(maxLen, head) => crece al principio
+     * - tail sigue cuando head > maxLen
+     *
+     * Importante: NO hay fadeOut por tiempo.
+     * El gusano sale naturalmente cuando head y tail salen del viewport (porque el path termina fuera).
+     */
+    function WormRunner({
+        d,
+        frac, // 0..1 para ESTE recorrido
         colorVar,
         thickness = 54,
-        cycleSec = 12.5,
-        visibleFrac = 0.60, // largo máximo relativo
+        visibleFrac = 0.60, // largo máximo del gusano (fracción del path)
         seed = 1,
-        startDelay = 0,     // ✅ nuevo: para que no arranque “en cualquier parte”
         }) {
-        const pathRef = useRef(null);
         const [pathLen, setPathLen] = useState(0);
+        const pathRef = useRef(null);
 
-        const L = pathLen > 10 ? pathLen : 6000;
-        const maxLen = L * visibleFrac;
-
-        // ✅ delay real: hasta que arranca, no hay progreso
-        const tt = Math.max(0, t - startDelay);
-
-        // ✅ ciclo entero (0,1,2...) sin seed metido en el frac
-        const cycle = Math.floor(tt / cycleSec);
-        const cycleT = (tt - cycle * cycleSec) / cycleSec; // 0..1
-
-        // alterna A/B por ciclo
-        const useB = cycle % 2 === 1;
-        const d = useMemo(() => (useB ? dB : dA), [useB, dA, dB]);
-
-        // medir path
         useEffect(() => {
             if (!pathRef.current) return;
             try {
-            const len = pathRef.current.getTotalLength();
-            setPathLen( Number.isFinite(len) && len > 10 ? len : 6000 );
+            const L = pathRef.current.getTotalLength();
+            setPathLen(Number.isFinite(L) && L > 10 ? L : 0);
             } catch {
-            setPathLen(6000);
+            setPathLen(0);
             }
         }, [d]);
 
-        // ✅ CLAVE: el head viaja más que el path (sale con cola)
-        // head: 0 .. (L + maxLen)
+        // Hasta medir, no mostramos nada (evita “saltos” y gusanos fantasmas)
+        if (pathLen <= 10) {
+            return (
+            <path ref={pathRef} d={d} fill="none" stroke="transparent" strokeWidth={1} />
+            );
+        }
+
+        const L = pathLen;
+
+        // máximo largo visible en unidades del path
+        const maxLen = L * visibleFrac;
+
+        // CLAVE: hacemos que en un ciclo la cabeza recorra L + maxLen
+        // (primero crece, luego cola persigue y termina de salir)
         const travel = L + maxLen;
-        const head = travel * cycleT;
+        const headDist = clamp01(frac) * travel;
 
-        // gusano crece hasta maxLen
-        const wormLen = Math.min(maxLen, head);
+        const headOnPath = Math.min(L, headDist);
+        const tailDist = Math.max(0, headDist - maxLen);
+        const tailOnPath = Math.min(L, tailDist);
 
-        // segmento visible
+        const wormLen = Math.max(0, headOnPath - tailOnPath);
+
         const dasharray = `${wormLen} ${L}`;
-        const dashoffset = L - head;
+        const dashoffset = -tailOnPath; // ✅ ANCLA EN LA COLA (no “rebota” al inicio)
 
-        // fade-in suave solo al inicio del ciclo
-        const alpha = 0.95 * smoothstep(0.0, 0.05, cycleT);
+        // Fade MUY leve solo al inicio para evitar “pop”
+        const alpha = 0.95 * smoothstep(0.0, 0.02, frac);
 
-        const glowId = `glow-${seed}-${useB ? "b" : "a"}`;
-        const haloId = `halo-${seed}-${useB ? "b" : "a"}`;
+        const glowId = `glow-${seed}`;
+        const haloId = `halo-${seed}`;
 
         return (
             <g opacity={alpha}>
@@ -129,25 +130,25 @@ function useResizeHeight(ref) {
                     <feMergeNode in="SourceGraphic" />
                 </feMerge>
                 </filter>
-
                 <filter id={haloId} x="-120%" y="-120%" width="340%" height="340%">
-                <feGaussianBlur stdDeviation="28" />
+                <feGaussianBlur stdDeviation="30" />
                 </filter>
             </defs>
 
-            {/* halo continuo */}
+            {/* halo con el MISMO dash => no ensucia */}
             <path
                 d={d}
                 fill="none"
                 stroke={`var(${colorVar})`}
-                strokeWidth={thickness * 1.12}
+                strokeWidth={thickness * 1.10}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                strokeDasharray={dasharray}
+                strokeDashoffset={dashoffset}
                 opacity={0.10}
                 filter={`url(#${haloId})`}
             />
 
-            {/* gusano viajando */}
             <path
                 ref={pathRef}
                 d={d}
@@ -159,9 +160,54 @@ function useResizeHeight(ref) {
                 strokeDasharray={dasharray}
                 strokeDashoffset={dashoffset}
                 filter={`url(#${glowId})`}
-                style={{ filter: `url(#${glowId}) saturate(1.6) brightness(1.2)` }}
             />
             </g>
+        );
+        }
+
+    /**
+     * Scheduler A/B:
+     * - Nunca aparecen juntos.
+     * - durA y durB son independientes y NO se contaminan.
+     */
+    function WormPair({
+        t,
+        dA,
+        dB,
+        durA,
+        durB,
+        colorVar,
+        thickness,
+        visibleFrac,
+        seedBase,
+        startDelay = 0, // ✅ delay real (no arranca “a mitad de camino”)
+        }) {
+        const period = durA + durB;
+
+        // ✅ Mientras no se cumple el delay, nada “desplegado”
+        if (t < startDelay) return null;
+
+        // ✅ tiempo local arranca en 0 cuando aparece
+        const tt = t - startDelay;
+        const local = tt % period;
+
+        const isA = local < durA;
+        const frac = isA ? local / durA : (local - durA) / durB;
+        const d = isA ? dA : dB;
+
+        // seed SOLO para ids (no afecta tiempo)
+        const seed = isA ? seedBase * 10 + 1 : seedBase * 10 + 2;
+
+        return (
+            <WormRunner
+            key={isA ? `${seedBase}-A` : `${seedBase}-B`}  // ✅ fuerza remount al alternar
+            d={d}
+            frac={frac}
+            colorVar={colorVar}
+            thickness={thickness}
+            visibleFrac={visibleFrac}
+            seed={seed}
+        />
         );
         }
 
@@ -172,89 +218,66 @@ function useResizeHeight(ref) {
     const viewW = 1200;
     const viewH = 2000;
 
-    /**
-     * Ajuste clave:
-     * - ORANGE_A y ORANGE_B: 1 loop cada uno (no “doble loop encima”)
-     * - Todos los paths nacen fuera (x<0 o x>viewW o y<0) y mueren fuera (y>viewH)
-     * - Mantienen curvas suaves “brazo entero”
-     */
+// viewW=1200 viewH=2000
+// nacen fuera (y<0 o x fuera) y mueren fuera (y>2000 o x fuera)
+// =========================
 
-    // 🟠 NARANJA (A): entra arriba, loop grande temprano, segundo loop más abajo y se va por ABAJO-IZQ
-        const ORANGE_A = `M 220 -280
-        C 340 60, 260 260, 200 460
-        C 120 720, 260 820, 460 900
-        C 720 1020, 760 820, 600 680
-        C 430 530, 220 640, 300 900
-        C 420 1280, 760 1260, 820 980
-        C 880 720, 620 640, 460 820
-        C 320 980, 420 1160, 640 1200
-        C 920 1260, 860 1560, 640 1700
-        C 460 1820, 360 1700, 420 1540
-        C 500 1340, 760 1400, 740 1640
-        C 720 1900, 420 1960, -160 2140`;
+    // 🟠 ORANGE_A: loop temprano (y~520), sale abajo-izq
+    const ORANGE_A = `M 140 -260
+    C 160 60, 140 260, 200 430
+    C 300 650, 420 780, 320 920
+    C 220 1040, 140 980, 180 880
+    C 240 760, 420 820, 420 980
+    C 420 1180, 260 1300, 200 1480
+    C 120 1700, 110 1920, 80 2140`;
 
-        // 🟠 NARANJA (B): entra por IZQ arriba, loop más abajo (más apretado) y sale por ABAJO-DER
-        const ORANGE_B = `M -260 120
-        C 40 200, 160 380, 220 560
-        C 300 800, 160 940, 40 1040
-        C -60 1140, 60 1240, 280 1240
-        C 560 1240, 680 1020, 520 860
-        C 360 700, 180 820, 260 1060
-        C 380 1440, 740 1460, 860 1200
-        C 960 980, 760 900, 620 1040
-        C 480 1180, 620 1340, 820 1400
-        C 1120 1490, 1080 1840, 860 1960
-        C 640 2080, 360 2060, 1320 2140`;
+    const ORANGE_B = `M 1160 -240
+    C 1145 10, 1090 320, 1105 560
+    C 1130 920, 1210 1140, 1120 1280
+    C 1060 1420, 1040 1540, 1080 1640
+    C 1180 1760, 1040 1840, 940 1720
+    C 840 1600, 920 1420, 1060 1460
+    C 1220 1520, 1240 1760, 1120 1900
+    C 1040 2000, 1000 2060, 1020 2140`;
 
 
-        // 🟣 VIOLETA (A): orgánico, S larga, loop amplio más abajo, sale por ABAJO-CENTRO (no derecha)
-        const VIOLET_A = `M 560 -300
-        C 820 80, 460 300, 600 560
-        C 770 880, 1020 900, 1100 700
-        C 1180 520, 1040 320, 820 360
-        C 600 400, 620 680, 820 780
-        C 1010 880, 980 1140, 760 1260
-        C 560 1380, 440 1240, 520 1000
-        C 620 720, 860 780, 940 960
-        C 1040 1200, 820 1500, 580 1640
-        C 360 1760, 240 1940, 540 2140`;
+    // 🟣 VIOLET_A: loop medio (y~850), sale abajo-centro
+    const VIOLET_A = `M 600 -280
+    C 620 40, 580 260, 640 520
+    C 720 760, 760 980, 680 1180
+    C 620 1320, 640 1460, 700 1560
+    C 780 1700, 640 1760, 560 1680
+    C 460 1580, 520 1400, 640 1420
+    C 800 1460, 820 1720, 700 1880
+    C 620 2000, 560 2060, 520 2140`;
 
-        // 🟣 VIOLETA (B): entra por DERECHA, loop más arriba y más grande (distinto al A), sale por IZQ abajo
-        const VIOLET_B = `M 1460 40
-        C 1120 160, 960 360, 900 560
-        C 820 860, 580 920, 460 760
-        C 300 560, 420 320, 680 360
-        C 940 400, 980 720, 760 820
-        C 560 900, 600 1100, 800 1220
-        C 1040 1370, 1180 1200, 1120 940
-        C 1080 720, 860 760, 760 900
-        C 620 1100, 760 1320, 980 1400
-        C 1260 1500, 1200 1780, 940 1920
-        C 700 2060, 520 2060, -220 2140`;
+    // 🟣 VIOLET_B: loop bien abajo (y~1500), sale abajo-izq
+    const VIOLET_B = `M 80 -240
+    C 100 80, 140 260, 200 440
+    C 280 640, 360 820, 260 960
+    C 180 1080, 110 1040, 140 940
+    C 200 780, 360 860, 380 1020
+    C 420 1260, 300 1380, 220 1560
+    C 140 1760, 120 1960, 120 2140`;
 
 
-        // 🔵 AZUL (A): columna vertebral, sin loops perfectos, cruza y sale por IZQ
-        const BLUE_A = `M 1160 -280
-        C 1080 40, 880 220, 720 380
-        C 520 580, 560 860, 860 900
-        C 1140 940, 1160 1240, 900 1380
-        C 660 1510, 560 1350, 600 1140
-        C 640 920, 840 940, 940 1080
-        C 1080 1260, 980 1500, 740 1640
-        C 520 1760, 260 1880, -240 2140`;
+    // 🔵 BLUE_A: loop bajo-izq (y~1050), sale abajo-izq
+    const BLUE_A = `M 1080 -260
+    C 1040 80, 980 260, 1040 440
+    C 1140 660, 1180 820, 1080 940
+    C 960 1080, 940 980, 980 880
+    C 1040 760, 1160 820, 1180 980
+    C 1220 1240, 1100 1400, 1040 1580
+    C 940 1800, 920 1980, 940 2140`;
 
-        // 🔵 AZUL (B): entra por DERECHA, 1 “rulo” suave (no compás), sale por ABAJO-DER (distinto del A)
-        const BLUE_B = `M 1440 260
-        C 1140 320, 960 480, 920 680
-        C 860 980, 1100 1120, 1240 940
-        C 1380 760, 1220 540, 1040 600
-        C 860 660, 880 880, 1040 980
-        C 1220 1100, 1140 1320, 940 1460
-        C 720 1620, 500 1600, 320 1460
-        C 140 1320, 180 1060, 420 960
-        C 640 860, 820 980, 900 1180
-        C 1000 1460, 900 1700, 700 1820
-        C 460 1980, 160 2040, 1320 2140`;
+    // 🔵 BLUE_B: loop más arriba (y~650), sale abajo-der
+    const BLUE_B = `M 720 -260
+    C 700 60, 640 260, 700 440
+    C 780 640, 760 800, 640 900
+    C 520 1000, 500 880, 560 800
+    C 640 700, 740 760, 760 900
+    C 820 1140, 740 1340, 660 1540
+    C 560 1760, 540 1960, 560 2140`;
 
 
     return (
@@ -270,41 +293,44 @@ function useResizeHeight(ref) {
             aria-hidden="true"
             style={{ display: "block" }}
         >
-            <WormPath
-                t={t}
-                dA={ORANGE_A}
-                dB={ORANGE_B}
-                colorVar="--brand-primary"
-                thickness={54}
-                cycleSec={15.5}
-                visibleFrac={0.62}
-                seed={7}
-                startDelay={0.0}   // ✅ arranca primero
-                />
+            {/* 🟠 Naranja: SOLO A o SOLO B (nunca juntos) */}
+            <WormPair
+            t={t}
+            dA={ORANGE_A}
+            dB={ORANGE_B}
+            durA={6.0}  // ← velocidad del recorrido A
+            durB={6.0}  // ← velocidad del recorrido B
+            colorVar="--brand-primary"
+            thickness={54}
+            visibleFrac={0.60}
+            seedBase={701}
+            />
 
-                <WormPath
-                t={t}
-                dA={VIOLET_A}
-                dB={VIOLET_B}
-                colorVar="--brand-accent"
-                thickness={56}
-                cycleSec={16.2}
-                visibleFrac={0.60}
-                seed={13}
-                startDelay={1.2}   // ✅ arranca después
-                />
+            {/* 🟣 Violeta */}
+            <WormPair
+            t={t}
+            dA={VIOLET_A}
+            dB={VIOLET_B}
+            durA={12.0}
+            durB={12.0}
+            colorVar="--brand-accent"
+            thickness={56}
+            visibleFrac={0.58}
+            seedBase={1301}
+            />
 
-                <WormPath
-                t={t}
-                dA={BLUE_A}
-                dB={BLUE_B}
-                colorVar="--brand-secondary"
-                thickness={50}
-                cycleSec={15.8}
-                visibleFrac={0.58}
-                seed={21}
-                startDelay={2.2}   // ✅ arranca después
-                />
+            {/* 🔵 Azul */}
+            <WormPair
+            t={t}
+            dA={BLUE_A}
+            dB={BLUE_B}
+            durA={12.0}
+            durB={12.0}
+            colorVar="--brand-secondary"
+            thickness={50}
+            visibleFrac={0.56}
+            seedBase={2101}
+            />
         </svg>
         </div>
     );
