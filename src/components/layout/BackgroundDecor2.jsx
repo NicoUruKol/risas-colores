@@ -298,8 +298,8 @@ function useResizeHeight(ref) {
             t={t}
             dA={ORANGE_A}
             dB={ORANGE_B}
-            durA={6.0}  // ← velocidad del recorrido A
-            durB={6.0}  // ← velocidad del recorrido B
+            durA={16.0}  // ← velocidad del recorrido A
+            durB={15.0}  // ← velocidad del recorrido B
             colorVar="--brand-primary"
             thickness={54}
             visibleFrac={0.60}
@@ -311,8 +311,8 @@ function useResizeHeight(ref) {
             t={t}
             dA={VIOLET_A}
             dB={VIOLET_B}
-            durA={12.0}
-            durB={12.0}
+            durA={18.0}
+            durB={16.0}
             colorVar="--brand-accent"
             thickness={56}
             visibleFrac={0.58}
@@ -324,8 +324,8 @@ function useResizeHeight(ref) {
             t={t}
             dA={BLUE_A}
             dB={BLUE_B}
-            durA={12.0}
-            durB={12.0}
+            durA={17.0}
+            durB={17.0}
             colorVar="--brand-secondary"
             thickness={50}
             visibleFrac={0.56}
