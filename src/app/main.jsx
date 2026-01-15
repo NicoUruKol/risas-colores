@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 
 import "../styles/globals.css";
 
@@ -14,7 +14,7 @@ import Carrito from "../pages/Carrito";
 import Checkout from "../pages/Checkout";
 import Confirmacion from "../pages/Confirmacion";
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     element: <AppShell />,
     children: [

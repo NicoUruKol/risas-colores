@@ -6,26 +6,28 @@ import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import { useRevealOnScroll } from "../components/hooks/useRevealOnScroll";
-
+import Hero1 from "../assets/Hero1.png"
+import Hero2 from "../assets/Hero2.png"
+import Hero3 from "../assets/Hero3.png"
 
 export default function Home() {
     const heroSlides = [
         {
-            img: "../../public/Hero1.png",
+            img: {Hero1},
             title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
             subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
             cta1: { to: "/el-jardin", label: "Conocer el jardín" },
             cta2: { to: "/uniformes", label: "Comprar uniformes" },
         },
         {
-            img: "../../public/Hero2.png",
+            img: {Hero2},
             title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
             subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
             cta1: { to: "/el-jardin", label: "Ver propuesta" },
             cta2: { to: "/uniformes", label: "Ver uniformes" },
         },
         {
-            img: "../../public/Hero3.png",
+            img: {Hero3},
             title: "Un lugar donde cada niño se siente seguro para crecer",
             subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
             cta1: { to: "/el-jardin", label: "Más información" },

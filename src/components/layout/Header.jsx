@@ -4,6 +4,7 @@ import Container from "./Container";
 import Button from "../ui/Button";
 import { useCart } from "../../context/CartContext";
 import styles from "./Header.module.css";
+import logo from "../../assets/logoDesat.png"
 
 export default function Header() {
     const { count } = useCart();
@@ -25,7 +26,7 @@ export default function Header() {
             <Link to="/" className={styles.brand} aria-label="Ir al inicio">
             <div className={styles.logoWrap}>
                 {<img
-                    src="/logoDesat.png"
+                    src={logo}
                     alt="Risas y Colores"
                     className={styles.logoImg}
                     />
