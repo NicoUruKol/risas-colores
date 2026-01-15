@@ -13,21 +13,21 @@ import Hero3 from "../assets/Hero3.png"
 export default function Home() {
     const heroSlides = [
         {
-            img: {Hero1},
+            img: Hero1,
             title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
             subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
             cta1: { to: "/el-jardin", label: "Conocer el jardín" },
             cta2: { to: "/uniformes", label: "Comprar uniformes" },
         },
         {
-            img: {Hero2},
+            img: Hero2,
             title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
             subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
             cta1: { to: "/el-jardin", label: "Ver propuesta" },
             cta2: { to: "/uniformes", label: "Ver uniformes" },
         },
         {
-            img: {Hero3},
+            img: Hero3,
             title: "Un lugar donde cada niño se siente seguro para crecer",
             subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
             cta1: { to: "/el-jardin", label: "Más información" },
