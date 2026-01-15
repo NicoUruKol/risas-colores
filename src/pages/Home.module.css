@@ -350,8 +350,8 @@
 ============================== */
 
 .benefitCard {
-  /* Lavanda base (visible y alegre) */
-    --soft-tint: rgba(177, 132, 240, 0.38);
+  /* Azul base (visible y alegre) */
+    --soft-tint: rgba(25, 157, 252, 0.14);
 
     transition:
         background 240ms ease,
