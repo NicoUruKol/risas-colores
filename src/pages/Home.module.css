@@ -1,0 +1,85 @@
+/* Home.module.css */
+.stage {
+    position: relative;
+    overflow: hidden;
+}
+
+/* capa decorativa fija (parallax sutil) */
+.bg {
+    position: absolute;
+    inset: -80px;
+    z-index: -10;
+    pointer-events: none;
+}
+
+/* líneas de colores verticales (tipo crayón) */
+.bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.55;
+    filter: blur(0.2px);
+    background:
+        linear-gradient(to bottom, rgba(246,166,90,.0), rgba(246,166,90,.35), rgba(246,166,90,.0)) 12% 0 / 10px 220px repeat-y,
+        linear-gradient(to bottom, rgba(74,144,194,.0), rgba(74,144,194,.35), rgba(74,144,194,.0)) 48% 0 / 12px 260px repeat-y,
+        linear-gradient(to bottom, rgba(200,182,226,.0), rgba(177, 132, 240,.35), rgba(200,182,226,.0)) 78% 0 / 9px 240px repeat-y;
+    animation: driftY 10s linear infinite;
+}
+
+/* blobs suaves (orgánico, no “cuadrado”) */
+.bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.7;
+    background:
+        radial-gradient(220px 160px at 15% 20%, rgba(246,166,90,.22), transparent 65%),
+        radial-gradient(260px 190px at 85% 25%, rgba(74,144,194,.20), transparent 65%),
+        radial-gradient(320px 240px at 55% 75%, rgba(177, 132, 240, 0.22), transparent 70%);
+    animation: floaty 8s ease-in-out infinite;
+}
+
+@keyframes driftY {
+    from { transform: translateY(-30px); }
+    to   { transform: translateY(30px); }
+}
+
+@keyframes floaty {
+    0%,100% { transform: translateY(0px); }
+    50%     { transform: translateY(18px); }
+}
+
+/* Hero con forma más “jardín”: curva y sombra suave */
+.hero {
+    border-radius: 28px;
+}
+
+/* --- Card suave tipo nube --- */
+.softCard {
+    border-radius: 28px 26px 30px 24px;
+    background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.92),
+        var(--soft-tint, rgba(246,166,90,0.14))
+    );
+    border: 1px solid rgba(229,231,235,0.9);
+    backdrop-filter: blur(1px);
+    box-shadow: 0 12px 26px rgba(0,0,0,0.06);
+}
+
+/* Variantes de color */
+.softOrange { --soft-tint: rgba(246,166,90,0.16); }
+.softBlue   { --soft-tint: rgba(74,144,194,0.14); }
+.softPurple { --soft-tint: rgba(177, 132, 240,0.16); }
+
+/* Beneficios: todas púrpura → hover naranja */
+.benefitCard {
+    --soft-tint: rgba(177, 132, 240, 0.16); /* púrpura */
+    transition: background 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.benefitCard:hover {
+  --soft-tint: rgba(246, 166, 90, 0.22); /* naranja */
+}
+
+
