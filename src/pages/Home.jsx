@@ -4,16 +4,44 @@ import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
+import HeroCarousel from "../components/ui/HeroCarousel";
 import { useRevealOnScroll } from "../components/hooks/useRevealOnScroll";
 
 
 export default function Home() {
+    const heroSlides = [
+        {
+            img: "../../public/Hero1.png",
+            title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
+            subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
+            cta1: { to: "/el-jardin", label: "Conocer el jardín" },
+            cta2: { to: "/uniformes", label: "Comprar uniformes" },
+        },
+        {
+            img: "../../public/Hero2.png",
+            title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
+            subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
+            cta1: { to: "/el-jardin", label: "Ver propuesta" },
+            cta2: { to: "/uniformes", label: "Ver uniformes" },
+        },
+        {
+            img: "../../public/Hero3.png",
+            title: "Un lugar donde cada niño se siente seguro para crecer",
+            subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
+            cta1: { to: "/el-jardin", label: "Más información" },
+            cta2: { to: "/uniformes", label: "Ir a la tienda" },
+        },
+        ];
+
     const homeRef = useRef(null);
-
-    // ✅ Sentinel: dispara cuando llegás scrolleando (así la animación se nota)
-    const benefitsSentinelRef = useRef(null);
-
+    const benefitsSentinelRef = useRef(null);  //Sentinel: dispara scrolleando (así la animación se nota)
     const [benefitsIn, setBenefitsIn] = useState(false);
+    const [heroTick, setHeroTick] = useState(0);
+    const [heroIndex, setHeroIndex] = useState(0);
+    const currentHero = heroSlides[heroIndex];  
+
+
+
 
     useEffect(() => {
         const el = benefitsSentinelRef.current;
@@ -36,24 +64,14 @@ export default function Home() {
         }, []);
 
 
-    // ✅ Animación base (inline → no depende de Tailwind)
+    //Animación base (inline → no depende de Tailwind)
     const sectionRevealStyle = {
         opacity: benefitsIn ? 1 : 0,
         transform: benefitsIn ? "translateY(0)" : "translateY(18px)",
         transition: "opacity 700ms ease, transform 700ms ease",
         willChange: "opacity, transform",
     };
-
-    const getCardRevealStyle = (i) => {
-        const delay = i * 120;
-        return {
-        opacity: benefitsIn ? 1 : 0,
-        transform: benefitsIn ? "translateY(0)" : "translateY(18px)",
-        transition: `opacity 600ms ease ${delay}ms, transform 600ms ease ${delay}ms`,
-        willChange: "opacity, transform",
-        };
-    };
-
+    
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <div className={styles.bg} />
@@ -61,27 +79,56 @@ export default function Home() {
         <Container className="relative z-10 grid gap-10">
             {/* Hero */}
             <section
-            className={`${styles.hero} border p-6 md:p-8 grid gap-4
+            className={`${styles.hero} ${styles.heroCard} border p-6 md:p-8 grid gap-4
                 bg-[rgba(255,255,255,0.88)]
                 border-[var(--ui-border)]
                 shadow-[0_12px_30px_rgba(0,0,0,0.08)]
                 backdrop-blur-[2px]`}
             >
-            <div
-                className="h-56 rounded-2xl border
-                bg-[var(--ui-tint-secondary)] border-[var(--ui-border)]"
-            />
-            <h1 className="text-2xl md:text-4xl font-extrabold text-[var(--ui-text)] leading-tight">
-                Acompañamos los primeros pasos con cuidado, juego y aprendizaje
-            </h1>
+            <div className={styles.heroConfetti}>
+                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p1}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p2}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p3}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p4}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p5}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p6}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p7}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p8}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p9}`} />
+                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p10}`} />
+            </div>
 
-            <div className="flex flex-wrap gap-3">
-                <Link to="/el-jardin">
-                <Button variant="secondary">Conocer el jardín</Button>
-                </Link>
-                <Link to="/uniformes">
-                <Button variant="primary">Comprar uniformes</Button>
-                </Link>
+
+            <HeroCarousel
+                images={heroSlides.map((s) => s.img)}
+                onChange={(next) => {
+                    setHeroIndex(next);
+                    setHeroTick((t) => t + 1);
+                }}
+                />
+
+            <div key={heroTick} className={styles.heroTextAnim}>
+                <h1 className={`text-[1.6rem] sm:text-2xl md:text-4xl font-extrabold leading-tight text-[var(--ui-text)] ${styles.heroTitle}`}>
+                    {currentHero.title}
+                </h1>
+
+                <p className="text-sm sm:text-base text-[var(--ui-muted)]">
+                    {currentHero.subtitle}
+                </p>
+
+                <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
+                    <Link to={currentHero.cta1.to} className="w-full sm:w-auto">
+                    <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
+                        {currentHero.cta1.label} <span className={styles.heroArrow}>→</span>
+                    </Button>
+                    </Link>
+
+                    <Link to={currentHero.cta2.to} className="w-full sm:w-auto">
+                    <Button variant="primary" className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}>
+                        {currentHero.cta2.label} <span className={styles.heroArrow}>→</span>
+                    </Button>
+                    </Link>
+                </div>
             </div>
             </section>
 
@@ -91,12 +138,13 @@ export default function Home() {
             {/* Beneficios */}
             <section
             style={sectionRevealStyle}
-            className="
+                className={`
                 grid gap-4 rounded-3xl p-5 md:p-6 border
                 bg-[rgba(255,255,255,0.55)]
                 border-[var(--ui-border)]
                 backdrop-blur-[1px]
-            "
+                ${styles.benefitsSection}
+            `}
             >
             <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ui-text)]">
                 ¿Por qué elegirnos?

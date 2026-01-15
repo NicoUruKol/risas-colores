@@ -311,7 +311,7 @@ function useResizeHeight(ref) {
             t={t}
             dA={VIOLET_A}
             dB={VIOLET_B}
-            durA={18.0}
+            durA={15.0}
             durB={16.0}
             colorVar="--brand-accent"
             thickness={56}
@@ -324,8 +324,8 @@ function useResizeHeight(ref) {
             t={t}
             dA={BLUE_A}
             dB={BLUE_B}
-            durA={17.0}
-            durB={17.0}
+            durA={16.0}
+            durB={15.0}
             colorVar="--brand-secondary"
             thickness={50}
             visibleFrac={0.56}
