@@ -1,9 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router-dom";
-
 import "../styles/globals.css";
-
 import AppShell from "./AppShell";
 import Home from "../pages/Home";
 import ElJardin from "../pages/ElJardin";

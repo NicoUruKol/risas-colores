@@ -1,10 +1,8 @@
 import { useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import BackgroundDecor2 from "../components/layout/BackgroundDecor2";
-
 import { CartProvider } from "../context/CartContext";
 
 export default function AppShell() {
@@ -16,12 +14,12 @@ export default function AppShell() {
 
     return (
         <CartProvider>
-        <div ref={pageRef} className="relative min-h-screen overflow-hidden">
+        <div ref={pageRef} className="relative min-h-screen overflow-x-hidden">
             {showDecor && (
-            <div className="absolute inset-0 -z-10 pointer-events-none">
-                <BackgroundDecor2 containerRef={pageRef} />
-            </div>
-            )}
+        <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden">
+            <BackgroundDecor2 />
+        </div>
+        )}
 
             <Header />
             <main className="relative z-10">

@@ -381,6 +381,7 @@
 /* Contenedor de Beneficios */
 .benefitsSection {
     transition: background-color 300ms ease;
+    overflow-anchor: none;
 }
 
 /* Cuando hay hover en una card, el fondo acompaña */
