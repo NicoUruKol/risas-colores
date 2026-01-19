@@ -57,7 +57,7 @@ export default function Home() {
                 io.disconnect();
             }
             },
-            { threshold: 0, rootMargin: "0px 0px -25% 0px" }
+            { threshold: 0, rootMargin: "200px 0px -10% 0px" }
         );
 
         io.observe(el);

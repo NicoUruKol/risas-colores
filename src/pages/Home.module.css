@@ -350,13 +350,10 @@
     --soft-tint: rgba(25, 157, 252, 0.14);
     opacity: 0;
     transform: translateY(22px);
-    will-change: opacity, transform;
     transition:
-        background 240ms ease,
-        box-shadow 240ms ease,
         opacity 600ms ease var(--d, 0ms),
         transform 600ms ease var(--d, 0ms);
-            
+    will-change: opacity, transform;  
 }
 
 /* Hover: naranja */
