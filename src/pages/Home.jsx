@@ -6,9 +6,9 @@ import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import { useRevealOnScroll } from "../components/hooks/useRevealOnScroll";
-import Hero1 from "../assets/Hero1.png";
-import Hero2 from "../assets/Hero2.png";
-import Hero3 from "../assets/Hero3.png";
+import Hero1 from "../assets/Hero1.webp";
+import Hero2 from "../assets/Hero2.webp";
+import Hero3 from "../assets/Hero3.webp";
 
 export default function Home() {
     const heroSlides = [

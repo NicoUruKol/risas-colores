@@ -389,3 +389,9 @@
     background-color: rgba(246, 166, 90, 0.06);
 }
 
+@media (max-width: 768px) {
+    .card {
+        box-shadow: 0 4px 16px rgba(0,0,0,.08);
+        backdrop-filter: none;
+    }
+}
