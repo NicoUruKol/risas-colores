@@ -22,7 +22,7 @@
     opacity: 0;
     transform: translateX(6px);
     transition:
-        opacity 700ms ease,
+        opacity 350ms ease,
         transform 700ms ease;
 }
 

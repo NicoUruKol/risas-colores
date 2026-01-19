@@ -41,9 +41,6 @@ export default function Home() {
     const [heroIndex, setHeroIndex] = useState(0);
     const currentHero = heroSlides[heroIndex];  
 
-
-
-
     useEffect(() => {
         const el = benefitsSentinelRef.current;
         if (!el) return;

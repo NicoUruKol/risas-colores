@@ -349,11 +349,17 @@
   /* Azul base (visible y alegre) */
     --soft-tint: rgba(25, 157, 252, 0.14);
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(18px);
     transition:
-        opacity 600ms ease var(--d, 0ms),
-        transform 600ms ease var(--d, 0ms);
-    will-change: opacity, transform;  
+        opacity 450ms ease,
+        transform 450ms ease;
+    transition-delay: var(--d, 0ms);
+    will-change: transform, opacity; 
+}
+
+.benefitCard[data-in="1"] {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* Hover: naranja */
@@ -384,11 +390,6 @@
 /* Cuando hay hover en una card, el fondo acompaña */
 .benefitsSection:hover {
     background-color: rgba(246, 166, 90, 0.06);
-}
-
-.benefitCard[data-in="1"] {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 @media (max-width: 768px) {
