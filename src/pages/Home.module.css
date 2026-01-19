@@ -401,3 +401,32 @@
     transition-duration: 450ms;
     }
 }
+
+@media (max-width: 768px) {
+    .bg::before {
+        background:
+            linear-gradient(to bottom,
+                rgba(246,166,90,0),
+                rgba(246,166,90,.30),
+                rgba(246,166,90,0)
+            ) 20% 0 / 8px 180px repeat-y,
+
+            linear-gradient(to bottom,
+                rgba(74,144,194,0),
+                rgba(74,144,194,.30),
+                rgba(74,144,194,0)
+            ) 50% 0 / 10px 220px repeat-y,
+
+            linear-gradient(to bottom,
+                rgba(200,182,226,0),
+                rgba(177,132,240,.30),
+                rgba(200,182,226,0)
+            ) 80% 0 / 7px 200px repeat-y;
+    }
+}
+
+@media (max-width: 768px) {
+    .bg {
+        inset: 0;
+    }
+}
