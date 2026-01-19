@@ -6,7 +6,7 @@ const smoothstep = (a, b, x) => {
     return t * t * (3 - 2 * t);
 };
 
-function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
+function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac, haloOpacityMul = 0.1) {
     if (!pathEl || !haloEl || !L || L <= 10) return;
 
     const maxLen = L * visibleFrac;
@@ -35,12 +35,37 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
     haloEl.setAttribute("stroke-width", String(thickness * 1.1));
     haloEl.setAttribute("stroke-dasharray", dasharray);
     haloEl.setAttribute("stroke-dashoffset", dashoffset);
-    haloEl.setAttribute("opacity", String(alpha * 0.10));
-    }
+    haloEl.setAttribute("opacity", String(alpha * haloOpacityMul));
+}
 
-    export default function BackgroundDecor2() {
+export default function BackgroundDecor2() {
     const viewW = 1200;
     const viewH = 2000;
+
+    // ✅ Detect mobile 1 sola vez (no re-render)
+    const isMobileRef = useRef(false);
+    if (typeof window !== "undefined" && isMobileRef.current === false) {
+        // heurística simple y segura
+        isMobileRef.current =
+        window.matchMedia?.("(max-width: 768px)").matches ||
+        (typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+    }
+    const isMobile = isMobileRef.current;
+
+    // ✅ Performance knobs
+    const fps = isMobile ? 10 : 60;             // 20fps en mobile queda suave y barato
+    const minFrame = 1 / fps;
+
+    // ✅ Filtros: bajar blur / o apagar halo en mobile
+    const glowBlur = isMobile ? 9 : 16;
+    const haloBlur = isMobile ? 14 : 30;
+
+    // ✅ Visual + perf: gusanos un toque más finos en mobile
+    const thicknessMul = isMobile ? 0.85 : 1.0;
+    const visibleMul = isMobile ? 0.92 : 1.0;
+
+    // ✅ halo opacity (en mobile bajarlo mucho para que no “ensucie” y no cueste tanto)
+    const haloOpacityMul = isMobile ? 0.06 : 0.10;
 
     const paths = useMemo(() => {
         const ORANGE_A = `M 140 -260
@@ -118,9 +143,11 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
 
     useEffect(() => {
         let raf = 0;
-        const start = performance.now();
 
-        // init con path A
+        const start = performance.now();
+        let last = start;
+        let acc = 0;
+
         const setPathAndLen = (mainEl, d) => {
         if (!mainEl) return 0;
         mainEl.setAttribute("d", d);
@@ -150,9 +177,19 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
         init();
 
         const loop = (now) => {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+
+        // ✅ throttle FPS para mobile (y también baja costo en general)
+        acc += dt;
+        if (acc < minFrame) {
+            raf = requestAnimationFrame(loop);
+            return;
+        }
+        acc = 0;
+
         const t = (now - start) / 1000;
 
-        // Scheduler A/B (igual que antes)
         const stepPair = (name, durA, durB, dA, dB, haloEl, mainEl, colorVar, thickness, visibleFrac) => {
             const period = durA + durB;
             const local = t % period;
@@ -160,7 +197,6 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             const isA = local < durA;
             const frac = isA ? local / durA : (local - durA) / durB;
 
-            // si cambió de A<->B, actualizo d + longitud una sola vez
             const modeKey = `${name}ModeA`;
             if (lensRef.current[modeKey] !== isA) {
             lensRef.current[modeKey] = isA;
@@ -178,7 +214,16 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             }
             }
 
-            applyWorm(mainEl, haloEl, lensRef.current[name], frac, colorVar, thickness, visibleFrac);
+            applyWorm(
+            mainEl,
+            haloEl,
+            lensRef.current[name],
+            frac,
+            colorVar,
+            thickness,
+            visibleFrac,
+            haloOpacityMul
+            );
         };
 
         stepPair(
@@ -190,8 +235,8 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             refs.orangeHalo.current,
             refs.orangeMain.current,
             "--brand-primary",
-            54,
-            0.60
+            54 * thicknessMul,
+            0.60 * visibleMul
         );
 
         stepPair(
@@ -203,8 +248,8 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             refs.violetHalo.current,
             refs.violetMain.current,
             "--brand-accent",
-            56,
-            0.58
+            56 * thicknessMul,
+            0.58 * visibleMul
         );
 
         stepPair(
@@ -216,8 +261,8 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             refs.blueHalo.current,
             refs.blueMain.current,
             "--brand-secondary",
-            50,
-            0.56
+            50 * thicknessMul,
+            0.56 * visibleMul
         );
 
         raf = requestAnimationFrame(loop);
@@ -225,7 +270,7 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
 
         raf = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(raf);
-    }, [paths]);
+    }, [paths, minFrame, thicknessMul, visibleMul, haloOpacityMul]);
 
     return (
         <div
@@ -241,16 +286,17 @@ function applyWorm(pathEl, haloEl, L, frac, colorVar, thickness, visibleFrac) {
             style={{ display: "block" }}
         >
             <defs>
-            {/* filtros únicos (mejor performance que 1 por gusano) */}
+            {/* ✅ filtros únicos (y adaptados a mobile) */}
             <filter id="wormGlow" x="-80%" y="-80%" width="260%" height="260%">
-                <feGaussianBlur stdDeviation="16" result="blur" />
+                <feGaussianBlur stdDeviation={String(glowBlur)} result="blur" />
                 <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
                 </feMerge>
             </filter>
+
             <filter id="wormHalo" x="-120%" y="-120%" width="340%" height="340%">
-                <feGaussianBlur stdDeviation="30" />
+                <feGaussianBlur stdDeviation={String(haloBlur)} />
             </filter>
             </defs>
 

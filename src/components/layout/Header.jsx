@@ -4,7 +4,7 @@ import Container from "./Container";
 import Button from "../ui/Button";
 import { useCart } from "../../context/CartContext";
 import styles from "./Header.module.css";
-import logo from "../../assets/logoDesat.png"
+import logo from "../../assets/logoDesat.webp"
 
 export default function Header() {
     const { count } = useCart();
