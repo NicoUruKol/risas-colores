@@ -2,11 +2,22 @@ import styles from "./MobileDecor.module.css";
 
 export default function MobileDecor() {
     return (
-        <div className={styles.wrap} aria-hidden="true">
-        <span className={`${styles.blob} ${styles.orange}`} />
-        <span className={`${styles.blob} ${styles.violet}`} />
-        <span className={`${styles.blob} ${styles.blue}`} />
-        <span className={styles.grain} />
+        <div className={styles.stage} aria-hidden="true">
+        {/* Arriba */}
+        <div className={`${styles.bubble} ${styles.orange} ${styles.o1}`} />
+        <div className={`${styles.bubble} ${styles.violet} ${styles.v1}`} />
+        <div className={`${styles.bubble} ${styles.blue} ${styles.b1}`} />
+
+        {/* Medio */}
+        <div className={`${styles.bubble} ${styles.orange} ${styles.o2}`} />
+        <div className={`${styles.bubble} ${styles.violet} ${styles.v2}`} />
+        <div className={`${styles.bubble} ${styles.blue} ${styles.b2}`} />
+
+        {/* Abajo */}
+        <div className={`${styles.bubble} ${styles.orange} ${styles.o3}`} />
+        <div className={`${styles.bubble} ${styles.violet} ${styles.v3}`} />
+        <div className={`${styles.bubble} ${styles.blue} ${styles.b3}`} />
         </div>
     );
 }
+
