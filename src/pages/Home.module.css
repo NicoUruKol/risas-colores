@@ -323,10 +323,6 @@
     }*/
 }
 
-
-
-
-
 /* --- Card suave tipo nube --- */
 .softCard {
     border-radius: 28px 26px 30px 24px;
@@ -352,11 +348,15 @@
 .benefitCard {
   /* Azul base (visible y alegre) */
     --soft-tint: rgba(25, 157, 252, 0.14);
-
+    opacity: 0;
+    transform: translateY(22px);
+    will-change: opacity, transform;
     transition:
         background 240ms ease,
         box-shadow 240ms ease,
-        transform 200ms ease;
+        opacity 600ms ease var(--d, 0ms),
+        transform 600ms ease var(--d, 0ms);
+            
 }
 
 /* Hover: naranja */
@@ -389,9 +389,17 @@
     background-color: rgba(246, 166, 90, 0.06);
 }
 
+.benefitCard[data-in="1"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @media (max-width: 768px) {
     .card {
         box-shadow: 0 4px 16px rgba(0,0,0,.08);
         backdrop-filter: none;
+    }
+    .benefitCard {
+    transition-duration: 450ms;
     }
 }
