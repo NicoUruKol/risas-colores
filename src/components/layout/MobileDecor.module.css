@@ -1,0 +1,87 @@
+.wrap {
+    position: absolute;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* blobs */
+.blob {
+    position: absolute;
+    width: 62vmin;
+    height: 62vmin;
+    border-radius: 999px;
+    filter: blur(28px);
+    opacity: 0.38;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+}
+
+/* posiciones + colores */
+.orange {
+    top: -16vmin;
+    left: -18vmin;
+    background: radial-gradient(circle at 30% 30%, rgba(246, 166, 90, 0.85), rgba(246, 166, 90, 0.0) 60%);
+    animation: floatA 14s ease-in-out infinite;
+}
+
+.violet {
+    top: 18vmin;
+    right: -20vmin;
+    background: radial-gradient(circle at 40% 35%, rgba(200, 182, 226, 0.85), rgba(200, 182, 226, 0.0) 60%);
+    animation: floatB 16s ease-in-out infinite;
+}
+
+.blue {
+    bottom: -18vmin;
+    left: 12vmin;
+    background: radial-gradient(circle at 35% 35%, rgba(74, 144, 194, 0.85), rgba(74, 144, 194, 0.0) 60%);
+    animation: floatC 18s ease-in-out infinite;
+}
+
+/* micro-grain súper sutil para que se sienta “vivo” */
+.grain {
+    position: absolute;
+    inset: -20%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    transform: translateZ(0);
+}
+
+/* animaciones: SOLO transforms (baratísimo) */
+@keyframes floatA {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(8vmin, 6vmin, 0) scale(1.05); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes floatB {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(-10vmin, 7vmin, 0) scale(1.06); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes floatC {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    50%  { transform: translate3d(6vmin, -8vmin, 0) scale(1.07); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Respeto reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .orange, .violet, .blue {
+        animation: none !important;
+    }
+}
+
+/* Ajustes extra para pantallas MUY chicas */
+@media (max-width: 380px) {
+    .blob {
+        width: 70vmin;
+        height: 70vmin;
+        filter: blur(24px);
+        opacity: 0.34;
+    }
+}
