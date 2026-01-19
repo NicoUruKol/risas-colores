@@ -153,31 +153,16 @@ export default function Home() {
             </h2>
 
             <div className="grid gap-4 md:grid-cols-2">
-            {[
-                "Proyecto educativo",
-                "Equipo docente",
-                "Espacios seguros",
-                "Acompañamiento familiar",
-            ].map((t, i) => {
-                const { ref, visible } = useRevealOnScroll({
-                rootMargin: "0px 0px -10% 0px",
-                });
-
-                const color = styles.softPurple;
-
-                const style = {
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(22px)",
-                transition: `opacity 600ms ease ${i * 120}ms, transform 600ms ease ${
-                    i * 120
-                }ms`,
-                };
-
-                return (
-                <Card
+                {[
+                    "Proyecto educativo",
+                    "Equipo docente",
+                    "Espacios seguros",
+                    "Acompañamiento familiar",
+                ].map((t, i) => (
+                    <Card
                     key={t}
-                    ref={ref}
-                    style={style}
+                    data-in={benefitsIn ? "1" : "0"}
+                    style={{ "--d": `${i * 120}ms` }}
                     className={`
                         p-6 transition-transform duration-200 hover:-translate-y-1
                         ${styles.softCard} ${styles.softPurple} ${styles.benefitCard}
@@ -185,17 +170,16 @@ export default function Home() {
                         ${i === 2 ? "md:-translate-x-2" : ""}
                     `}
                     >
-
                     <div className="font-semibold text-[var(--ui-text)] text-base md:text-lg">
-                    {t}
+                        {t}
                     </div>
                     <p className="text-sm text-[var(--ui-muted)] mt-1">
-                    Texto breve (1 línea) que refuerce confianza.
+                        Texto breve (1 línea) que refuerce confianza.
                     </p>
-                </Card>
-                );
-            })}
+                    </Card>
+                ))}
             </div>
+
             </section>
 
             {/* Familias actuales */}
