@@ -57,15 +57,15 @@ export default function BackgroundDecor2() {
     const minFrame = 1 / fps;
 
     // ✅ Filtros: bajar blur / o apagar halo en mobile
-    const glowBlur = isMobile ? 9 : 16;
-    const haloBlur = isMobile ? 14 : 30;
+    const glowBlur = isMobile ? 8 : 16;
+    const haloBlur = isMobile ? 12 : 30;
 
     // ✅ Visual + perf: gusanos un toque más finos en mobile
     const thicknessMul = isMobile ? 0.85 : 1.0;
     const visibleMul = isMobile ? 0.92 : 1.0;
 
     // ✅ halo opacity (en mobile bajarlo mucho para que no “ensucie” y no cueste tanto)
-    const haloOpacityMul = isMobile ? 0.06 : 0.10;
+    const haloOpacityMul = isMobile ? 0.03 : 0.10;
 
     const paths = useMemo(() => {
         const ORANGE_A = `M 140 -260
