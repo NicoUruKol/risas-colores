@@ -11,6 +11,7 @@ import ProductoDetalle from "../pages/ProductosDetalle";
 import Carrito from "../pages/Carrito";
 import Checkout from "../pages/Checkout";
 import Confirmacion from "../pages/Confirmacion";
+import Contacto from "../pages/Contacto";
 
 const router = createHashRouter([
   {
@@ -18,6 +19,7 @@ const router = createHashRouter([
     children: [
       { path: "/", element: <Home /> },
       { path: "/el-jardin", element: <ElJardin /> },
+      { path: "/contacto", element: <Contacto /> }, // ✅ NUEVO
       { path: "/uniformes", element: <UniformesEntry /> },
       { path: "/uniformes/:sala", element: <Catalogo /> },
       { path: "/producto/:id", element: <ProductoDetalle /> },

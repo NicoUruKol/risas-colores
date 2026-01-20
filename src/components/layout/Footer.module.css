@@ -1,0 +1,98 @@
+.footer {
+    position: relative;
+    z-index: 10;
+    border-top: 1px solid rgba(229,231,235,0.9);
+
+    /* glass suave */
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(8px);
+}
+
+.inner {
+    padding: 22px 0 18px;
+    display: grid;
+    gap: 12px;
+}
+
+/* 2 columnas en desktop */
+@media (min-width: 768px) {
+    .inner {
+        grid-template-columns: 1.2fr 1fr;
+        gap: 18px;
+        align-items: start;
+    }
+}
+
+.title {
+    font-weight: 900;
+    color: var(--ui-text);
+    letter-spacing: 0.2px;
+}
+
+.muted {
+    color: var(--ui-muted);
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+}
+
+.link {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ui-text);
+    text-decoration: none;
+    transition: transform 140ms ease, color 140ms ease;
+}
+
+.link:hover {
+    color: var(--brand-secondary);
+    transform: translateY(-1px);
+}
+
+.metaRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+/* strip de color (igual lenguaje que header) */
+.bottomConfetti {
+    height: 3px;
+    opacity: 0.55;
+    background:
+        linear-gradient(
+        90deg,
+        rgba(246,166,90,0.0) 0%,
+        rgba(246,166,90,0.55) 14%,
+        rgba(74,144,194,0.55) 42%,
+        rgba(177,132,240,0.55) 70%,
+        rgba(246,166,90,0.0) 100%
+        );
+}
+
+/* mini “chip” para redes (opcional, queda lindo) */
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.10);
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+}
+
+.pillLabel {
+    font-weight: 800;
+    color: var(--ui-text);
+}
+
+.small {
+    font-size: 0.82rem;
+}

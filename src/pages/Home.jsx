@@ -187,7 +187,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
                 <Link to="/uniformes">
-                <Button variant="primary">Ver uniformes</Button>
+                <Button variant="primary" className={styles.btnTextDark}>Ver uniformes</Button>
                 </Link>
                 <Button variant="ghost">Información importante</Button>
             </div>

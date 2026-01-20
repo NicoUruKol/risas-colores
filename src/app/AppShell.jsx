@@ -9,7 +9,7 @@ import { CartProvider } from "../context/CartContext";
 function isMobile() {
     if (typeof window === "undefined") return false;
     return (
-        window.matchMedia?.("(max-width: 768px)").matches ||
+        window.matchMedia?.("(max-width: 560px)").matches ||
         /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
     );
     }

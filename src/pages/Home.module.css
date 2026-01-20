@@ -466,3 +466,7 @@
     transform: translateY(-2px);
     box-shadow: 0 16px 34px rgba(0,0,0,0.10);
 }
+
+.btnTextDark {
+    color: #2b2b2b !important;
+}
