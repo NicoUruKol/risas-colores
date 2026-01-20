@@ -1,49 +1,105 @@
 .footer {
-    position: relative;
-    z-index: 10;
-    border-top: 1px solid rgba(229,231,235,0.9);
-
-    /* glass suave */
-    background: rgba(255,255,255,0.82);
+    border-top: 1px solid rgba(229, 231, 235, 0.9);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(8px);
 }
 
-.inner {
-    padding: 22px 0 18px;
-    display: grid;
-    gap: 12px;
+/* Strip arriba */
+.bottomConfetti {
+    height: 3px;
+    opacity: 0.55;
+    background: linear-gradient(
+        90deg,
+        rgba(246, 166, 90, 0) 0%,
+        rgba(246, 166, 90, 0.55) 14%,
+        rgba(74, 144, 194, 0.55) 42%,
+        rgba(177, 132, 240, 0.55) 70%,
+        rgba(246, 166, 90, 0) 100%
+    );
 }
 
-/* 2 columnas en desktop */
+/* Layout general */
+.inner {
+    padding: 10px 0;
+    display: grid;
+    gap: 10px;
+}
+
 @media (min-width: 768px) {
     .inner {
-        grid-template-columns: 1.2fr 1fr;
-        gap: 18px;
+        grid-template-columns: 1fr 1fr;
         align-items: start;
+        gap: 10px 18px;
     }
+}
+
+.col {
+    display: grid;
+    gap: 6px;
+}
+
+.colRight {
+    justify-items: start;
+}
+
+@media (min-width: 768px) {
+    .colRight {
+        justify-items: end;
+        text-align: right;
+    }
+}
+
+/* ===== Tipos ===== */
+.muted {
+    color: var(--ui-muted);
+}
+
+.small {
+    font-size: 0.82rem;
+}
+
+/* ===== Título + Contacto inline ===== */
+.titleRow {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .title {
     font-weight: 900;
     color: var(--ui-text);
-    letter-spacing: 0.2px;
 }
 
-.muted {
+.titleContact {
+    text-decoration: none;
+    font-weight: 800;
     color: var(--ui-muted);
+    transition: color 140ms ease, transform 140ms ease;
 }
 
+.titleContact:hover {
+    color: var(--brand-secondary);
+    transform: translateY(-1px);
+}
+
+/* ===== Links ===== */
 .links {
     display: flex;
     flex-wrap: wrap;
     gap: 10px 14px;
 }
 
+@media (min-width: 768px) {
+    .links {
+        justify-content: flex-end;
+    }
+}
+
 .link {
-    font-size: 0.9rem;
-    font-weight: 700;
     color: var(--ui-text);
     text-decoration: none;
+    font-weight: 700;
     transition: transform 140ms ease, color 140ms ease;
 }
 
@@ -52,47 +108,96 @@
     transform: translateY(-1px);
 }
 
+/* ===== Meta (dirección/teléfono) ===== */
 .metaRow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    font-size: 0.9rem;
+    display: grid;
+    gap: 4px;
+    line-height: 1.25;
 }
 
-/* strip de color (igual lenguaje que header) */
-.bottomConfetti {
-    height: 3px;
-    opacity: 0.55;
-    background:
-        linear-gradient(
-        90deg,
-        rgba(246,166,90,0.0) 0%,
-        rgba(246,166,90,0.55) 14%,
-        rgba(74,144,194,0.55) 42%,
-        rgba(177,132,240,0.55) 70%,
-        rgba(246,166,90,0.0) 100%
-        );
+.address { }
+.phone { }
+
+/* Desktop: mismo look pero más compacto */
+@media (min-width: 768px) {
+    .metaRow {
+        gap: 6px;
+    }
 }
 
-/* mini “chip” para redes (opcional, queda lindo) */
+/* ===== WhatsApp pill ===== */
 .pill {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.90);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    width: fit-content;
+}
+
+@media (min-width: 768px) {
+    .pill {
+        justify-self: end;
+    }
+}
+
+.pillMain {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,0.10);
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(6px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+    text-decoration: none;
+}
+
+.pillIcon {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .pillLabel {
-    font-weight: 800;
+    font-weight: 900;
     color: var(--ui-text);
+    font-size: 0.92rem;
 }
 
-.small {
-    font-size: 0.82rem;
+.pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+}
+
+/* ===== Legal abajo ===== */
+.legal {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 0 6px;
+    font-size: 0.78rem;
+    color: var(--ui-muted);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: 6px;
+}
+
+@media (min-width: 768px) {
+    .legal {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.credit {
+    text-decoration: none;
+    color: var(--ui-muted);
+    font-weight: 600;
+    transition: color 160ms ease, transform 160ms ease;
+}
+
+.credit:hover {
+    color: var(--brand-secondary);
+    transform: translateY(-1px);
 }
