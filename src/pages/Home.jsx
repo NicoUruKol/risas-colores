@@ -78,7 +78,6 @@ export default function Home() {
             {/* Hero */}
             <section
             className={`${styles.hero} ${styles.heroCard} border p-6 md:p-8 grid gap-4
-                bg-[rgba(255,255,255,0.88)]
                 border-[var(--ui-border)]
                 shadow-[0_12px_30px_rgba(0,0,0,0.08)]
                 backdrop-blur-[2px]`}
@@ -179,7 +178,7 @@ export default function Home() {
             </section>
 
             {/* Familias actuales */}
-            <section className="border rounded-3xl p-6 grid gap-3 bg-[var(--ui-tint-primary)] border-[var(--ui-border)]">
+            <section className={`border rounded-3xl p-6 grid gap-3 border-[var(--ui-border)] ${styles.familiasSection}`}>
             <h3 className="text-lg md:text-xl font-extrabold text-[var(--ui-text)]">
                 ¿Ya formás parte del jardín?
             </h3>
