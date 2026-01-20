@@ -9,6 +9,8 @@
     --ui-tint-secondary: rgba(74, 144, 194, 0.14);
     --ui-tint-accent: rgba(200, 182, 226, 0.18);
     overflow-anchor: none;
+    --bgTempo: 18s;        /* tempo general */
+    --bgEase: ease-in-out; /* suavidad */
 }
 
 /* =====================================================

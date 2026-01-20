@@ -8,7 +8,7 @@
 .bubble {
     position: absolute;
     border-radius: 999px;
-    opacity: 0.9;
+    opacity: 0.88;
 
     box-shadow:
         inset 0 0 0 2px rgba(255,255,255,0.55),
@@ -26,53 +26,75 @@
 
     transform: translate3d(0,0,0);
     will-change: transform;
+
+  /* ✅ ahora sí: el tempo global manda */
+    animation-duration: var(--bgTempo);
+    animation-timing-function: var(--bgEase);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
 }
 
 /* Colores: aro más fuerte, interior suave */
-.orange { --ring: rgba(246, 166, 90, 0.65); --fill: rgba(246, 166, 90, 0.18); }
-.violet { --ring: rgba(200, 182, 226, 0.65); --fill: rgba(200, 182, 226, 0.16); }
-.blue   { --ring: rgba(74, 144, 194, 0.65); --fill: rgba(74, 144, 194, 0.16); }
+.orange { --ring: rgba(246, 166, 90, 0.70); --fill: rgba(246, 166, 90, 0.20); }
+.violet { --ring: rgba(200, 182, 226, 0.70); --fill: rgba(200, 182, 226, 0.18); }
 
-/* Tamaños variados */
-.o1 { width: 22vmin; height: 22vmin; }
-.v1 { width: 18vmin; height: 18vmin; }
-.b1 { width: 26vmin; height: 26vmin; }
+/* ✅ Azul un poco más fuerte para que no desaparezca */
+.blue   { --ring: rgba(74, 144, 194, 0.75); --fill: rgba(74, 144, 194, 0.22); }
 
-.o2 { width: 16vmin; height: 16vmin; }
-.v2 { width: 24vmin; height: 24vmin; }
-.b2 { width: 18vmin; height: 18vmin; }
+/* Tamaños variados (un poco más chicos que antes y más variados) */
+.o1 { width: 18vmin; height: 18vmin; }
+.v1 { width: 14vmin; height: 14vmin; }
+.b1 { width: 20vmin; height: 20vmin; }
 
-.o3 { width: 26vmin; height: 26vmin; }
-.v3 { width: 16vmin; height: 16vmin; }
-.b3 { width: 22vmin; height: 22vmin; }
+.o2 { width: 12vmin; height: 12vmin; }
+.v2 { width: 18vmin; height: 18vmin; }
+.b2 { width: 14vmin; height: 14vmin; }
 
-/* Posiciones (cubren toda la página) */
-.o1 { left: -8vmin; top: 6vmin;  animation: floatA 7s ease-in-out infinite alternate; }
-.v1 { right: -10vmin; top: 18vmin; animation: floatB 8s ease-in-out infinite alternate; }
-.b1 { left: 55%; top: -10vmin;  animation: floatC 9s ease-in-out infinite alternate; }
+.o3 { width: 20vmin; height: 20vmin; }
+.v3 { width: 12vmin; height: 12vmin; }
+.b3 { width: 16vmin; height: 16vmin; }
 
-.o2 { left: 10vmin; top: 52vmin; animation: floatB 8.5s ease-in-out infinite alternate; }
-.v2 { right: 6vmin; top: 64vmin; animation: floatA 7.8s ease-in-out infinite alternate; }
-.b2 { left: -10vmin; top: 78vmin; animation: floatC 9.2s ease-in-out infinite alternate; }
+.o4 { width: 14vmin; height: 14vmin; }
+.v4 { width: 20vmin; height: 20vmin; }
+.b4 { width: 16vmin; height: 16vmin; }
 
-.o3 { right: -12vmin; top: 110vmin; animation: floatC 10s ease-in-out infinite alternate; }
-.v3 { left: 8vmin; top: 124vmin; animation: floatA 8.8s ease-in-out infinite alternate; }
-.b3 { left: 50%; top: 150vmin; transform: translate3d(-50%,0,0); animation: floatB 9.8s ease-in-out infinite alternate; }
+/* ✅ Reparto más parejo en el alto (0..170vmin aprox)
+- también balanceo izq/der/centro
+- y meto delays negativos para que no arranquen sincronizadas
+*/
+.o1 { left: -7vmin;  top: 10vmin;   animation-name: floatA; animation-delay: calc(var(--bgTempo) * -0.12); }
+.v1 { right: -8vmin; top: 22vmin;   animation-name: floatB; animation-delay: calc(var(--bgTempo) * -0.28); }
+.b1 { left: 52%;     top: 34vmin;   animation-name: floatC; animation-delay: calc(var(--bgTempo) * -0.44); transform: translate3d(-50%,0,0); }
 
-/* Movimiento marcado pero suave */
+.o2 { left: 8vmin;   top: 58vmin;   animation-name: floatB; animation-delay: calc(var(--bgTempo) * -0.18); }
+.v2 { right: 6vmin;  top: 76vmin;   animation-name: floatA; animation-delay: calc(var(--bgTempo) * -0.52); }
+.b2 { left: -8vmin;  top: 96vmin;   animation-name: floatC; animation-delay: calc(var(--bgTempo) * -0.33); }
+
+.o3 { right: -9vmin; top: 118vmin;  animation-name: floatC; animation-delay: calc(var(--bgTempo) * -0.64); }
+.v3 { left: 10vmin;  top: 142vmin;  animation-name: floatA; animation-delay: calc(var(--bgTempo) * -0.40); }
+.b3 { left: 60%;     top: 168vmin;  animation-name: floatB; animation-delay: calc(var(--bgTempo) * -0.70); transform: translate3d(-50%,0,0); }
+
+.o4 { left: 12vmin;  top: 185vmin;  animation: floatB 15s ease-in-out infinite alternate;}
+.v4 { right: 10vmin; top: 195vmin;  animation: floatA 16s ease-in-out infinite alternate;}
+.b4 { left: 50%;     top: 210vmin;  transform: translateX(-50%); animation: floatC 17s ease-in-out infinite alternate;}
+
+/* ✅ Movimiento más marcado pero suave y “burbuja”
+(más desplazamiento vertical, un poco de drift lateral)
+*/
 @keyframes floatA {
-    0% { transform: translate3d(0,0,0) rotate(-10deg) scale(1); }
-    100% { transform: translate3d(22vmin, 14vmin, 0) rotate(12deg) scale(1.10); }
+    0%   { transform: translate3d(0,0,0) rotate(-8deg) scale(1); }
+    100% { transform: translate3d(10vmin, 20vmin, 0) rotate(10deg) scale(1.08); }
 }
 @keyframes floatB {
-    0% { transform: translate3d(0,0,0) rotate(8deg) scale(1); }
-    100% { transform: translate3d(-20vmin, 16vmin, 0) rotate(-14deg) scale(1.12); }
+    0%   { transform: translate3d(0,0,0) rotate(6deg) scale(1); }
+    100% { transform: translate3d(-12vmin, 22vmin, 0) rotate(-12deg) scale(1.10); }
 }
 @keyframes floatC {
-    0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
-    100% { transform: translate3d(10vmin, -18vmin, 0) rotate(10deg) scale(1.08); }
+    0%   { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+    100% { transform: translate3d(8vmin, 18vmin, 0) rotate(8deg) scale(1.06); }
 }
 
+/* Accesibilidad */
 @media (prefers-reduced-motion: reduce) {
-    .bubble { animation: none; }
+    .bubble { animation: none !important; }
 }

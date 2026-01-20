@@ -23,7 +23,8 @@
         linear-gradient(to bottom, rgba(246,166,90,.0), rgba(246,166,90,.35), rgba(246,166,90,.0)) 12% 0 / 10px 220px repeat-y,
         linear-gradient(to bottom, rgba(74,144,194,.0), rgba(74,144,194,.35), rgba(74,144,194,.0)) 48% 0 / 12px 260px repeat-y,
         linear-gradient(to bottom, rgba(200,182,226,.0), rgba(177, 132, 240,.35), rgba(200,182,226,.0)) 78% 0 / 9px 240px repeat-y;
-    animation: driftY 10s linear infinite;
+    animation: driftY var(--bgTempo) linear infinite;
+    will-change: background-position;
 }
 
 /* blobs suaves (orgánico, no “cuadrado”) */
@@ -40,8 +41,8 @@
 }
 
 @keyframes driftY {
-    from { transform: translateY(-30px); }
-    to   { transform: translateY(30px); }
+    from { background-position-y: 0, 0, 0; }
+    to   { background-position-y: 220px, 260px, 240px; }
 }
 
 @keyframes floaty {
