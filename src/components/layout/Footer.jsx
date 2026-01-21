@@ -37,10 +37,11 @@ export default function Footer() {
 
             {/* 4) Links internos */}
             <nav className={styles.links} aria-label="Enlaces">
-            <Link className={styles.link} to="/el-jardin">El Jardín</Link>
-            <Link className={styles.link} to="/uniformes">Uniformes</Link>
-            <Link className={styles.link} to="/carrito">Carrito</Link>
+            <Link className={`${styles.link} ${styles.bulleted}`} to="/el-jardin">El Jardín</Link>
+            <Link className={`${styles.link} ${styles.bulleted}`} to="/uniformes">Uniformes</Link>
+            <Link className={`${styles.link} ${styles.bulleted}`} to="/carrito">Carrito</Link>
             </nav>
+
 
             {/* 5) Botonera: WhatsApp / Instagram / Contacto */}
             <div className={styles.pillsRow}>
@@ -82,7 +83,7 @@ export default function Footer() {
                 rel="noreferrer"
                 className={styles.credit}
             >
-                Realizado por NicouruKol
+                Realizado por Glotch 2.0
             </a>
             </div>
         </Container>
