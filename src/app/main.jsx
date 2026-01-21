@@ -19,7 +19,7 @@ const router = createHashRouter([
     children: [
       { path: "/", element: <Home /> },
       { path: "/el-jardin", element: <ElJardin /> },
-      { path: "/contacto", element: <Contacto /> }, // ✅ NUEVO
+      { path: "/contacto", element: <Contacto /> }, // 
       { path: "/uniformes", element: <UniformesEntry /> },
       { path: "/uniformes/:sala", element: <Catalogo /> },
       { path: "/producto/:id", element: <ProductoDetalle /> },

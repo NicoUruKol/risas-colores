@@ -18,7 +18,7 @@ export default function Checkout() {
 
     const handleConfirm = () => {
         if (!canPay) return;
-        // Acá después integrás Mercado Pago / backend
+        // integrar Mercado Pago / backend
         navigate("/confirmacion");
     };
 

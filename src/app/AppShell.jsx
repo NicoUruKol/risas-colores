@@ -2,8 +2,8 @@ import { useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import BackgroundDecor2 from "../components/layout/BackgroundDecor2"; // desktop worms
-import MobileDecor from "../components/layout/MobileDecor";          // mobile bubbles
+import BackgroundDecor2 from "../components/layout/BackgroundDecor2"; 
+import MobileDecor from "../components/layout/MobileDecor";          
 import { CartProvider } from "../context/CartContext";
 
 function isMobile() {
