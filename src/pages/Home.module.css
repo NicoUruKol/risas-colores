@@ -4,7 +4,7 @@
     overflow: hidden;
 }
 
-/* capa decorativa fija (parallax sutil) */
+/* capa decorativa fija */
 .bg {
     position: absolute;
     inset: -80px;
@@ -12,7 +12,7 @@
     pointer-events: none;
 }
 
-/* líneas de colores verticales (tipo crayón) */
+/* líneas verticales */
 .bg::before {
     content: "";
     position: absolute;
@@ -22,12 +22,11 @@
     background:
         linear-gradient(to bottom, rgba(246,166,90,.0), rgba(246,166,90,.35), rgba(246,166,90,.0)) 12% 0 / 10px 220px repeat-y,
         linear-gradient(to bottom, rgba(74,144,194,.0), rgba(74,144,194,.35), rgba(74,144,194,.0)) 48% 0 / 12px 260px repeat-y,
-        linear-gradient(to bottom, rgba(200,182,226,.0), rgba(177, 132, 240,.35), rgba(200,182,226,.0)) 78% 0 / 9px 240px repeat-y;
+        linear-gradient(to bottom, rgba(200,182,226,.0), rgba(177,132,240,.35), rgba(200,182,226,.0)) 78% 0 / 9px 240px repeat-y;
     animation: driftY var(--bgTempo) linear infinite;
     will-change: background-position;
 }
 
-/* blobs suaves (orgánico, no “cuadrado”) */
 .bg::after {
     content: "";
     position: absolute;
@@ -36,7 +35,7 @@
     background:
         radial-gradient(220px 160px at 15% 20%, rgba(246,166,90,.22), transparent 65%),
         radial-gradient(260px 190px at 85% 25%, rgba(74,144,194,.20), transparent 65%),
-        radial-gradient(320px 240px at 55% 75%, rgba(177, 132, 240, 0.22), transparent 70%);
+        radial-gradient(320px 240px at 55% 75%, rgba(177,132,240,.22), transparent 70%);
     animation: floaty 8s ease-in-out infinite;
 }
 
@@ -44,33 +43,36 @@
     from { background-position-y: 0, 0, 0; }
     to   { background-position-y: 220px, 260px, 240px; }
 }
-
 @keyframes floaty {
     0%,100% { transform: translateY(0px); }
     50%     { transform: translateY(18px); }
 }
 
-/* Hero con forma más “jardín”: curva y sombra suave */
+/* ==============================
+HERO – comportamiento deseado
+Mobile: reposo naranja -> tap blanco
+Desktop: reposo sin caja -> hover blanco
+============================== */
+
 .hero {
     border-radius: 28px;
 }
 
-/* ==============================
-    HERO – look jardín + micro vida
-============================== */
-
+/* BASE = MOBILE (reposo naranja translúcido) */
 .heroCard {
     position: relative;
     overflow: hidden;
     border-radius: 28px;
-    transition:
-        transform 220ms ease,
-        box-shadow 260ms ease,
-        background-color 260ms ease;
+
     background-color: rgba(246, 166, 90, 0.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+
+    transition: transform 220ms ease, box-shadow 260ms ease, background-color 260ms ease;
 }
 
-/* capa orgánica “nubes / blobs” */
+/* capas decorativas (en mobile visibles) */
 .heroCard::before {
     content: "";
     position: absolute;
@@ -84,7 +86,6 @@
     filter: blur(0.2px);
 }
 
-/* brillo diagonal suave */
 .heroCard::after {
     content: "";
     position: absolute;
@@ -92,69 +93,76 @@
     pointer-events: none;
     opacity: 0.35;
     transform: rotate(-10deg);
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,0.55),
-        transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
 }
 
-/* hover: más calidez + lift sutil */
-.heroCard:hover {
-    background-color: rgba(255,255,255,0.88);
-    transform: translateY(-2px);
-    box-shadow: 0 18px 42px rgba(0,0,0,0.10);
+/* MOBILE: al tocar -> blanco (igual idea que Beneficios) */
+@media (hover: none) and (pointer: coarse) {
+    .heroCard:active,
+    .heroCard:focus-within {
+        background-color: rgba(255,255,255,0.88);
+        box-shadow: 0 18px 42px rgba(0,0,0,0.10);
+    }
 }
 
-/* Título del hero: micro gesto independiente */
+/* DESKTOP: reposo sin caja (no se ve el contenedor) */
+@media (hover: hover) and (pointer: fine) {
+    .heroCard {
+        background-color: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+
+        /* mantiene layout y evita “borde fantasma” */
+        border-color: transparent !important;
+    }
+
+    .heroCard::before,
+    .heroCard::after {
+        opacity: 0;
+        transition: opacity 260ms ease;
+    }
+
+    /* DESKTOP hover: aparece caja blanca */
+    .heroCard:hover {
+        background-color: rgba(255,255,255,0.88);
+        transform: translateY(-2px);
+        box-shadow: 0 18px 42px rgba(0,0,0,0.10);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
+
+    .heroCard:hover::before { opacity: 0.9; }
+    .heroCard:hover::after  { opacity: 0.35; }
+}
+
+/* Título gesto */
 .heroTitle {
     transition: transform 220ms ease, letter-spacing 220ms ease;
 }
 
-.heroCard:hover .heroTitle {
-    transform: translateY(-2px);
-    letter-spacing: 0.2px;
+@media (hover: hover) and (pointer: fine) {
+    .heroCard:hover .heroTitle {
+        transform: translateY(-2px);
+        letter-spacing: 0.2px;
+    }
 }
 
-/* “imagen” placeholder: borde más amable */
-.heroMedia {
-    border-radius: 22px;
-    transition: transform 240ms ease, filter 240ms ease;
-}
-
-.heroCard:hover .heroMedia {
-    transform: scale(1.01);
-    filter: saturate(1.05);
-}
-
-/* HERO – animación de texto al cambiar imagen */
+/* HERO – animación texto */
 .heroTextAnim {
     animation: heroTextIn 520ms ease-out both;
 }
-
 @keyframes heroTextIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-
 @media (prefers-reduced-motion: reduce) {
-    .heroTextAnim {
-        animation: none !important;
-    }
+    .heroTextAnim { animation: none !important; }
 }
-
 
 /* ==============================
-    HERO – Papel picado (10 piezas)
+HERO – Papel picado
 ============================== */
-
 .heroConfetti {
     position: absolute;
     inset: 0;
@@ -162,26 +170,21 @@
     z-index: 0;
 }
 
-/* pieza de papel (recta, sin bordes redondeados) */
 .confettiPaper {
     position: absolute;
     width: 16px;
     height: 9px;
-    border-radius: 0; /* ✅ sin redondeado */
+    border-radius: 0;
     opacity: 0.78;
     filter: saturate(1.05);
-
-  /* caída lenta + leve deriva */
     animation: paperFall 9s linear infinite;
     will-change: transform;
 }
 
-/* Colores del jardín */
 .paperPurple { background: rgb(177, 132, 240); }
 .paperOrange { background: rgb(246, 166, 90); }
 .paperBlue   { background: rgb(74, 144, 194); }
 
-/* Cada papelito: posición + rotación inicial + delay + duración */
 .p1  { left: 8%;  top: -6%;  --r: -18deg; animation-delay: 0.0s; animation-duration: 10.5s; }
 .p2  { left: 18%; top: -10%; --r:  12deg; animation-delay: 1.2s; animation-duration: 9.2s;  }
 .p3  { left: 30%; top: -8%;  --r: -7deg;  animation-delay: 0.6s; animation-duration: 11.0s; }
@@ -193,65 +196,39 @@
 .p9  { left: 12%; top: -14%; --r:  4deg;  animation-delay: 3.4s; animation-duration: 10.0s; }
 .p10 { left: 92%; top: -8%;  --r: -10deg; animation-delay: 3.9s; animation-duration: 11.2s; }
 
-/* caída + deriva + mini “bamboleo” */
 @keyframes paperFall {
-    0% {
-        transform: translate3d(0, 0, 0) rotate(var(--r));
-        opacity: 0.0;
-    }
-    8% {
-        opacity: 0.78;
-    }
-    50% {
-        transform: translate3d(10px, 220px, 0) rotate(calc(var(--r) + 8deg));
-    }
-    100% {
-        transform: translate3d(-10px, 520px, 0) rotate(calc(var(--r) - 10deg));
-        opacity: 0.0;
-    }
+    0%   { transform: translate3d(0, 0, 0) rotate(var(--r)); opacity: 0; }
+    8%   { opacity: 0.78; }
+    50%  { transform: translate3d(10px, 220px, 0) rotate(calc(var(--r) + 8deg)); }
+    100% { transform: translate3d(-10px, 520px, 0) rotate(calc(var(--r) - 10deg)); opacity: 0; }
 }
 
-/* accesibilidad */
 @media (prefers-reduced-motion: reduce) {
-    .confettiPaper {
-        animation: none !important;
-        opacity: 0.35;
-        transform: rotate(var(--r));
-    }
+    .confettiPaper { animation: none !important; opacity: 0.35; transform: rotate(var(--r)); }
 }
 
 @media (max-width: 640px) {
-.confettiPaper {
-    opacity: 0.55;
-    width: 14px;
-    height: 8px;
-    }
+    .confettiPaper { opacity: 0.55; width: 14px; height: 8px; }
 
-  /* menos “caída” para que no se amontone abajo */
-@keyframes paperFall {
-    0% { transform: translate3d(0, 0, 0) rotate(var(--r)); opacity: 0; }
-    10% { opacity: 0.55; }
-    50% { transform: translate3d(8px, 160px, 0) rotate(calc(var(--r) + 6deg)); }
+    @keyframes paperFall {
+    0%   { transform: translate3d(0, 0, 0) rotate(var(--r)); opacity: 0; }
+    10%  { opacity: 0.55; }
+    50%  { transform: translate3d(8px, 160px, 0) rotate(calc(var(--r) + 6deg)); }
     100% { transform: translate3d(-8px, 360px, 0) rotate(calc(var(--r) - 8deg)); opacity: 0; }
     }
 }
 
 /* ==============================
-    HERO – Botones legibles
+Botones hero
 ============================== */
+.heroActions button { color: #3a3a3a; }
 
-.heroActions button {
-  color: #3a3a3a; /* texto oscuro */
-}
-
-/* Primary: fondo naranja más sólido */
 .heroActions button[data-variant="primary"],
 .heroActions .bg-brand-orange {
     background-color: rgb(246, 166, 90);
     color: #3a3a3a;
 }
 
-/* Secondary: fondo claro con borde */
 .heroActions button[data-variant="secondary"],
 .heroActions .bg-brand-blue {
     background-color: rgba(255,255,255,0.85);
@@ -259,209 +236,87 @@
     color: #3a3a3a;
 }
 
-/* HERO – botones con volumen/claridad */
 .heroArrow {
     display: inline-block;
     margin-left: 8px;
     transition: transform 160ms ease;
 }
-.heroBtn:hover .heroArrow {
-    transform: translateX(2px);
-}
-
-/* ==============================
-    HERO – Botones claros (A + B)
-============================== */
+.heroBtn:hover .heroArrow { transform: translateX(3px); }
 
 .heroBtn {
     border-radius: 16px;
-
-    transition:
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        filter 160ms ease;
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
     letter-spacing: 0.2px;
 }
 
-/* Hover: se eleva */
 .heroBtn:hover {
     transform: translateY(-2px);
     box-shadow: 0 16px 32px rgba(0,0,0,0.18);
     filter: saturate(1.05);
 }
 
-/* Active: vuelve */
 .heroBtn:active {
     transform: translateY(0);
     box-shadow: 0 10px 22px rgba(0,0,0,0.12);
 }
 
-/* CTA principal */
 .heroBtnPrimary:hover {
     box-shadow:
         0 18px 38px rgba(246,166,90,0.45),
         0 16px 32px rgba(0,0,0,0.14);
 }
 
-/* Flecha */
-.heroArrow {
-    display: inline-block;
-    margin-left: 8px;
-    transition: transform 160ms ease;
-}
-
-.heroBtn:hover .heroArrow {
-    transform: translateX(3px);
-}
-
-/* Mobile: botones grandes y claros */
 @media (max-width: 640px) {
-    .heroBtn {
-        min-height: 48px; /* tamaño táctil */
-    }   
-    /*.heroBtn {
-        background: rgba(255,255,255,0.85);
-        box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-    }*/
+    .heroBtn { min-height: 48px; }
 }
 
-/* --- Card suave tipo nube --- */
+/* ==============================
+Beneficios (tu lógica invertida)
+============================== */
 .softCard {
     border-radius: 28px 26px 30px 24px;
-
-    /* ✅ REPOSO: más transparente */
-    background: linear-gradient(
-        180deg,
-        rgba(255,255,255,0.62),
-        var(--soft-tint, rgba(246,166,90,0.10))
-    );
-
+    background: linear-gradient(180deg, rgba(255,255,255,0.62), var(--soft-tint, rgba(246,166,90,0.10)));
     border: 1px solid rgba(229,231,235,0.85);
     backdrop-filter: blur(1px);
     box-shadow: 0 12px 26px rgba(0,0,0,0.06);
-
     transition: background 260ms ease, box-shadow 260ms ease, transform 220ms ease;
 }
-
-/* ✅ HOVER: vuelve a sólido */
 .softCard:hover {
-    background: linear-gradient(
-        180deg,
-        rgba(255,255,255,0.92),
-        var(--soft-tint, rgba(246,166,90,0.14))
-    );
+    background: linear-gradient(180deg, rgba(255,255,255,0.92), var(--soft-tint, rgba(246,166,90,0.14)));
 }
 
-/* Variantes de color */
 .softOrange { --soft-tint: rgba(246,166,90,0.16); }
 .softBlue   { --soft-tint: rgba(74,144,194,0.14); }
-.softPurple { --soft-tint: rgba(177, 132, 240,0.16); }
-
-/* ==============================
-    Beneficios – Hover interaction
-============================== */
+.softPurple { --soft-tint: rgba(177,132,240,0.16); }
 
 .benefitCard {
-  /* Azul base (visible y alegre) */
     --soft-tint: rgba(25, 157, 252, 0.14);
     opacity: 0;
     transform: translateY(18px);
-    transition:
-        opacity 450ms ease,
-        transform 450ms ease;
+    transition: opacity 450ms ease, transform 450ms ease;
     transition-delay: var(--d, 0ms);
-    will-change: transform, opacity; 
+    will-change: transform, opacity;
 }
+.benefitCard[data-in="1"] { opacity: 1; transform: translateY(0); }
+.benefitCard:hover { --soft-tint: rgba(246, 166, 90, 0.32); }
 
-.benefitCard[data-in="1"] {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Hover: naranja */
-.benefitCard:hover {
-    --soft-tint: rgba(246, 166, 90, 0.32);
-}
-
-/* Título base */
-.benefitTitle {
-    color: var(--ui-text);
-    transition:
-        color 220ms ease,
-        transform 220ms ease;
-}
-
-/* Hover: el título hace un gesto propio */
-.benefitCard:hover .benefitTitle {
-    color: #9a4f14;              /* naranja oscuro */
-    transform: translateY(-2px); /* micro subida independiente */
-}
-
-/* Contenedor de Beneficios */
 .benefitsSection {
     transition: background-color 300ms ease;
     overflow-anchor: none;
     background-color: rgba(246, 166, 90, 0.06);
 }
-
-/* Cuando hay hover en una card, el fondo acompaña */
-.benefitsSection:hover {
-    background-color: rgba(255,255,255,0.92);
-}
-
-@media (max-width: 768px) {
-    .card {
-        box-shadow: 0 4px 16px rgba(0,0,0,.08);
-        backdrop-filter: none;
-    }
-    .benefitCard {
-    transition-duration: 450ms;
-    }
-}
-
-@media (max-width: 768px) {
-    .bg::before {
-        background:
-            linear-gradient(to bottom,
-                rgba(246,166,90,0),
-                rgba(246,166,90,.30),
-                rgba(246,166,90,0)
-            ) 20% 0 / 8px 180px repeat-y,
-
-            linear-gradient(to bottom,
-                rgba(74,144,194,0),
-                rgba(74,144,194,.30),
-                rgba(74,144,194,0)
-            ) 50% 0 / 10px 220px repeat-y,
-
-            linear-gradient(to bottom,
-                rgba(200,182,226,0),
-                rgba(177,132,240,.30),
-                rgba(200,182,226,0)
-            ) 80% 0 / 7px 200px repeat-y;
-    }
-}
-
-@media (max-width: 768px) {
-    .bg {
-        inset: 0;
-    }
-}
+.benefitsSection:hover { background-color: rgba(255,255,255,0.92); }
 
 /* ==============================
-    Familias – Hover interaction
+Familias
 ============================== */
-
 .familiasSection {
-    /* ✅ REPOSO: transparente */
     background: rgba(246, 166, 90, 0.05);
     transition: background 260ms ease, box-shadow 260ms ease, transform 220ms ease;
     backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(1px);
 }
-
 .familiasSection:hover {
-    /* ✅ HOVER: sólido */
     background: rgba(255,255,255,0.92);
     transform: translateY(-2px);
     box-shadow: 0 16px 34px rgba(0,0,0,0.10);
@@ -469,4 +324,14 @@
 
 .btnTextDark {
     color: #2b2b2b !important;
+}
+
+@media (max-width: 768px) {
+    .bg { inset: 0; }
+    .bg::before {
+        background:
+        linear-gradient(to bottom, rgba(246,166,90,0), rgba(246,166,90,.30), rgba(246,166,90,0)) 20% 0 / 8px 180px repeat-y,
+        linear-gradient(to bottom, rgba(74,144,194,0), rgba(74,144,194,.30), rgba(74,144,194,0)) 50% 0 / 10px 220px repeat-y,
+        linear-gradient(to bottom, rgba(200,182,226,0), rgba(177,132,240,.30), rgba(200,182,226,0)) 80% 0 / 7px 200px repeat-y;
+    }
 }
