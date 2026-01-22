@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useWheelProgress } from "../hooks/useWheelProgress";
 
 /* =========================
-   HELPERS
+HELPERS
 ========================= */
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
 const smoothstep = (a, b, x) => {
@@ -12,9 +12,9 @@ const smoothstep = (a, b, x) => {
 };
 
 /* =========================
-   CATMULL-ROM -> BEZIER
-   - más “delicado”: s más bajo
-   - más puntos: step menor
+CATMULL-ROM -> BEZIER
+- más “delicado”: s más bajo
+- más puntos: step menor
 ========================= */
 function catmullRomToBezierPath(points, s = 0.22) {
     if (!points || points.length < 2) return "";
