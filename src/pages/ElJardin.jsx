@@ -11,7 +11,7 @@ export default function ElJardin() {
         {/* HERO */}
                 <section className="grid gap-6 md:grid-cols-2 items-center bg-ui-tintBlue border border-ui-border rounded-lg shadow-card p-6">
                     <div className="grid gap-3">
-                        <Badge variant="blue">Jardín maternal</Badge>
+                        <Badge variant="blue">Jardín materno infantil</Badge>
                         <h1 className="text-3xl md:text-4xl font-extrabold text-ui-text leading-tight">
                         Un lugar seguro, cálido y creativo para crecer
                         </h1>
@@ -70,7 +70,7 @@ export default function ElJardin() {
                         <div>
                         <h2 className="text-xl font-extrabold text-ui-text">Conocé el espacio</h2>
                         <p className="text-sm text-ui-muted mt-1">
-                            Algunas imágenes para que las familias se ubiquen y se entusiasmen.
+                            Imágenes del jardin.
                         </p>
                         </div>
                         <Badge variant="orange">Galería</Badge>
@@ -91,7 +91,7 @@ export default function ElJardin() {
                         <Card className="p-5">
                             <div className="font-extrabold text-ui-text">¿Qué edades reciben?</div>
                             <p className="mt-1 text-sm text-ui-muted">
-                                Desde lactantes y salas por edad (ajustalo a la realidad del jardín).
+                                Desde lactantes y salas por edad (consultar salas).
                             </p>
                         </Card>
 
