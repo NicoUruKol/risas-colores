@@ -364,3 +364,13 @@
   font-weight: 600;
 }
 
+/* Mobile: primero panel (título/sub), después escena */
+.side { order: 1; }
+.sceneSection { order: 2; }
+
+/* Desktop: panel izquierda, escena derecha (como lo tenías) */
+@media (min-width: 900px){
+  .side { order: 1; }
+  .sceneSection { order: 2; }
+}
+
