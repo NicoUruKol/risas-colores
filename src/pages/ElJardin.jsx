@@ -42,9 +42,9 @@ const SCENE_HOTSPOTS = [
     // Pájaros (centro arriba)
     { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 56, y: 11, w: 16, h: 12 }, z: 60 },
     // Sol/cara (arriba derecha) -> MÁS CHICO para no tapar nube
-    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 73, y: 6, w: 14, h: 14 }, z: 80, animKey: "sun" },
+    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 73, y: 10, w: 14, h: 20 }, z: 80, animKey: "sun" },
     // Nube derecha (chiquita)
-    { id: "cloudR", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 84, y: 18, w: 14, h: 12 }, z: 50, animKey: "clouds" },
+    { id: "cloudR", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 84, y: 20, w: 18, h: 15 }, z: 50, animKey: "clouds" },
 ];
 
 
@@ -191,8 +191,12 @@ export default function ElJardin() {
                     <img src={fondoImg} alt="" className={styles.layer} />
 
                     {/* Sol */}
-                    <div key={`sun-${anim.sun}`} className={`${styles.sun} ${anim.sun ? styles.play : ""}`}>
-                    <img src={solImg} alt="" className={`${styles.layer} ${styles.sunRays}`} />
+                    <div
+                    key={`sun-${anim.sun}`}
+                    className={`${styles.sun} ${anim.sun ? styles.play : ""}`}
+                    style={{ "--sun-cx": "77%", "--sun-cy": "22%" }}  // <-- centro aproximado de la cara
+                    >
+                    <img src={solImg} alt="" className={styles.layer} />
                     <img src={solCaraImg} alt="" className={styles.layer} />
                     </div>
 
