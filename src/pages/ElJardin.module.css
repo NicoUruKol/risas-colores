@@ -1,108 +1,284 @@
+.page{
+  padding: 24px 0;
+}
+
+/* Layout: mobile first */
+.layout{
+  display: grid;
+  gap: 18px;
+}
+
+/* Mobile: escena arriba, texto abajo */
+.side{ order: 2; }
+.sceneSection{ order: 1; }
+
+/* Desktop: texto izquierda, escena derecha (más ancho para escena) */
+@media (min-width: 900px){
+  .layout{
+    grid-template-columns: 320px 1fr; /* antes 360px */
+    align-items: start;
+    gap: 22px;
+  }
+  .side{ order: 1; }
+  .sceneSection{ order: 2; }
+}
+
+.sideInner{
+  display: grid;
+  gap: 10px;
+}
+
+.title{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 28px;
+  line-height: 1.05;
+  margin: 0;
+}
+.subtitle{
+  color: var(--ui-muted);
+  margin: 0;
+  font-size: 14px;
+}
+
+.sideCtaRow{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.progressTextDesktop{
+  margin-top: 10px;
+  color: var(--ui-muted);
+  font-size: 13px;
+  display: none;
+}
+@media (min-width: 900px){
+  .progressTextDesktop{ display: block; }
+}
+
+/* ---------- ESCENA ---------- */
+
+.sceneWrap{
+  --header-h: 88px;
+  display: grid;
+  gap: 10px;
+}
+
+/* escena SIN borde visible */
+.scene{
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+
+  /* que ENTRE en pantalla con header */
+  height: min(
+    520px,
+    calc(100vh - var(--header-h) - 28px - 28px)
+  );
+
+  background: transparent;
+}
+
+/* Desktop: un poco más alto pero sin forzar scroll */
+@media (min-width: 900px){
+  .scene{
+    height: min(
+      640px,
+      calc(100vh - var(--header-h) - 34px)
+    );
+  }
+}
+
+/* capa base: todas las imágenes exportadas con el mismo lienzo */
+.layer{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Desktop: contain para que calcen las capas con el lienzo */
+@media (min-width: 900px){
+  .layer{
+    object-fit: contain;
+  }
+}
+
+/* HOTSPOTS */
+.hotspot{
+  position: absolute;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 16px;
+  outline: none;
+  touch-action: manipulation;
+}
+.hotspot:focus-visible{
+  outline: 2px solid rgba(74,144,194,.55);
+  outline-offset: 2px;
+}
+
+/* Tooltip dentro */
+.tooltip{
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 85;
+
+  background: rgba(255,255,255,.86);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.10);
+}
+.tooltipTitle{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 13px;
+}
+.tooltipText{
+  color: rgba(15, 23, 42, .72);
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+/* Progreso mobile debajo (texto) */
+.progressTextMobile{
+  color: var(--ui-muted);
+  font-size: 13px;
+  padding-left: 4px;
+}
+@media (min-width: 900px){
+  .progressTextMobile{ display: none; }
+}
+
+.unlockRow{
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.unlockedLine{
+  color: var(--ui-muted);
+  font-size: 13px;
+  padding-left: 4px;
+}
+
+.rest{
+  display: grid;
+  gap: 24px;
+  margin-top: 18px;
+}
+.hidden{
+  display: none;
+}
+
+/* ---------- CAPAS ANIMABLES ---------- */
+.sun, .clouds, .birds, .tree, .kids, .ball, .magnifier{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10; /* debajo de hotspots */
+}
+
+.wingR{ transform-origin: 60% 40%; }
+.wingL{ transform-origin: 40% 40%; }
+
+.armR{ transform-origin: 60% 50%; }
+.armL{ transform-origin: 40% 50%; }
+
 .play{}
 
-/* ☀️ SOL (posicionarlo sobre el sol real) */
-.sun{
-  position:absolute;
-  left:78%;
-  top:6%;
-  width:18%;
-  height:24%;
-  transform-origin:center;
+/* Sol */
+.sun img:first-child{
+  animation: sunSpin 18s linear infinite;
 }
-.sunSvg{ width:100%; height:100%; }
-.sunRays{ fill: rgba(246,166,90,.95); transform-origin:50% 50%; }
-.sunCore{ fill: rgba(246,166,90,.9); }
-
-.sun.play{ animation: sunPop 420ms ease-out; }
-.sun.play .sunRays{ animation: raysSpin 650ms ease-out; }
-
+.sun.play{
+  animation: sunPop 450ms ease-out;
+}
+@keyframes sunSpin{ to{ transform: rotate(360deg); } }
 @keyframes sunPop{
-  0%{ transform:scale(1); filter:none; }
-  50%{ transform:scale(1.07); filter: drop-shadow(0 10px 14px rgba(246,166,90,.25)); }
-  100%{ transform:scale(1); filter:none; }
-}
-@keyframes raysSpin{
-  0%{ transform:rotate(0deg); }
-  100%{ transform:rotate(40deg); }
+  0%{ transform: scale(1); }
+  45%{ transform: scale(1.05); }
+  100%{ transform: scale(1); }
 }
 
-/* ☁️ NUBES (posicionar sobre nubes reales) */
-.cloudSvg{ width:100%; height:100%; fill: rgba(74,144,194,.18); stroke: rgba(74,144,194,.22); stroke-width:2; }
-.cloud1{
-  position:absolute; left:30%; top:12%; width:18%; height:12%;
-}
-.cloud2{
-  position:absolute; left:84%; top:22%; width:14%; height:10%;
-}
-.cloud1.play{ animation: cloudDrift 700ms ease-in-out; }
-.cloud2.play{ animation: cloudDrift2 700ms ease-in-out; }
-
+/* Nubes */
+.clouds.play{ animation: cloudDrift 700ms ease-in-out; }
 @keyframes cloudDrift{
-  0%{ transform:translateX(0); }
-  50%{ transform:translateX(10px); }
-  100%{ transform:translateX(0); }
-}
-@keyframes cloudDrift2{
-  0%{ transform:translateX(0); }
-  50%{ transform:translateX(-8px); }
-  100%{ transform:translateX(0); }
+  0%{ transform: translateX(0); }
+  50%{ transform: translateX(10px); }
+  100%{ transform: translateX(0); }
 }
 
-/* 🎈 GLOBOS (sobre la ventana derecha) */
-.balloons{
-  position:absolute;
-  left:70%;
-  top:44%;
-  width:16%;
-  height:22%;
-}
-.balloon{
-  position:absolute;
-  width:34%;
-  height:100%;
-  stroke: rgba(74,144,194,.55);
-  fill: rgba(200,182,226,.45);
-}
-.b0{ left:0%; fill: rgba(246,166,90,.55); }
-.b1{ left:33%; fill: rgba(74,144,194,.45); }
-.b2{ left:66%; fill: rgba(200,182,226,.55); }
+/* Pájaros + alas */
+.birds.play{ animation: birdsFly 650ms ease-out; }
+.birds.play .wingR{ animation: flapR 280ms ease-in-out 0ms 2; }
+.birds.play .wingL{ animation: flapL 280ms ease-in-out 40ms 2; }
 
-.balloons.play{ animation: balloonsUp 520ms ease-out; }
-@keyframes balloonsUp{
-  0%{ transform:translateY(0); }
-  60%{ transform:translateY(-12px); }
-  100%{ transform:translateY(0); }
+@keyframes birdsFly{
+  0%{ transform: translate(0,0); }
+  60%{ transform: translate(16px,-10px); }
+  100%{ transform: translate(0,0); }
+}
+@keyframes flapR{
+  0%{ transform: rotate(0deg); }
+  50%{ transform: rotate(10deg); }
+  100%{ transform: rotate(0deg); }
+}
+@keyframes flapL{
+  0%{ transform: rotate(0deg); }
+  50%{ transform: rotate(-10deg); }
+  100%{ transform: rotate(0deg); }
 }
 
-/* 🐦 PÁJAROS (sobre los pajaritos reales) */
-.birds{
-  position:absolute;
-  left:56%;
-  top:8%;
-  width:22%;
-  height:18%;
+/* Árbol hojas */
+.tree.play{ animation: treeWiggle 650ms ease-in-out; }
+@keyframes treeWiggle{
+  0%{ transform: rotate(0deg); }
+  25%{ transform: rotate(-1.2deg); }
+  55%{ transform: rotate(1.2deg); }
+  100%{ transform: rotate(0deg); }
 }
-.bird{
-  position:absolute;
-  width:45%;
-  height:55%;
-  stroke: rgba(74,144,194,.85);
-  fill:none;
-  opacity:.9;
-}
-.bird0{ left:0%; top:5%; }
-.bird1{ left:40%; top:25%; }
 
-.birds.play .bird0{ animation: birdFly 650ms ease-out; }
-.birds.play .bird1{ animation: birdFly2 650ms ease-out; }
+/* Niños */
+.kids.play{ animation: kidsPop 420ms ease-out; }
+.kids.play .armR{ animation: armWave 380ms ease-in-out; }
+.kids.play .armL{ animation: armWave 380ms ease-in-out 60ms; }
 
-@keyframes birdFly{
-  0%{ transform:translate(0,0) scale(1); }
-  60%{ transform:translate(16px,-10px) scale(1.06); }
-  100%{ transform:translate(0,0) scale(1); }
+@keyframes kidsPop{
+  0%{ transform: translateY(0); }
+  45%{ transform: translateY(-6px); }
+  100%{ transform: translateY(0); }
 }
-@keyframes birdFly2{
-  0%{ transform:translate(0,0) scale(1); }
-  60%{ transform:translate(10px,-6px) scale(1.05); }
-  100%{ transform:translate(0,0) scale(1); }
+@keyframes armWave{
+  0%{ transform: rotate(0deg); }
+  50%{ transform: rotate(8deg); }
+  100%{ transform: rotate(0deg); }
+}
+
+/* Pelota */
+.ball.play{ animation: ballBump 520ms ease-out; }
+@keyframes ballBump{
+  0%{ transform: translate(0,0); }
+  35%{ transform: translate(8px,-8px); }
+  100%{ transform: translate(0,0); }
+}
+
+/* Lupa */
+.magnifier.play{ animation: lupaTap 420ms ease-out; }
+@keyframes lupaTap{
+  0%{ transform: scale(1); }
+  45%{ transform: scale(1.04); }
+  100%{ transform: scale(1); }
 }
