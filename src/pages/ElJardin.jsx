@@ -41,8 +41,10 @@ const SCENE_HOTSPOTS = [
 
 export default function ElJardin() {
     const [discovered, setDiscovered] = useState(() => new Set());
+    const [forceUnlocked, setForceUnlocked] = useState(false);
+
     const discoveredCount = discovered.size;
-    const unlocked = discoveredCount >= 3;
+    const unlocked = forceUnlocked || discoveredCount >= 3;
 
     const [activeTip, setActiveTip] = useState(null);
     const [tipVisible, setTipVisible] = useState(false);
@@ -125,6 +127,11 @@ export default function ElJardin() {
     const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
     smoothScrollTo(targetY, 1100); // 🔥 más lento (podés subir a 1300 si querés)
     };
+    const skipToContent = () => {
+    setForceUnlocked(true);      // ✅ habilita el resto
+    setShowUnlockModal(false);   // ✅ si está el modal, lo cierra
+    requestAnimationFrame(() => goToNext()); // ✅ scroll suave al contenido
+    };
 
 
     return (
@@ -140,7 +147,14 @@ export default function ElJardin() {
                     ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
                     : "Tocá la escena y desbloqueá el recorrido."}
                 </p>
-
+                
+                <button
+                type="button"
+                className={styles.skipHint}
+                onClick={skipToContent}
+                >
+                O seguí sin jugar <span aria-hidden>→</span>
+                </button>
                 <div className={styles.sideInfo}>
                 {!unlocked && discoveredCount === 0 && (
                     <p className={styles.sideHint}> </p>
@@ -156,14 +170,6 @@ export default function ElJardin() {
                     <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
                 )}
                 </div>
-
-
-                <div className={styles.sideCtaRow}>
-                    <Link to="/uniformes">
-                    <Button variant="primary">Uniformes</Button>
-                    </Link>
-                </div>
-
                 </div>
             </aside>
 
@@ -276,6 +282,7 @@ export default function ElJardin() {
 
                 </div>
             </div>
+            
             </section>
         </Container>
 
