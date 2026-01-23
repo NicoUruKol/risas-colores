@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 
 import styles from "./ElJardin.module.css";
@@ -20,6 +21,8 @@ import alaIzqImg from "../assets/animacion/escena_0003_pajaros-alas-cortas.png";
 
 import hojasImg from "../assets/animacion/escena_0006_hojas.png";
 
+import cartelCasa from "../assets/animacion/escena_0005_risas-colores.png";
+
 import ninoHamacaImg from "../assets/animacion/escena_0007_hamaca.png";
 import pelotaImg from "../assets/animacion/escena_0010_pelota.png";
 import brazoDerImg from "../assets/animacion/escena_0012_brazo-azul-hamaca.png";
@@ -31,9 +34,9 @@ const SCENE_HOTSPOTS = [
     { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 6, y: 60, w: 70, h: 38 }, z: 30 },
     { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 26, y: 26, w: 48, h: 40 }, z: 20 },
     { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 0, y: 10, w: 30, h: 55 }, z: 20 },
-    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 70, y: 0, w: 30, h: 34 }, z: 90 },
+    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 70, y: 0, w: 30, h: 32 }, z: 80 },
     { id: "clouds", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 28, y: 6, w: 72, h: 26 }, z: 40 },
-    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 52, y: 2, w: 30, h: 26 }, z: 50 },
+    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 52, y: 2, w: 30, h: 26 }, z: 60 },
 ];
 
 export default function ElJardin() {
@@ -44,20 +47,22 @@ export default function ElJardin() {
     const [activeTip, setActiveTip] = useState(null);
     const [tipVisible, setTipVisible] = useState(false);
 
-    // “Play” de animaciones (con key para reiniciar)
+    // Para reiniciar animaciones con key
     const [anim, setAnim] = useState({
         sun: 0,
         clouds: 0,
         birds: 0,
         kids: 0,
-        house: 0,
         tree: 0,
+        house: 0,
     });
 
-    const heroRef = useRef(null);
     const sceneWrapRef = useRef(null);
+    const nextSectionRef = useRef(null);
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
 
-    // medir header real para que la escena entre sin scroll
+
+    // ✅ medir header real para que la escena entre sin scroll
     useEffect(() => {
         const setHeaderH = () => {
         const headerEl = document.querySelector("header");
@@ -70,12 +75,12 @@ export default function ElJardin() {
         return () => window.removeEventListener("resize", setHeaderH);
     }, []);
 
-    const progressText = useMemo(() => {
-        if (discoveredCount === 0) return "Tocá la escena para descubrir el jardín";
-        if (discoveredCount < 3) return `¡Bien! Llevás ${discoveredCount}/3 descubrimientos`;
-        return "¡Desbloqueaste el recorrido! 🌈";
-    }, [discoveredCount]);
+    useEffect(() => {
+    if (unlocked) setShowUnlockModal(true);
+    }, [unlocked]);
 
+
+    
     const onHotspotClick = (spot) => {
         setDiscovered((prev) => {
         const next = new Set(prev);
@@ -92,157 +97,312 @@ export default function ElJardin() {
         onHotspotClick._t = window.setTimeout(() => setTipVisible(false), 2200);
     };
 
-    const revealRest = () => {
-        requestAnimationFrame(() => {
-        heroRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
+    const smoothScrollTo = (targetY, duration = 1100) => {
+    const startY = window.pageYOffset;
+    const diff = targetY - startY;
+    const start = performance.now();
+
+    const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+    const step = (now) => {
+        const elapsed = now - start;
+        const t = Math.min(1, elapsed / duration);
+        const eased = easeInOut(t);
+        window.scrollTo(0, startY + diff * eased);
+        if (t < 1) requestAnimationFrame(step);
     };
+
+    requestAnimationFrame(step);
+    };
+
+    const goToNext = () => {
+    const el = nextSectionRef.current;
+    if (!el) return;
+
+    const headerEl = document.querySelector("header");
+    const headerH = headerEl?.getBoundingClientRect?.().height ?? 0;
+
+    const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
+    smoothScrollTo(targetY, 1100); // 🔥 más lento (podés subir a 1300 si querés)
+    };
+
 
     return (
         <main className={styles.page}>
-        <Container className={styles.layout}>
-            {/* ======= LADO IZQUIERDO ======= */}
+        {/* ====== BLOQUE SUPERIOR: panel + escena ====== */}
+        <Container>
+            <section className={styles.layout}>
             <aside className={styles.side}>
-            <div className={styles.sideInner}>
-                {/* ❌ Sacado: el chip/botón “El Jardín” */}
+                <div className={styles.sideInner}>
                 <h1 className={styles.title}>Descubrí Risas y Colores</h1>
-                <p className={styles.subtitle}>Tocá la escena y desbloqueá el recorrido.</p>
+                <p className={styles.subtitle}>
+                {unlocked
+                    ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
+                    : "Tocá la escena y desbloqueá el recorrido."}
+                </p>
+
+                <div className={styles.sideInfo}>
+                {!unlocked && discoveredCount === 0 && (
+                    <p className={styles.sideHint}> </p>
+                )}
+
+                {!unlocked && discoveredCount > 0 && (
+                    <p className={styles.sideProgress}>
+                    ¡Bien! Llevás {discoveredCount}/3 descubrimientos.
+                    </p>
+                )}
+
+                {unlocked && (
+                    <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
+                )}
+                </div>
+
 
                 <div className={styles.sideCtaRow}>
-                <Link to="/uniformes">
+                    <Link to="/uniformes">
                     <Button variant="primary">Uniformes</Button>
-                </Link>
-                {/* ❌ Sacado: Agendar visita */}
+                    </Link>
                 </div>
 
-                {/* texto de progreso en desktop */}
-                <div className={styles.progressTextDesktop}>{progressText}</div>
-            </div>
+                </div>
             </aside>
 
-            {/* ================= ESCENA ================= */}
-            <section className={styles.sceneSection}>
-            <div ref={sceneWrapRef} className={styles.sceneWrap}>
+            <div className={styles.sceneSection}>
+                <div ref={sceneWrapRef} className={styles.sceneWrap}>
                 <div className={styles.scene} aria-label="Escena interactiva del jardín">
-                {/* Fondo */}
-                <img src={fondoImg} alt="" className={styles.layer} />
+                    {/* Fondo */}
+                    <img src={fondoImg} alt="" className={styles.layer} />
 
-                {/* Sol */}
-                <div key={`sun-${anim.sun}`} className={`${styles.sun} ${anim.sun ? styles.play : ""}`}>
+                    {/* Sol */}
+                    <div key={`sun-${anim.sun}`} className={`${styles.sun} ${anim.sun ? styles.play : ""}`}>
                     <img src={solImg} alt="" className={styles.layer} />
                     <img src={solCaraImg} alt="" className={styles.layer} />
-                </div>
+                    </div>
 
-                {/* Nubes */}
-                <div key={`clouds-${anim.clouds}`} className={`${styles.clouds} ${anim.clouds ? styles.play : ""}`}>
+                    {/* Nubes */}
+                    <div key={`clouds-${anim.clouds}`} className={`${styles.clouds} ${anim.clouds ? styles.play : ""}`}>
                     <img src={nubesImg} alt="" className={styles.layer} />
-                </div>
+                    </div>
 
-                {/* Pájaros + alas */}
-                <div key={`birds-${anim.birds}`} className={`${styles.birds} ${anim.birds ? styles.play : ""}`}>
+                    {/* Pájaros + alas */}
+                    <div key={`birds-${anim.birds}`} className={`${styles.birds} ${anim.birds ? styles.play : ""}`}>
                     <img src={pajarosImg} alt="" className={styles.layer} />
                     <img src={alaDerImg} alt="" className={`${styles.layer} ${styles.wingR}`} />
                     <img src={alaIzqImg} alt="" className={`${styles.layer} ${styles.wingL}`} />
-                </div>
+                    </div>
 
-                {/* Hojas */}
-                <div key={`tree-${anim.tree}`} className={`${styles.tree} ${anim.tree ? styles.play : ""}`}>
+                    {/* Hojas */}
+                    <div key={`tree-${anim.tree}`} className={`${styles.tree} ${anim.tree ? styles.play : ""}`}>
                     <img src={hojasImg} alt="" className={styles.layer} />
-                </div>
+                    </div>
 
-                {/* Niño hamaca + brazos */}
-                <div key={`kids-${anim.kids}`} className={`${styles.kids} ${anim.kids ? styles.play : ""}`}>
+                    {/* Cartel Casa (se anima con el hotspot "house") */}
+                    <div key={`house-${anim.house}`} className={`${styles.house} ${anim.house ? styles.play : ""}`}>
+                    <img src={cartelCasa} alt="" className={styles.layer} />
+                    </div>
+
+                    {/* Niño hamaca + brazos */}
+                    <div key={`kids-${anim.kids}`} className={`${styles.kids} ${anim.kids ? styles.play : ""}`}>
                     <img src={ninoHamacaImg} alt="" className={styles.layer} />
                     <img src={brazoDerImg} alt="" className={`${styles.layer} ${styles.armR}`} />
                     <img src={brazoIzqImg} alt="" className={`${styles.layer} ${styles.armL}`} />
-                </div>
+                    </div>
 
-                {/* Pelota */}
-                <div className={`${styles.ball} ${anim.kids ? styles.play : ""}`} key={`ball-${anim.kids}`}>
+                    {/* Pelota */}
+                    <div key={`ball-${anim.kids}`} className={`${styles.ball} ${anim.kids ? styles.play : ""}`}>
                     <img src={pelotaImg} alt="" className={styles.layer} />
-                </div>
+                    </div>
 
-                {/* Lupa */}
-                <div className={`${styles.magnifier} ${anim.kids ? styles.play : ""}`} key={`lupa-${anim.kids}`}>
+                    {/* Lupa */}
+                    <div key={`lupa-${anim.kids}`} className={`${styles.magnifier} ${anim.kids ? styles.play : ""}`}>
                     <img src={lupaImg} alt="" className={styles.layer} />
-                </div>
+                    </div>
 
-                {/* HOTSPOTS */}
-                {SCENE_HOTSPOTS.map((spot) => {
-                    const { x, y, w, h } = spot.rect;
-                    return (
+                    {/* HOTSPOTS */}
+                    {SCENE_HOTSPOTS.map((spot) => (
                     <button
                         key={spot.id}
                         type="button"
                         onClick={() => onHotspotClick(spot)}
                         className={styles.hotspot}
                         style={{
-                        left: `${x}%`,
-                        top: `${y}%`,
-                        width: `${w}%`,
-                        height: `${h}%`,
+                        left: `${spot.rect.x}%`,
+                        top: `${spot.rect.y}%`,
+                        width: `${spot.rect.w}%`,
+                        height: `${spot.rect.h}%`,
                         zIndex: spot.z,
                         }}
                         aria-label={`Interactuar con ${spot.label}`}
                     />
-                    );
-                })}
+                    ))}
 
-                {/* Tooltip adentro */}
-                {activeTip && tipVisible && (
+                    {/* Tooltip */}
+                    {activeTip && tipVisible && (
                     <div className={styles.tooltip}>
-                    <div className={styles.tooltipTitle}>{activeTip.label}</div>
-                    <div className={styles.tooltipText}>{activeTip.tip}</div>
+                        <div className={styles.tooltipTitle}>{activeTip.label}</div>
+                        <div className={styles.tooltipText}>{activeTip.tip}</div>
                     </div>
-                )}
-                </div>
+                    )}
 
-                {/* texto progreso mobile debajo */}
-                <div className={styles.progressTextMobile}>{progressText}</div>
+                    {/* OVERLAY desbloqueo (centrado, blur + botón) */}
+                    {showUnlockModal && unlocked && (
+                    <div className={styles.unlockOverlay} role="dialog" aria-modal="true">
+                        <div className={styles.unlockCard}>
+                        <div className={styles.unlockTitle}>¡Felicidades! 🌈</div>
+                        <div className={styles.unlockSubtitle}>Desbloqueaste el camino.</div>
+                        <Button
+                        variant="primary"
+                        onClick={() => {
+                            setShowUnlockModal(false);
+                            goToNext();
+                        }}
+                        >
+                        Descubrí el jardín ↓
+                        </Button>
 
-                {unlocked && (
-                <div className={styles.unlockRow}>
-                    <Button variant="primary" onClick={revealRest}>
-                    Conocé el jardín ↓
-                    </Button>
-                </div>
-                )}
+                        <button
+                        type="button"
+                        className={styles.unlockClose}
+                        onClick={() => setShowUnlockModal(false)}
+                        aria-label="Cerrar"
+                        >
+                        ✕
+                        </button>
 
-                {/* Mensaje desbloqueo (si lo querés mantener fuera de escena) */}
-                {unlocked && <div className={styles.unlockedLine}>¡Desbloqueaste el recorrido! 🌈</div>}
-            </div>
-
-            {/* ================= RESTO DEL COMPONENTE (BLOQUEADO) ================= */}
-            <div className={unlocked ? styles.rest : styles.hidden}>
-                <section
-                ref={heroRef}
-                className="grid gap-6 md:grid-cols-2 items-center bg-ui-tintBlue border border-ui-border rounded-lg shadow-card p-6"
-                >
-                <div className="grid gap-3">
-                    <Badge variant="blue">Jardín materno infantil</Badge>
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-ui-text leading-tight">
-                    Un lugar seguro, cálido y creativo para crecer
-                    </h2>
-                    <p className="text-ui-muted">
-                    Acompañamos a las familias en la primera infancia con propuestas
-                    pensadas para cada etapa: juego, vínculo, exploración y hábitos.
-                    </p>
-
-                    <div className="flex flex-wrap gap-3 mt-2">
-                    <Link to="/uniformes">
-                        <Button variant="primary">Comprar uniformes</Button>
-                    </Link>
-                    {/* ❌ Sacado: Agendar visita */}
+                        </div>
                     </div>
+                    )}
                 </div>
 
-                <div className="aspect-video md:aspect-square rounded-md bg-gray-200 border border-ui-border" />
-                </section>
-
-                {/* (Acá pegás el resto cuando lo retomemos: propuesta, galería, FAQ, CTA) */}
+                </div>
             </div>
             </section>
         </Container>
+
+        {/* ====== RESTO DEL COMPONENTE: FULL WIDTH (normal) ====== */}
+        <div ref={nextSectionRef} className={unlocked ? styles.rest : styles.hidden}>
+            <Container>
+            <section className="grid gap-6 md:grid-cols-2 items-center bg-ui-tintBlue border border-ui-border rounded-lg shadow-card p-6">
+                <div className="grid gap-3">
+                <Badge variant="blue">Jardín materno infantil</Badge>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-ui-text leading-tight">
+                    Un lugar seguro, cálido y creativo para crecer
+                </h2>
+                <p className="text-ui-muted">
+                    Acompañamos a las familias en la primera infancia con propuestas
+                    pensadas para cada etapa: juego, vínculo, exploración y hábitos.
+                </p>
+
+                <div className="flex flex-wrap gap-3 mt-2">
+                    <Link to="/uniformes">
+                    <Button variant="primary">Comprar uniformes</Button>
+                    </Link>
+                </div>
+                </div>
+
+                <div className="aspect-video md:aspect-square rounded-md bg-gray-200 border border-ui-border" />
+            </section>
+
+            {/* BLOQUES INFO */}
+            <section className="grid gap-4">
+                <h2 className="text-xl font-extrabold text-ui-text">Nuestra propuesta</h2>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                <Card className="p-5">
+                    <div className="text-2xl">🧩</div>
+                    <div className="mt-2 font-extrabold text-ui-text">Aprender jugando</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Actividades lúdicas para desarrollar autonomía, lenguaje y motricidad.
+                    </p>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="text-2xl">🤍</div>
+                    <div className="mt-2 font-extrabold text-ui-text">Cuidado y vínculo</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Acompañamiento afectivo y rutinas que brindan seguridad y confianza.
+                    </p>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="text-2xl">🌈</div>
+                    <div className="mt-2 font-extrabold text-ui-text">Ambiente amable</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Espacios pensados para explorar, crear y compartir en comunidad.
+                    </p>
+                </Card>
+                </div>
+            </section>
+
+            {/* GALERÍA */}
+            <section className="grid gap-4">
+                <div className="flex items-end justify-between gap-4">
+                <div>
+                    <h2 className="text-xl font-extrabold text-ui-text">Conocé el espacio</h2>
+                    <p className="text-sm text-ui-muted mt-1">Imágenes del jardin.</p>
+                </div>
+                <Badge variant="orange">Galería</Badge>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
+                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
+                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
+                </div>
+            </section>
+
+            {/* FAQ */}
+            <section className="grid gap-4">
+                <h2 className="text-xl font-extrabold text-ui-text">Preguntas frecuentes</h2>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                <Card className="p-5">
+                    <div className="font-extrabold text-ui-text">¿Qué edades reciben?</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Desde lactantes y salas por edad (consultar salas).
+                    </p>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="font-extrabold text-ui-text">¿Cómo coordino una visita?</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Podés contactarnos por WhatsApp o completar un formulario.
+                    </p>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="font-extrabold text-ui-text">¿Cómo compro uniformes?</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Entrás a Uniformes, elegís sala, talle y agregás al carrito.
+                    </p>
+                </Card>
+
+                <Card className="p-5">
+                    <div className="font-extrabold text-ui-text">¿Hacen envíos?</div>
+                    <p className="mt-1 text-sm text-ui-muted">
+                    Podés definir retiro en el jardín o envío a domicilio (según lo que decidan).
+                    </p>
+                </Card>
+                </div>
+            </section>
+
+            {/* CTA FINAL */}
+            <section className="bg-ui-tintOrange border border-ui-border rounded-lg p-6 grid gap-3 text-center">
+                <h3 className="text-xl font-extrabold text-ui-text">¿Listos para empezar?</h3>
+                <p className="text-sm text-ui-muted">
+                Conocé el catálogo de uniformes y resolvé la compra en minutos.
+                </p>
+                <div className="flex justify-center gap-3 flex-wrap">
+                <Link to="/uniformes">
+                    <Button variant="primary">Ir a Uniformes</Button>
+                </Link>
+                <Link to="/">
+                    <Button variant="secondary">Volver al inicio</Button>
+                </Link>
+                </div>
+            </section>
+            </Container>
+        </div>
         </main>
     );
-    }
+}

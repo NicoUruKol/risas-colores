@@ -2,39 +2,45 @@
   padding: 24px 0;
 }
 
-/* Layout: mobile first */
+/* Layout: mobile first (escena arriba, texto abajo) */
 .layout{
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
-/* Mobile: escena arriba, texto abajo */
+/* Mobile */
 .side{ order: 2; }
 .sceneSection{ order: 1; }
 
-/* Desktop: texto izquierda, escena derecha (más ancho para escena) */
+/* Desktop */
 @media (min-width: 900px){
   .layout{
-    grid-template-columns: 320px 1fr; /* antes 360px */
-    align-items: start;
-    gap: 22px;
+    grid-template-columns: 340px 1fr;
+    align-items: center;
+    gap: 18px;
   }
   .side{ order: 1; }
   .sceneSection{ order: 2; }
 }
 
+/* Panel izquierdo */
 .sideInner{
   display: grid;
   gap: 10px;
+  align-content: center;
 }
 
 .title{
   font-weight: 900;
   color: var(--ui-text);
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1.05;
   margin: 0;
 }
+@media (min-width: 900px){
+  .title{ font-size: 34px; }
+}
+
 .subtitle{
   color: var(--ui-muted);
   margin: 0;
@@ -45,35 +51,28 @@
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-.progressTextDesktop{
+.unlockedInlineText{
   margin-top: 10px;
   color: var(--ui-muted);
-  font-size: 13px;
-  display: none;
-}
-@media (min-width: 900px){
-  .progressTextDesktop{ display: block; }
+  font-size: 14px;
 }
 
 /* ---------- ESCENA ---------- */
-
 .sceneWrap{
   --header-h: 88px;
   display: grid;
   gap: 10px;
 }
 
-/* escena SIN borde visible */
 .scene{
   position: relative;
   width: 100%;
   overflow: hidden;
   border-radius: 18px;
 
-  /* que ENTRE en pantalla con header */
   height: min(
     520px,
     calc(100vh - var(--header-h) - 28px - 28px)
@@ -82,36 +81,27 @@
   background: transparent;
 }
 
-/* Desktop: un poco más alto pero sin forzar scroll */
 @media (min-width: 900px){
   .scene{
     height: min(
       640px,
-      calc(100vh - var(--header-h) - 34px)
+      calc(100vh - var(--header-h) - 28px)
     );
   }
 }
 
-/* capa base: todas las imágenes exportadas con el mismo lienzo */
 .layer{
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   user-select: none;
   pointer-events: none;
 }
 
-/* Desktop: contain para que calcen las capas con el lienzo */
-@media (min-width: 900px){
-  .layer{
-    object-fit: contain;
-  }
-}
-
-/* HOTSPOTS */
+/* Hotspots */
 .hotspot{
   position: absolute;
   background: transparent;
@@ -127,14 +117,13 @@
   outline-offset: 2px;
 }
 
-/* Tooltip dentro */
+/* Tooltip */
 .tooltip{
   position: absolute;
   left: 12px;
   right: 12px;
   bottom: 12px;
   z-index: 85;
-
   background: rgba(255,255,255,.86);
   backdrop-filter: blur(10px);
   border-radius: 18px;
@@ -152,48 +141,23 @@
   font-size: 13px;
 }
 
-/* Progreso mobile debajo (texto) */
-.progressTextMobile{
-  color: var(--ui-muted);
-  font-size: 13px;
-  padding-left: 4px;
-}
-@media (min-width: 900px){
-  .progressTextMobile{ display: none; }
-}
+/* ====== RESTO FULL WIDTH ====== */
+.rest{ margin-top: 18px; }
+.hidden{ display: none; }
 
-.unlockRow{
-  display: flex;
-  justify-content: center;
-  margin-top: 6px;
-}
-
-.unlockedLine{
-  color: var(--ui-muted);
-  font-size: 13px;
-  padding-left: 4px;
-}
-
-.rest{
-  display: grid;
-  gap: 24px;
-  margin-top: 18px;
-}
-.hidden{
-  display: none;
-}
-
-/* ---------- CAPAS ANIMABLES ---------- */
-.sun, .clouds, .birds, .tree, .kids, .ball, .magnifier{
+/* ---------- CAPAS ANIMABLES (contenedores) ---------- */
+.sun, .clouds, .birds, .tree, .kids, .ball, .magnifier, .house{
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 10; /* debajo de hotspots */
+  z-index: 10;
 }
 
+/* Alas */
 .wingR{ transform-origin: 60% 40%; }
 .wingL{ transform-origin: 40% 40%; }
 
+/* Brazos */
 .armR{ transform-origin: 60% 50%; }
 .armL{ transform-origin: 40% 50%; }
 
@@ -214,7 +178,9 @@
 }
 
 /* Nubes */
-.clouds.play{ animation: cloudDrift 700ms ease-in-out; }
+.clouds.play{
+  animation: cloudDrift 700ms ease-in-out;
+}
 @keyframes cloudDrift{
   0%{ transform: translateX(0); }
   50%{ transform: translateX(10px); }
@@ -222,10 +188,11 @@
 }
 
 /* Pájaros + alas */
-.birds.play{ animation: birdsFly 650ms ease-out; }
+.birds.play{
+  animation: birdsFly 650ms ease-out;
+}
 .birds.play .wingR{ animation: flapR 280ms ease-in-out 0ms 2; }
 .birds.play .wingL{ animation: flapL 280ms ease-in-out 40ms 2; }
-
 @keyframes birdsFly{
   0%{ transform: translate(0,0); }
   60%{ transform: translate(16px,-10px); }
@@ -243,7 +210,9 @@
 }
 
 /* Árbol hojas */
-.tree.play{ animation: treeWiggle 650ms ease-in-out; }
+.tree.play{
+  animation: treeWiggle 650ms ease-in-out;
+}
 @keyframes treeWiggle{
   0%{ transform: rotate(0deg); }
   25%{ transform: rotate(-1.2deg); }
@@ -252,10 +221,11 @@
 }
 
 /* Niños */
-.kids.play{ animation: kidsPop 420ms ease-out; }
+.kids.play{
+  animation: kidsPop 420ms ease-out;
+}
 .kids.play .armR{ animation: armWave 380ms ease-in-out; }
 .kids.play .armL{ animation: armWave 380ms ease-in-out 60ms; }
-
 @keyframes kidsPop{
   0%{ transform: translateY(0); }
   45%{ transform: translateY(-6px); }
@@ -268,7 +238,9 @@
 }
 
 /* Pelota */
-.ball.play{ animation: ballBump 520ms ease-out; }
+.ball.play{
+  animation: ballBump 520ms ease-out;
+}
 @keyframes ballBump{
   0%{ transform: translate(0,0); }
   35%{ transform: translate(8px,-8px); }
@@ -276,9 +248,119 @@
 }
 
 /* Lupa */
-.magnifier.play{ animation: lupaTap 420ms ease-out; }
+.magnifier.play{
+  animation: lupaTap 420ms ease-out;
+}
 @keyframes lupaTap{
   0%{ transform: scale(1); }
   45%{ transform: scale(1.04); }
   100%{ transform: scale(1); }
 }
+
+/* ✅ Casa/cartel: animación suave cuando toca hotspot house */
+.house.play{
+  animation: housePop 520ms ease-out;
+}
+@keyframes housePop{
+  0%{ transform: scale(1); }
+  45%{ transform: scale(1.04); }
+  100%{ transform: scale(1); }
+}
+
+/* ====== OVERLAY DESBLOQUEO (blur + botón) ====== */
+.unlockOverlay{
+    pointer-events: auto;
+    position: absolute;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.35);
+    backdrop-filter: blur(6px);
+}
+
+.unlockCard{
+    position: relative;
+    width: min(360px, 92%);
+    padding: 16px 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.88);
+    box-shadow: 0 18px 44px rgba(0,0,0,.14);
+    display: grid;
+    gap: 10px;
+    text-align: center;
+    z-index: 1;
+}
+
+.unlockTitle{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 18px;
+}
+.unlockSubtitle{
+  color: rgba(15, 23, 42, .72);
+  font-size: 14px;
+  margin-top: -6px;
+}
+
+.unlockClose{
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: .7;
+    z-index: 2;
+    pointer-events: auto;
+}
+.unlockClose:hover{ opacity: 1; }
+
+/* ✅ FIX: botón del overlay con buen contraste */
+.unlockCard :global(button){
+  background: var(--ui-primary, #4a90c2);
+  color: #fff;
+  border: 0;
+  opacity: 1;
+}
+
+.unlockCard :global(button):hover{
+  filter: brightness(.95);
+}
+
+.unlockCard :global(button):active{
+  transform: translateY(1px);
+}
+
+/* por si tu Button renderiza un <a> dentro */
+.unlockCard :global(a){
+  color: inherit;
+  text-decoration: none;
+}
+
+.sideInfo{
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sideHint{
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 14px;
+}
+
+.sideProgress{
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 14px;
+}
+
+.sideUnlocked{
+  margin: 0;
+  font-size: 14px;
+  color: var(--ui-text);
+  font-weight: 600;
+}
+
