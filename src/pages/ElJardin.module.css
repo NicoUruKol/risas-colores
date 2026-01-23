@@ -164,17 +164,27 @@
 .play{}
 
 /* Sol */
+
+.sun { z-index: 10; }
+.clouds { z-index: 12; } /* nube por encima del sol */
+.birds { z-index: 13; }  /* pájaros por encima */
+
+
+.sun { transform: none; }
+
+/* Rayos: rota sobre el punto donde está el sol (NO centro del canvas) */
 .sun img:first-child{
-  animation: sunSpin 18s linear infinite;
+  animation: none;
+  transform-origin: 80% 13%; /* <-- centro del sol en tu escena */
 }
-.sun.play{
-  animation: sunPop 450ms ease-out;
+
+/* Solo gira cuando el usuario toca */
+.sun.play img:first-child{
+  animation: sunSpin 900ms linear;
 }
-@keyframes sunSpin{ to{ transform: rotate(360deg); } }
-@keyframes sunPop{
-  0%{ transform: scale(1); }
-  45%{ transform: scale(1.05); }
-  100%{ transform: scale(1); }
+
+@keyframes sunSpin{
+  to{ transform: rotate(360deg); }
 }
 
 /* Nubes */
@@ -186,6 +196,87 @@
   50%{ transform: translateX(10px); }
   100%{ transform: translateX(0); }
 }
+/* ✅ Área donde “llueve” (ajustá posición si querés) */
+.dropField{
+  position: absolute;
+  left: 46%;
+  top: 14%;
+  width: 34%;
+  height: 22%;
+  pointer-events: none;
+  z-index: 12; /* arriba de capas, abajo de hotspots igual da */
+  opacity: 0;
+}
+
+/* gotita individual */
+.drop{
+  position: absolute;
+  left: calc(6% + (var(--i) * 12%));
+  top: 0%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.9);
+
+  transform: translateY(0);
+  opacity: 0;
+}
+
+/* ✅ solo cuando tocás nubes */
+.clouds.play .dropField{
+  opacity: 1;
+}
+
+.clouds.play .drop{
+  animation: drizzle 650ms ease-out;
+  animation-delay: calc(var(--i) * 35ms);
+}
+
+@keyframes drizzle{
+  0%{ transform: translateY(0); opacity: 0; }
+  15%{ opacity: .9; }
+  100%{ transform: translateY(22px); opacity: 0; }
+}
+
+.cloudDrops{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;                 /* ✅ nunca visibles por defecto */
+}
+
+.cloudDrops::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  /* ✅ 8 “gotitas/burbujas” ubicadas con % bajo cada nube */
+  background:
+    radial-gradient(circle, rgba(74,144,194,.30) 0 55%, transparent 56%) 36% 28% / 7px 7px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.22) 0 55%, transparent 56%) 39% 30% / 6px 6px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.26) 0 55%, transparent 56%) 42% 28% / 7px 7px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.18) 0 55%, transparent 56%) 40% 33% / 5px 5px no-repeat,
+
+    radial-gradient(circle, rgba(74,144,194,.28) 0 55%, transparent 56%) 86% 30% / 7px 7px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.20) 0 55%, transparent 56%) 89% 32% / 6px 6px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.24) 0 55%, transparent 56%) 92% 30% / 7px 7px no-repeat,
+    radial-gradient(circle, rgba(74,144,194,.16) 0 55%, transparent 56%) 90% 35% / 5px 5px no-repeat;
+
+  opacity: 0;                 /* ✅ invisibles si no hay animación */
+  transform: translateY(0);
+}
+
+/* ✅ SOLO cuando el usuario toca nubes: aparecen, caen más lento, y desaparecen */
+.clouds.play .cloudDrops::before{
+  animation: dropsFall 1400ms ease-out;
+}
+
+@keyframes dropsFall{
+  0%   { opacity: 0; transform: translateY(0); }
+  15%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(26px); } /* más largo */
+}
+
 
 /* Pájaros + alas */
 .birds.play{

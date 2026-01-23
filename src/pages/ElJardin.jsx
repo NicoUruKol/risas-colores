@@ -31,13 +31,22 @@ import lupaImg from "../assets/animacion/escena_0009_lupa-rosa.png";
 
 /* === HOTSPOTS === */
 const SCENE_HOTSPOTS = [
-    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 6, y: 60, w: 70, h: 38 }, z: 30 },
-    { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 26, y: 26, w: 48, h: 40 }, z: 20 },
-    { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 0, y: 10, w: 30, h: 55 }, z: 20 },
-    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 70, y: 0, w: 30, h: 32 }, z: 80 },
-    { id: "clouds", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 28, y: 6, w: 72, h: 26 }, z: 40 },
-    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 52, y: 2, w: 30, h: 26 }, z: 60 },
+  // Izquierda grande (árbol + hamaca)
+    { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 2, y: 14, w: 22, h: 78 }, z: 30 },
+    // Casa (centro)
+    { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 26, y: 33, w: 46, h: 34 }, z: 20, animKey: "house" },
+    // Niños derecha abajo
+    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 52, y: 67, w: 30, h: 22 }, z: 30 },
+    // Nube izquierda (chiquita)
+    { id: "cloudL", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 34, y: 14, w: 18, h: 12 }, z: 40, animKey: "clouds" },
+    // Pájaros (centro arriba)
+    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 56, y: 11, w: 16, h: 12 }, z: 60 },
+    // Sol/cara (arriba derecha) -> MÁS CHICO para no tapar nube
+    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 73, y: 6, w: 14, h: 14 }, z: 80, animKey: "sun" },
+    // Nube derecha (chiquita)
+    { id: "cloudR", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 84, y: 18, w: 14, h: 12 }, z: 50, animKey: "clouds" },
 ];
+
 
 export default function ElJardin() {
     const [discovered, setDiscovered] = useState(() => new Set());
@@ -85,19 +94,21 @@ export default function ElJardin() {
     
     const onHotspotClick = (spot) => {
         setDiscovered((prev) => {
-        const next = new Set(prev);
-        next.add(spot.id);
-        return next;
+            const next = new Set(prev);
+            next.add(spot.id);
+            return next;
         });
 
         setActiveTip({ label: spot.label, tip: spot.tip });
         setTipVisible(true);
 
-        setAnim((prev) => ({ ...prev, [spot.id]: (prev[spot.id] ?? 0) + 1 }));
+        const key = spot.animKey ?? spot.id; // 👈 acá
+        setAnim((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
 
         window.clearTimeout(onHotspotClick._t);
         onHotspotClick._t = window.setTimeout(() => setTipVisible(false), 2200);
-    };
+        };
+
 
     const smoothScrollTo = (targetY, duration = 1100) => {
     const startY = window.pageYOffset;
@@ -181,13 +192,17 @@ export default function ElJardin() {
 
                     {/* Sol */}
                     <div key={`sun-${anim.sun}`} className={`${styles.sun} ${anim.sun ? styles.play : ""}`}>
-                    <img src={solImg} alt="" className={styles.layer} />
+                    <img src={solImg} alt="" className={`${styles.layer} ${styles.sunRays}`} />
                     <img src={solCaraImg} alt="" className={styles.layer} />
                     </div>
 
                     {/* Nubes */}
-                    <div key={`clouds-${anim.clouds}`} className={`${styles.clouds} ${anim.clouds ? styles.play : ""}`}>
+                    <div
+                    key={`clouds-${anim.clouds}`}
+                    className={`${styles.clouds} ${anim.clouds ? styles.play : ""}`}
+                    >
                     <img src={nubesImg} alt="" className={styles.layer} />
+                    <div className={styles.cloudDrops} aria-hidden="true" />
                     </div>
 
                     {/* Pájaros + alas */}
