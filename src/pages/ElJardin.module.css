@@ -383,6 +383,15 @@
     backdrop-filter: blur(6px);
 }
 
+.unlockOverlay{
+  animation: unlockFadeIn 300ms ease-out;
+}
+
+@keyframes unlockFadeIn{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
+}
+
 .unlockCard{
     position: relative;
     width: min(360px, 92%);

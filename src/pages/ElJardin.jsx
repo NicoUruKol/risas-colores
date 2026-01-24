@@ -33,7 +33,7 @@ import lupaImg from "../assets/animacion/escena_0009_lupa-rosa.png";
 const SCENE_HOTSPOTS = [
     { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 2, y: 14, w: 30, h: 78 }, z: 30 },
     { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 32, y: 30, w: 46, h: 40}, z: 20, animKey: "house" },
-    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 58, y: 72, w: 30, h: 28 }, z: 30 },
+    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 56, y: 70, w: 30, h: 26 }, z: 30 },
     { id: "cloudL", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 27, y: 3, w: 18, h: 12 }, z: 40, animKey: "clouds" },
     { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 52, y: 5, w: 16, h: 12 }, z: 60 },
     { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 70, y: 2, w: 14, h: 22 }, z: 80, animKey: "sun" },
@@ -113,8 +113,15 @@ export default function ElJardin() {
     }, []);
 
     useEffect(() => {
-        if (unlocked) setShowUnlockModal(true);
+    if (!unlocked) return;
+
+    const t = setTimeout(() => {
+        setShowUnlockModal(true);
+    }, 900); // ⏱️ 900ms = se ve bien la animación
+
+    return () => clearTimeout(t);
     }, [unlocked]);
+
 
     const onHotspotClick = (spot) => {
         setDiscovered((prev) => {
@@ -172,7 +179,7 @@ export default function ElJardin() {
     // ✅ Centro del sol (en % del lienzo original)
     // tus valores actuales: 77% / 12%
     const sunCx = fit.x + (0.77 * fit.w);
-    const sunCy = fit.y + (0.12 * fit.h);
+    const sunCy = fit.y + (0.18 * fit.h);
 
     return (
         <main className={styles.page}>
