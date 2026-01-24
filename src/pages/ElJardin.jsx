@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
@@ -31,21 +31,18 @@ import lupaImg from "../assets/animacion/escena_0009_lupa-rosa.png";
 
 /* === HOTSPOTS === */
 const SCENE_HOTSPOTS = [
-  // Izquierda grande (árbol + hamaca)
-    { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 2, y: 14, w: 22, h: 78 }, z: 30 },
-    // Casa (centro)
-    { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 26, y: 33, w: 46, h: 34 }, z: 20, animKey: "house" },
-    // Niños derecha abajo
-    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 52, y: 67, w: 30, h: 22 }, z: 30 },
-    // Nube izquierda (chiquita)
-    { id: "cloudL", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 34, y: 14, w: 18, h: 12 }, z: 40, animKey: "clouds" },
-    // Pájaros (centro arriba)
-    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 56, y: 11, w: 16, h: 12 }, z: 60 },
-    // Sol/cara (arriba derecha) -> MÁS CHICO para no tapar nube
-    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 73, y: 10, w: 14, h: 20 }, z: 80, animKey: "sun" },
-    // Nube derecha (chiquita)
-    { id: "cloudR", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 84, y: 20, w: 18, h: 15 }, z: 50, animKey: "clouds" },
+    { id: "tree", label: "Árbol", tip: "Naturaleza y juego al aire libre 🌿", rect: { x: 2, y: 14, w: 30, h: 78 }, z: 30 },
+    { id: "house", label: "La casa", tip: "Un espacio pensado para crecer con seguridad ✨", rect: { x: 32, y: 30, w: 46, h: 40}, z: 20, animKey: "house" },
+    { id: "kids", label: "Niños", tip: "Jugamos, aprendemos y nos cuidamos 🤍", rect: { x: 58, y: 72, w: 30, h: 28 }, z: 30 },
+    { id: "cloudL", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 27, y: 3, w: 18, h: 12 }, z: 40, animKey: "clouds" },
+    { id: "birds", label: "Pajaritos", tip: "Acompañamos cada primer paso 🐦", rect: { x: 52, y: 5, w: 16, h: 12 }, z: 60 },
+    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 70, y: 2, w: 14, h: 22 }, z: 80, animKey: "sun" },
+    { id: "cloudR", label: "Nubes", tip: "La imaginación también se aprende ☁️", rect: { x: 81.5, y: 19, w: 18, h: 15 }, z: 50, animKey: "clouds" },
 ];
+
+// ✅ Poné el tamaño real de tu export (Figma)
+const IMG_W = 1536;
+const IMG_H = 1024;
 
 
 export default function ElJardin() {
@@ -58,7 +55,6 @@ export default function ElJardin() {
     const [activeTip, setActiveTip] = useState(null);
     const [tipVisible, setTipVisible] = useState(false);
 
-    // Para reiniciar animaciones con key
     const [anim, setAnim] = useState({
         sun: 0,
         clouds: 0,
@@ -69,9 +65,13 @@ export default function ElJardin() {
     });
 
     const sceneWrapRef = useRef(null);
+    const sceneRef = useRef(null);
     const nextSectionRef = useRef(null);
+
     const [showUnlockModal, setShowUnlockModal] = useState(false);
 
+    // ✅ Fit real del “conten” (para hotspots perfectos en mobile)
+    const [fit, setFit] = useState({ x: 0, y: 0, w: 0, h: 0 });
 
     // ✅ medir header real para que la escena entre sin scroll
     useEffect(() => {
@@ -86,107 +86,133 @@ export default function ElJardin() {
         return () => window.removeEventListener("resize", setHeaderH);
     }, []);
 
+    // ✅ calcula el “fit contain” dentro de .scene
     useEffect(() => {
-    if (unlocked) setShowUnlockModal(true);
+        const updateFit = () => {
+        const el = sceneRef.current;
+        if (!el) return;
+
+        const cw = el.clientWidth;
+        const ch = el.clientHeight;
+
+        const scale = Math.min(cw / IMG_W, ch / IMG_H);
+        const w = IMG_W * scale;
+        const h = IMG_H * scale;
+
+        setFit({
+            w,
+            h,
+            x: (cw - w) / 2,
+            y: (ch - h) / 2,
+        });
+        };
+
+        updateFit();
+        window.addEventListener("resize", updateFit);
+        return () => window.removeEventListener("resize", updateFit);
+    }, []);
+
+    useEffect(() => {
+        if (unlocked) setShowUnlockModal(true);
     }, [unlocked]);
 
-
-    
     const onHotspotClick = (spot) => {
         setDiscovered((prev) => {
-            const next = new Set(prev);
-            next.add(spot.id);
-            return next;
+        const next = new Set(prev);
+        next.add(spot.id);
+        return next;
         });
 
         setActiveTip({ label: spot.label, tip: spot.tip });
         setTipVisible(true);
 
-        const key = spot.animKey ?? spot.id; // 👈 acá
+        const key = spot.animKey ?? spot.id;
         setAnim((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
 
         window.clearTimeout(onHotspotClick._t);
         onHotspotClick._t = window.setTimeout(() => setTipVisible(false), 2200);
-        };
-
+    };
 
     const smoothScrollTo = (targetY, duration = 1100) => {
-    const startY = window.pageYOffset;
-    const diff = targetY - startY;
-    const start = performance.now();
+        const startY = window.pageYOffset;
+        const diff = targetY - startY;
+        const start = performance.now();
 
-    const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+        const easeInOut = (t) =>
+        t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
-    const step = (now) => {
+        const step = (now) => {
         const elapsed = now - start;
         const t = Math.min(1, elapsed / duration);
         const eased = easeInOut(t);
         window.scrollTo(0, startY + diff * eased);
         if (t < 1) requestAnimationFrame(step);
-    };
+        };
 
-    requestAnimationFrame(step);
+        requestAnimationFrame(step);
     };
 
     const goToNext = () => {
-    const el = nextSectionRef.current;
-    if (!el) return;
+        const el = nextSectionRef.current;
+        if (!el) return;
 
-    const headerEl = document.querySelector("header");
-    const headerH = headerEl?.getBoundingClientRect?.().height ?? 0;
+        const headerEl = document.querySelector("header");
+        const headerH = headerEl?.getBoundingClientRect?.().height ?? 0;
 
-    const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
-    smoothScrollTo(targetY, 1100); // 🔥 más lento (podés subir a 1300 si querés)
+        const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
+        smoothScrollTo(targetY, 1100);
     };
+
     const skipToContent = () => {
-    setForceUnlocked(true);      // ✅ habilita el resto
-    setShowUnlockModal(false);   // ✅ si está el modal, lo cierra
-    requestAnimationFrame(() => goToNext()); // ✅ scroll suave al contenido
+        setForceUnlocked(true);
+        setShowUnlockModal(false);
+        requestAnimationFrame(() => goToNext());
     };
 
+    // ✅ Centro del sol (en % del lienzo original)
+    // tus valores actuales: 77% / 12%
+    const sunCx = fit.x + (0.77 * fit.w);
+    const sunCy = fit.y + (0.12 * fit.h);
 
     return (
         <main className={styles.page}>
-        {/* ====== BLOQUE SUPERIOR: panel + escena ====== */}
         <Container>
             <section className={styles.layout}>
             <aside className={styles.side}>
                 <div className={styles.sideInner}>
                 <h1 className={styles.title}>Descubrí Risas y Colores</h1>
+
                 <p className={styles.subtitle}>
-                {unlocked
+                    {unlocked
                     ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
                     : "Tocá la escena y desbloqueá el recorrido."}
                 </p>
-                
+
                 <button
-                type="button"
-                className={styles.skipHint}
-                onClick={skipToContent}
+                    type="button"
+                    className={styles.skipHint}
+                    onClick={skipToContent}
                 >
-                O seguí sin jugar <span aria-hidden>→</span>
+                    O seguí sin jugar <span aria-hidden>→</span>
                 </button>
+
                 <div className={styles.sideInfo}>
-                {!unlocked && discoveredCount === 0 && (
-                    <p className={styles.sideHint}> </p>
-                )}
-
-                {!unlocked && discoveredCount > 0 && (
+                    {!unlocked && discoveredCount > 0 && (
                     <p className={styles.sideProgress}>
-                    ¡Bien! Llevás {discoveredCount}/3 descubrimientos.
+                        ¡Bien! Llevás {discoveredCount}/3 descubrimientos.
                     </p>
-                )}
+                    )}
 
-                {unlocked && (
+                    {unlocked && (
                     <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
-                )}
+                    )}
                 </div>
                 </div>
             </aside>
 
             <div className={styles.sceneSection}>
                 <div ref={sceneWrapRef} className={styles.sceneWrap}>
-                <div className={styles.scene} aria-label="Escena interactiva del jardín">
+                <div ref={sceneRef} className={styles.scene} aria-label="Escena interactiva del jardín">
                     {/* Fondo */}
                     <img src={fondoImg} alt="" className={styles.layer} />
 
@@ -194,10 +220,13 @@ export default function ElJardin() {
                     <div
                     key={`sun-${anim.sun}`}
                     className={`${styles.sun} ${anim.sun ? styles.play : ""}`}
-                    style={{ "--sun-cx": "77%", "--sun-cy": "22%" }}  // <-- centro aproximado de la cara
+                    style={{
+                        "--sun-cx": `${sunCx}px`,
+                        "--sun-cy": `${sunCy}px`,
+                    }}
                     >
                     <img src={solImg} alt="" className={styles.layer} />
-                    <img src={solCaraImg} alt="" className={styles.layer} />
+                    <img src={solCaraImg} alt="" className={`${styles.layer} ${styles.sunFace}`} />
                     </div>
 
                     {/* Nubes */}
@@ -221,7 +250,7 @@ export default function ElJardin() {
                     <img src={hojasImg} alt="" className={styles.layer} />
                     </div>
 
-                    {/* Cartel Casa (se anima con el hotspot "house") */}
+                    {/* Cartel Casa */}
                     <div key={`house-${anim.house}`} className={`${styles.house} ${anim.house ? styles.play : ""}`}>
                     <img src={cartelCasa} alt="" className={styles.layer} />
                     </div>
@@ -243,23 +272,27 @@ export default function ElJardin() {
                     <img src={lupaImg} alt="" className={styles.layer} />
                     </div>
 
-                    {/* HOTSPOTS */}
-                    {SCENE_HOTSPOTS.map((spot) => (
-                    <button
+                    {/* HOTSPOTS (✅ corregidos con fit) */}
+                    {SCENE_HOTSPOTS.map((spot) => {
+                    const { x, y, w, h } = spot.rect;
+
+                    return (
+                        <button
                         key={spot.id}
                         type="button"
                         onClick={() => onHotspotClick(spot)}
                         className={styles.hotspot}
                         style={{
-                        left: `${spot.rect.x}%`,
-                        top: `${spot.rect.y}%`,
-                        width: `${spot.rect.w}%`,
-                        height: `${spot.rect.h}%`,
-                        zIndex: spot.z,
+                            left: `${fit.x + (x / 100) * fit.w}px`,
+                            top: `${fit.y + (y / 100) * fit.h}px`,
+                            width: `${(w / 100) * fit.w}px`,
+                            height: `${(h / 100) * fit.h}px`,
+                            zIndex: spot.z,
                         }}
                         aria-label={`Interactuar con ${spot.label}`}
-                    />
-                    ))}
+                        />
+                    );
+                    })}
 
                     {/* Tooltip */}
                     {activeTip && tipVisible && (
@@ -269,43 +302,41 @@ export default function ElJardin() {
                     </div>
                     )}
 
-                    {/* OVERLAY desbloqueo (centrado, blur + botón) */}
+                    {/* OVERLAY desbloqueo */}
                     {showUnlockModal && unlocked && (
                     <div className={styles.unlockOverlay} role="dialog" aria-modal="true">
                         <div className={styles.unlockCard}>
                         <div className={styles.unlockTitle}>¡Felicidades! 🌈</div>
                         <div className={styles.unlockSubtitle}>Desbloqueaste el camino.</div>
+
                         <Button
-                        variant="primary"
-                        onClick={() => {
+                            variant="primary"
+                            onClick={() => {
                             setShowUnlockModal(false);
                             goToNext();
-                        }}
+                            }}
                         >
-                        Descubrí el jardín ↓
+                            Descubrí el jardín ↓
                         </Button>
 
                         <button
-                        type="button"
-                        className={styles.unlockClose}
-                        onClick={() => setShowUnlockModal(false)}
-                        aria-label="Cerrar"
+                            type="button"
+                            className={styles.unlockClose}
+                            onClick={() => setShowUnlockModal(false)}
+                            aria-label="Cerrar"
                         >
-                        ✕
+                            ✕
                         </button>
-
                         </div>
                     </div>
                     )}
                 </div>
-
                 </div>
             </div>
-            
             </section>
         </Container>
 
-        {/* ====== RESTO DEL COMPONENTE: FULL WIDTH (normal) ====== */}
+        {/* ====== RESTO DEL COMPONENTE ====== */}
         <div ref={nextSectionRef} className={unlocked ? styles.rest : styles.hidden}>
             <Container>
             <section className="grid gap-6 md:grid-cols-2 items-center bg-ui-tintBlue border border-ui-border rounded-lg shadow-card p-6">
@@ -329,7 +360,7 @@ export default function ElJardin() {
                 <div className="aspect-video md:aspect-square rounded-md bg-gray-200 border border-ui-border" />
             </section>
 
-            {/* BLOQUES INFO */}
+            {/* ... resto igual ... */}
             <section className="grid gap-4">
                 <h2 className="text-xl font-extrabold text-ui-text">Nuestra propuesta</h2>
 
@@ -357,74 +388,6 @@ export default function ElJardin() {
                     Espacios pensados para explorar, crear y compartir en comunidad.
                     </p>
                 </Card>
-                </div>
-            </section>
-
-            {/* GALERÍA */}
-            <section className="grid gap-4">
-                <div className="flex items-end justify-between gap-4">
-                <div>
-                    <h2 className="text-xl font-extrabold text-ui-text">Conocé el espacio</h2>
-                    <p className="text-sm text-ui-muted mt-1">Imágenes del jardin.</p>
-                </div>
-                <Badge variant="orange">Galería</Badge>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
-                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
-                <div className="aspect-video rounded-md bg-gray-200 border border-ui-border" />
-                </div>
-            </section>
-
-            {/* FAQ */}
-            <section className="grid gap-4">
-                <h2 className="text-xl font-extrabold text-ui-text">Preguntas frecuentes</h2>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                <Card className="p-5">
-                    <div className="font-extrabold text-ui-text">¿Qué edades reciben?</div>
-                    <p className="mt-1 text-sm text-ui-muted">
-                    Desde lactantes y salas por edad (consultar salas).
-                    </p>
-                </Card>
-
-                <Card className="p-5">
-                    <div className="font-extrabold text-ui-text">¿Cómo coordino una visita?</div>
-                    <p className="mt-1 text-sm text-ui-muted">
-                    Podés contactarnos por WhatsApp o completar un formulario.
-                    </p>
-                </Card>
-
-                <Card className="p-5">
-                    <div className="font-extrabold text-ui-text">¿Cómo compro uniformes?</div>
-                    <p className="mt-1 text-sm text-ui-muted">
-                    Entrás a Uniformes, elegís sala, talle y agregás al carrito.
-                    </p>
-                </Card>
-
-                <Card className="p-5">
-                    <div className="font-extrabold text-ui-text">¿Hacen envíos?</div>
-                    <p className="mt-1 text-sm text-ui-muted">
-                    Podés definir retiro en el jardín o envío a domicilio (según lo que decidan).
-                    </p>
-                </Card>
-                </div>
-            </section>
-
-            {/* CTA FINAL */}
-            <section className="bg-ui-tintOrange border border-ui-border rounded-lg p-6 grid gap-3 text-center">
-                <h3 className="text-xl font-extrabold text-ui-text">¿Listos para empezar?</h3>
-                <p className="text-sm text-ui-muted">
-                Conocé el catálogo de uniformes y resolvé la compra en minutos.
-                </p>
-                <div className="flex justify-center gap-3 flex-wrap">
-                <Link to="/uniformes">
-                    <Button variant="primary">Ir a Uniformes</Button>
-                </Link>
-                <Link to="/">
-                    <Button variant="secondary">Volver al inicio</Button>
-                </Link>
                 </div>
             </section>
             </Container>
