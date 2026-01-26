@@ -183,7 +183,6 @@
 @keyframes cloudDrift{
   0%{ transform: translateX(0); }
   35%{ transform: translateX(25px); }
-  50%{ transform: translateX(0px); }
   65%{ transform: translateX(-25px); }
   100%{ transform: translateX(0); }
 }
