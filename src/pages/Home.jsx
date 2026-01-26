@@ -1,3 +1,4 @@
+// Home.jsx
 import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
@@ -71,6 +72,10 @@ export default function Home() {
         willChange: "opacity, transform",
     };
 
+    const focusOnlyIfBackground = (e) => {
+        if (e.target === e.currentTarget) e.currentTarget.focus();
+    };
+
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <div className={styles.bg} />
@@ -79,22 +84,9 @@ export default function Home() {
             {/* Hero */}
             <section
             tabIndex={0}
-            onPointerDown={(e) => e.currentTarget.focus()}
-            className={`${styles.hero} ${styles.heroCard} border p-6 md:p-8 grid gap-4 border-[var(--ui-border)]`}
+            onPointerDown={focusOnlyIfBackground}
+            className={`${styles.heroCard} p-6 md:p-8 grid gap-4`}
             >
-            <div className={styles.heroConfetti}>
-                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p1}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p2}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p3}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p4}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p5}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p6}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p7}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperOrange} ${styles.p8}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperBlue} ${styles.p9}`} />
-                <span className={`${styles.confettiPaper} ${styles.paperPurple} ${styles.p10}`} />
-            </div>
-
             <HeroCarousel
                 images={heroSlides.map((s) => s.img)}
                 onChange={(next) => {
@@ -110,7 +102,9 @@ export default function Home() {
                 {currentHero.title}
                 </h1>
 
-                <p className="text-sm sm:text-base text-[var(--ui-muted)]">{currentHero.subtitle}</p>
+                <p className="text-sm sm:text-base text-[var(--ui-muted)]">
+                {currentHero.subtitle}
+                </p>
 
                 <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
                 <Link to={currentHero.cta1.to} className="w-full sm:w-auto">
@@ -136,14 +130,10 @@ export default function Home() {
 
             {/* Beneficios */}
             <section
+            tabIndex={0}
+            onPointerDown={focusOnlyIfBackground}
             style={sectionRevealStyle}
-            className={`
-                grid gap-4 rounded-3xl p-5 md:p-6 border
-                bg-[rgba(255,255,255,0.55)]
-                border-[var(--ui-border)]
-                backdrop-blur-[1px]
-                ${styles.benefitsSection}
-            `}
+            className={`${styles.benefitsShell} grid gap-4 p-5 md:p-6`}
             >
             <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ui-text)]">
                 ¿Por qué elegirnos?
@@ -175,11 +165,14 @@ export default function Home() {
 
             {/* Familias actuales */}
             <section
-            className={`border rounded-3xl p-6 grid gap-3 border-[var(--ui-border)] ${styles.familiasSection}`}
+            tabIndex={0}
+            onPointerDown={focusOnlyIfBackground}
+            className={`${styles.familiasShell} p-6 grid gap-3`}
             >
             <h3 className="text-lg md:text-xl font-extrabold text-[var(--ui-text)]">
                 ¿Ya formás parte del jardín?
             </h3>
+
             <p className="text-sm text-[var(--ui-muted)]">Accesos rápidos para resolver en segundos.</p>
 
             <div className="flex flex-wrap gap-3">

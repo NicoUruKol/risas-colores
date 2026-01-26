@@ -5,6 +5,8 @@ import Footer from "../components/layout/Footer";
 import BackgroundDecor2 from "../components/layout/BackgroundDecor2"; 
 import MobileDecor from "../components/layout/MobileDecor";          
 import { CartProvider } from "../context/CartContext";
+import ScrollToTop from "../routes/ScrollToTop";
+
 
 function isMobile() {
     if (typeof window === "undefined") return false;
@@ -23,23 +25,24 @@ function isMobile() {
 
     return (
         <CartProvider>
-        <div ref={pageRef} className="relative min-h-screen overflow-x-hidden">
-            {/* DECOR SIEMPRE ATRAS */}
-            {showDecor && (
-            <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
-                {mobile ? <MobileDecor /> : <BackgroundDecor2 />}
-            </div>
-            )}
+            <div ref={pageRef} className="relative min-h-screen overflow-x-hidden">
+                {/* DECOR SIEMPRE ATRAS */}
+                {showDecor && (
+                <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+                    {mobile ? <MobileDecor /> : <BackgroundDecor2 />}
+                </div>
+                )}
 
-            {/* CONTENIDO ARRIBA */}
-            <div className="relative z-10">
-            <Header />
-            <main>
-                <Outlet />
-            </main>
-            <Footer />
+                {/* CONTENIDO ARRIBA */}
+                <div className="relative z-10">
+                <ScrollToTop/>
+                <Header />
+                <main>
+                    <Outlet />
+                </main>
+                <Footer />
+                </div>
             </div>
-        </div>
         </CartProvider>
     );
 }

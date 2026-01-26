@@ -61,6 +61,7 @@ html {
         "Open Sans", "Helvetica Neue", sans-serif;
     overflow-anchor: none;
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 body {
