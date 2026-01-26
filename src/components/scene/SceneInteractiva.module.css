@@ -79,6 +79,50 @@
   font-size: 13px;
 }
 
+/* Barra de tip debajo de la escena */
+.tipBar{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.75);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 26px rgba(0,0,0,.08);
+  line-height: 1.25;
+}
+
+/* Texto */
+.tipLabel{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 13px;
+}
+
+.tipText{
+  color: rgba(15, 23, 42, .72);
+  font-size: 13px;
+}
+
+/* Si querés MÁS liviano todavía (sin caja), activá esto: */
+
+.tipBar{
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 8px;
+  text-align: center;
+}
+.tipLabel{ display:none; }
+.tipText{ color: var(--ui-muted); }
+
+/* Ajuste mobile: subir el tooltip para que no cruce el sol */
+@media (max-width: 640px){
+  .tipBar{
+    margin-top: 4px;          /* antes 10px */
+    transform: translateY(-10px);
+  }
+}
+
+
 /* ---------- CAPAS ANIMABLES (contenedores) ---------- */
 .sun, .clouds, .birds, .tree, .kids, .ball, .magnifier, .house{
   position: absolute;
@@ -86,14 +130,6 @@
   pointer-events: none;
   z-index: 10;
 }
-
-/* Alas */
-.wingR{ transform-origin: 60% 40%; }
-.wingL{ transform-origin: 40% 40%; }
-
-/* Brazos */
-.armR{ transform-origin: 60% 50%; }
-.armL{ transform-origin: 40% 50%; }
 
 .play{}
 
@@ -142,172 +178,202 @@
 
 /* Nubes */
 .clouds.play{
-  animation: cloudDrift 700ms ease-in-out;
+  animation: cloudDrift 1000ms ease-in-out;
 }
 @keyframes cloudDrift{
   0%{ transform: translateX(0); }
-  50%{ transform: translateX(10px); }
+  35%{ transform: translateX(25px); }
+  50%{ transform: translateX(0px); }
+  65%{ transform: translateX(-25px); }
   100%{ transform: translateX(0); }
 }
 
-/* ✅ Área donde “llueve” (ajustá posición si querés) */
-.dropField{
-  position: absolute;
-  left: 46%;
-  top: 14%;
-  width: 34%;
-  height: 22%;
-  pointer-events: none;
-  z-index: 12; /* arriba de capas, abajo de hotspots igual da */
-  opacity: 0;
-}
 
-/* gotita individual */
-.drop{
-  position: absolute;
-  left: calc(6% + (var(--i) * 12%));
-  top: 0%;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.9);
-
-  transform: translateY(0);
-  opacity: 0;
-}
-
-/* ✅ solo cuando tocás nubes */
-.clouds.play .dropField{
-  opacity: 1;
-}
-
-.clouds.play .drop{
-  animation: drizzle 650ms ease-out;
-  animation-delay: calc(var(--i) * 35ms);
-}
-
-@keyframes drizzle{
-  0%{ transform: translateY(0); opacity: 0; }
-  15%{ opacity: .9; }
-  100%{ transform: translateY(22px); opacity: 0; }
-}
-
-.cloudDrops{
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;            /* por defecto NO se ven */
-  z-index: 20;           /* por arriba de la imagen de nubes */
-}
-
-/* “8 gotitas” cerca de las nubes (coordenadas en % del lienzo) */
-.cloudDrops::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 32% 16% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 36% 17% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 40% 16% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 86% 22% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 89% 23% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 92% 22% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 28% 15% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 95% 23% / 10px 10px no-repeat;
-}
-
-/* Aparecen SOLO al click */
-.clouds.play .cloudDrops{
-  opacity: 1;
-  animation: dropsFall 1100ms ease-out forwards; /* más lento y más largo */
-}
-
-@keyframes dropsFall{
-  0%   { transform: translateY(0); opacity: 0; }
-  10%  { opacity: 1; }
-  75%  { opacity: 1; }
-  100% { transform: translateY(26px); opacity: 0; }
-}
 
 /* Pájaros + alas */
-.birds.play{
-  animation: birdsFly 650ms ease-out;
-}
-.birds.play .wingR{ animation: flapR 280ms ease-in-out 0ms 2; }
-.birds.play .wingL{ animation: flapL 280ms ease-in-out 40ms 2; }
-@keyframes birdsFly{
-  0%{ transform: translate(0,0); }
-  60%{ transform: translate(16px,-10px); }
-  100%{ transform: translate(0,0); }
-}
-@keyframes flapR{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(10deg); }
-  100%{ transform: rotate(0deg); }
-}
-@keyframes flapL{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(-10deg); }
-  100%{ transform: rotate(0deg); }
+/* --- Pájaros (grupo) --- */
+.birds{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
 }
 
+/* Movimiento del grupo completo (cuerpo+alas) */
+.birds.play{
+  animation: birdsFly 950ms ease-out 1;
+}
+
+
+.wingR{
+  transform-origin: 59% 22%; 
+  will-change: transform;
+}
+
+.wingL{
+  transform-origin: 61% 19%; 
+  will-change: transform;
+}
+
+/* Aleteo */
+.birds.play .wingR{
+  animation: flapR 500ms ease-in-out 0ms 3;
+}
+.birds.play .wingL{
+  animation: flapL 500ms ease-in-out 30ms 3;
+}
+
+/* --- Keyframes --- */
+@keyframes birdsFly{
+  0%   { transform: translate(0,0); }
+  60%  { transform: translate(16px,-10px); }
+  100% { transform: translate(0,0); }
+}
+
+@keyframes flapR{
+  0%   { transform: rotate(0deg); }
+  50%  { transform: rotate(12deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes flapL{
+  0%   { transform: rotate(0deg); }
+  50%  { transform: rotate(-12deg); }
+  100% { transform: rotate(0deg); }
+}
+
+
 /* Árbol hojas */
-.tree.play{
-  animation: treeWiggle 650ms ease-in-out;
+.treeLeaves{
+  /* por defecto quietas */
+  transform: translate3d(0,0,0);
+  opacity: 1;
+  will-change: transform, opacity;
 }
-@keyframes treeWiggle{
-  0%{ transform: rotate(0deg); }
-  25%{ transform: rotate(-1.2deg); }
-  55%{ transform: rotate(1.2deg); }
-  100%{ transform: rotate(0deg); }
+
+/* Cuando tocás el árbol: loop de caída cortita + vaivén + fade */
+.tree.play .treeLeaves{
+  animation: leavesDriftFall 1200ms ease-in-out 1 forwards;
 }
+
+/* Caen “unos cm”, zigzag suave, se desvanecen y reinician arriba */
+@keyframes leavesDriftFall{
+  0%   { transform: translate3d(0px, 0px, 0);   opacity: 1; }
+  20%  { transform: translate3d(10px, 8px, 0);  opacity: 1; }
+  45%  { transform: translate3d(-10px, 16px, 0); opacity: .95; }
+  70%  { transform: translate3d(8px, 24px, 0);  opacity: .7; }
+  100% { transform: translate3d(0px, 32px, 0);  opacity: 0; }
+}
+
+/* Hamaca */
+.hammock{
+  transform-origin: var(--hammock-ox, 17%) var(--hammock-oy, 36%);
+}
+
+/* 1 ciclo por click */
+.tree.play .hammock{
+  animation: hammockSwing 1400ms ease-in-out 1;
+}
+
+@keyframes hammockSwing{
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(7deg); }
+  45%  { transform: rotate(-6deg); }
+  70%  { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
 
 /* Niños */
 .kids.play{
   animation: kidsPop 420ms ease-out;
 }
-.kids.play .armR{ animation: armWave 380ms ease-in-out; }
-.kids.play .armL{ animation: armWave 380ms ease-in-out 60ms; }
-@keyframes kidsPop{
-  0%{ transform: translateY(0); }
-  45%{ transform: translateY(-6px); }
-  100%{ transform: translateY(0); }
+/* Brazos: punto fijo */
+.armR{
+  transform-origin: 61% 79%; /* <- hombro brazo derecho (tuneo fino) */
 }
-@keyframes armWave{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(8deg); }
-  100%{ transform: rotate(0deg); }
+
+.armL{
+  transform-origin: 63% 78%; /* <- hombro brazo izquierdo (tuneo fino) */
 }
+
+/* Vaivén: rotación alternada, SIN translate */
+.kids.play .armR{
+  animation: armSwingR 900ms ease-in-out 1;
+}
+
+.kids.play .armL{
+  animation: armSwingL 900ms ease-in-out 1;
+}
+
+@keyframes armSwingR{
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(-30deg); }
+  40%  { transform: rotate(8deg); }
+  60%  { transform: rotate(-30deg); }
+  80%  { transform: rotate(8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes armSwingL{
+  0%   { transform: rotate(0deg); }
+  20%  { transform: rotate(20deg); }
+  40%  { transform: rotate(-15deg); }
+  60%  { transform: rotate(10deg); }
+  80%  { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
 
 /* Pelota */
 .ball.play{
-  animation: ballBump 520ms ease-out;
+  animation: ballDownUp 500ms ease-in-out 1;
 }
-@keyframes ballBump{
-  0%{ transform: translate(0,0); }
-  35%{ transform: translate(8px,-8px); }
-  100%{ transform: translate(0,0); }
+
+@keyframes ballDownUp{
+  0%   { transform: translateY(0); }
+  55%  { transform: translateY(34px); } /* ajustá “piso” */
+  100% { transform: translateY(0); }
 }
+
 
 /* Lupa */
-.magnifier.play{
-  animation: lupaTap 420ms ease-out;
-}
-@keyframes lupaTap{
-  0%{ transform: scale(1); }
-  45%{ transform: scale(1.04); }
-  100%{ transform: scale(1); }
+/* Lupa: pivot fijo tipo hombro */
+.magnifier{
+  transform-origin: 78% 80%; /* <- ajustá */
 }
 
-/* ✅ Casa/cartel: animación suave cuando toca hotspot house */
+/* En vez de subir/bajar: rota hacia abajo y hace un micro vaivén */
+.magnifier.play{
+  animation: lupaAimDown 850ms ease-in-out 1;
+}
+
+@keyframes lupaAimDown{
+  0%   { transform: rotate(0deg); }
+  55%  { transform: rotate(-26deg); }  /* apunta abajo */
+  75%  { transform: rotate(-18deg); }  /* acomoda */
+  100% { transform: rotate(-24deg); }  /* queda abajo */
+}
+
+
+
+/* ✅ Casa/cartel: entra desde arriba + se acomoda con 2 movimientos laterales */
 .house.play{
-  animation: housePop 520ms ease-out;
+  animation: houseDropIn 2500ms cubic-bezier(.2,.9,.2,1) both;
 }
-@keyframes housePop{
-  0%{ transform: scale(1); }
-  45%{ transform: scale(1.04); }
-  100%{ transform: scale(1); }
+
+@keyframes houseDropIn{
+  /* cae desde arriba */
+  0%   { transform: translateY(-70%) scale(.98); opacity: 0; }
+  55%  { transform: translateY(0) scale(1);      opacity: 1; }
+
+  /* “se acomoda” con 2 movimientos laterales */
+  70%  { transform: translateX(10px); }
+  82%  { transform: translateX(-8px); }
+  92%  { transform: translateX(5px); }
+  100% { transform: translateX(0); }
 }
+
 
 /* ====== OVERLAY DESBLOQUEO (blur + botón) ====== */
 .unlockOverlay{

@@ -15,9 +15,10 @@ import alaDerImg from "../../assets/animacion/escena_0002_pajaros-alas-largas.pn
 import alaIzqImg from "../../assets/animacion/escena_0003_pajaros-alas-cortas.png";
 
 import hojasImg from "../../assets/animacion/escena_0006_hojas.png";
+import ninoHamacaImg from "../../assets/animacion/escena_0007_hamaca.png";
+
 import cartelCasa from "../../assets/animacion/escena_0005_risas-colores.png";
 
-import ninoHamacaImg from "../../assets/animacion/escena_0007_hamaca.png";
 import pelotaImg from "../../assets/animacion/escena_0010_pelota.png";
 import brazoDerImg from "../../assets/animacion/escena_0012_brazo-azul-hamaca.png";
 import brazoIzqImg from "../../assets/animacion/escena_0011_brazo-azul-rosa.png";
@@ -146,6 +147,17 @@ export default function SceneInteractiva({
     // centro del sol (en % del lienzo original)
     const sunCx = useMemo(() => fit.x + 0.77 * fit.w, [fit]);
     const sunCy = useMemo(() => fit.y + 0.18 * fit.h, [fit]);
+    // === HOMBROS (en % del lienzo original
+    const armRpx = useMemo(() => fit.x + 0.635 * fit.w, [fit]); // X hombro brazo derecho
+    const armRpy = useMemo(() => fit.y + 0.695 * fit.h, [fit]); // Y hombro brazo derecho
+
+    const armLpx = useMemo(() => fit.x + 0.585 * fit.w, [fit]); // X hombro brazo izquierdo
+    const armLpy = useMemo(() => fit.y + 0.705 * fit.h, [fit]); // Y hombro brazo izquierdo
+
+    // Hombro/agarre de la lupa (en % lienzo)
+    const lupaX = useMemo(() => fit.x + 0.585 * fit.w, [fit]);
+    const lupaY = useMemo(() => fit.y + 0.705 * fit.h, [fit]);
+
 
     return (
         <div ref={sceneWrapRef} className={styles.sceneWrap}>
@@ -155,21 +167,20 @@ export default function SceneInteractiva({
 
             {/* Sol */}
             <div
-            key={`sun-${anim.sun}`}
-            className={`${styles.sun} ${anim.sun ? styles.play : ""}`}
-            style={{
-                "--sun-cx": `${sunCx}px`,
-                "--sun-cy": `${sunCy}px`,
-            }}
-            >
-            <img src={solImg} alt="" className={styles.layer} />
-            <img src={solCaraImg} alt="" className={`${styles.layer} ${styles.sunFace}`} />
+                key={`sun-${anim.sun}`}
+                className={`${styles.sun} ${anim.sun ? styles.play : ""}`}
+                style={{
+                    "--sun-cx": `${sunCx}px`,
+                    "--sun-cy": `${sunCy}px`,
+                }}
+                >
+                <img src={solImg} alt="" className={styles.layer} />
+                <img src={solCaraImg} alt="" className={`${styles.layer} ${styles.sunFace}`} />
             </div>
 
             {/* Nubes */}
             <div key={`clouds-${anim.clouds}`} className={`${styles.clouds} ${anim.clouds ? styles.play : ""}`}>
             <img src={nubesImg} alt="" className={styles.layer} />
-            <div className={styles.cloudDrops} aria-hidden="true" />
             </div>
 
             {/* Pájaros */}
@@ -179,32 +190,51 @@ export default function SceneInteractiva({
             <img src={alaIzqImg} alt="" className={`${styles.layer} ${styles.wingL}`} />
             </div>
 
-            {/* Hojas */}
+            {/* Hojas y Hamaca */}
             <div key={`tree-${anim.tree}`} className={`${styles.tree} ${anim.tree ? styles.play : ""}`}>
-            <img src={hojasImg} alt="" className={styles.layer} />
-            <img src={ninoHamacaImg} alt="" className={styles.layer} />
+                <img src={hojasImg} alt="" className={`${styles.layer} ${styles.treeLeaves}`} />
+                <div className={styles.leafFall} aria-hidden="true" />
+                <img src={ninoHamacaImg} alt="" className={`${styles.layer} ${styles.hammock}`} />
             </div>
 
             {/* Cartel Casa */}
             <div key={`house-${anim.house}`} className={`${styles.house} ${anim.house ? styles.play : ""}`}>
-            <img src={cartelCasa} alt="" className={styles.layer} />
+                <img src={cartelCasa} alt="" className={styles.layer} />
             </div>
 
-            {/* Niño hamaca + brazos */}
-            <div key={`kids-${anim.kids}`} className={`${styles.kids} ${anim.kids ? styles.play : ""}`}>
-            <img src={brazoDerImg} alt="" className={`${styles.layer} ${styles.armR}`} />
-            <img src={brazoIzqImg} alt="" className={`${styles.layer} ${styles.armL}`} />
+            {/* Niñas */}
+            <div
+                key={`kids-${anim.kids}`}
+                className={`${styles.kids} ${anim.kids ? styles.play : ""}`}
+                style={{
+                    "--armR-x": `${armRpx}px`,
+                    "--armR-y": `${armRpy}px`,
+                    "--armL-x": `${armLpx}px`,
+                    "--armL-y": `${armLpy}px`,
+                }}
+                >
+                <img src={brazoDerImg} alt="" className={`${styles.layer} ${styles.armR}`} />
+                <img src={brazoIzqImg} alt="" className={`${styles.layer} ${styles.armL}`} />
             </div>
+
 
             {/* Pelota */}
             <div key={`ball-${anim.kids}`} className={`${styles.ball} ${anim.kids ? styles.play : ""}`}>
-            <img src={pelotaImg} alt="" className={styles.layer} />
+                <img src={pelotaImg} alt="" className={styles.layer} />
             </div>
 
             {/* Lupa */}
-            <div key={`lupa-${anim.kids}`} className={`${styles.magnifier} ${anim.kids ? styles.play : ""}`}>
-            <img src={lupaImg} alt="" className={styles.layer} />
+            <div
+                key={`lupa-${anim.kids}`}
+                className={`${styles.magnifier} ${anim.kids ? styles.play : ""}`}
+                style={{
+                    "--lupa-x": `${lupaX}px`,
+                    "--lupa-y": `${lupaY}px`,
+                }}
+                >
+                <img src={lupaImg} alt="" className={styles.layer} />
             </div>
+
 
             {/* HOTSPOTS (con fit) */}
             {SCENE_HOTSPOTS.map((spot) => {
@@ -229,10 +259,10 @@ export default function SceneInteractiva({
 
             {/* Tooltip */}
             {activeTip && tipVisible && (
-            <div className={styles.tooltip}>
-                <div className={styles.tooltipTitle}>{activeTip.label}</div>
-                <div className={styles.tooltipText}>{activeTip.tip}</div>
-            </div>
+            <div className={styles.tipBar} role="status" aria-live="polite">
+                <span className={styles.tipLabel}>{activeTip.label}:</span>{" "}
+                <span className={styles.tipText}>{activeTip.tip}</span>
+                </div>
             )}
 
             {/* Modal desbloqueo */}
