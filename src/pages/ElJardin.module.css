@@ -2,15 +2,15 @@
   padding: 24px 0;
 }
 
-/* Layout: mobile first (escena arriba, texto abajo) */
+/* Layout: mobile first */
 .layout{
   display: grid;
   gap: 16px;
 }
 
-/* Mobile */
-.side{ order: 2; }
-.sceneSection{ order: 1; }
+/* Mobile: primero panel, después escena */
+.side{ order: 1; }
+.sceneSection{ order: 2; }
 
 /* Desktop */
 @media (min-width: 900px){
@@ -37,6 +37,7 @@
   line-height: 1.05;
   margin: 0;
 }
+
 @media (min-width: 900px){
   .title{ font-size: 34px; }
 }
@@ -47,411 +48,7 @@
   font-size: 14px;
 }
 
-.sideCtaRow{
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.unlockedInlineText{
-  margin-top: 10px;
-  color: var(--ui-muted);
-  font-size: 14px;
-}
-
-/* ---------- ESCENA ---------- */
-.sceneWrap{
-  --header-h: 88px;
-  display: grid;
-  gap: 10px;
-}
-
-.scene{
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 18px;
-  background: transparent;
-
-  /* tamaño estable para el fit calculation */
-  aspect-ratio: 3 / 2;
-  height: auto;
-  max-height: calc(100vh - var(--header-h) - 28px - 28px);
-}
-
-
-@media (min-width: 900px){
-  .scene{
-    height: min(
-      640px,
-      calc(100vh - var(--header-h) - 28px)
-    );
-  }
-}
-
-.layer{
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain !important;
-  object-position: center;
-  user-select: none;
-  pointer-events: none;
-}
-
-
-/* Hotspots */
-.hotspot{
-  position: absolute;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 16px;
-  outline: none;
-  touch-action: manipulation;
-}
-.hotspot:focus-visible{
-  outline: 2px solid rgba(74,144,194,.55);
-  outline-offset: 2px;
-}
-
-/* Tooltip */
-.tooltip{
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  z-index: 85;
-  background: rgba(255,255,255,.86);
-  backdrop-filter: blur(10px);
-  border-radius: 18px;
-  padding: 12px 14px;
-  box-shadow: 0 14px 34px rgba(0,0,0,.10);
-}
-.tooltipTitle{
-  font-weight: 900;
-  color: var(--ui-text);
-  font-size: 13px;
-}
-.tooltipText{
-  color: rgba(15, 23, 42, .72);
-  margin-top: 2px;
-  font-size: 13px;
-}
-
-/* ====== RESTO FULL WIDTH ====== */
-.rest{ margin-top: 18px; }
-.hidden{ display: none; }
-
-/* ---------- CAPAS ANIMABLES (contenedores) ---------- */
-.sun, .clouds, .birds, .tree, .kids, .ball, .magnifier, .house{
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10;
-}
-
-/* Alas */
-.wingR{ transform-origin: 60% 40%; }
-.wingL{ transform-origin: 40% 40%; }
-
-/* Brazos */
-.armR{ transform-origin: 60% 50%; }
-.armL{ transform-origin: 40% 50%; }
-
-.play{}
-
-/* Sol */
-.sun img:first-child{
-  animation: none;
-  transform-origin: var(--sun-cx) var(--sun-cy);
-}
-
-.sun.play img:first-child{
-  animation: sunSpinClick 700ms ease-in-out 1;
-}
-
-@keyframes sunSpinClick{
-  from{ transform: rotate(0deg); }
-  to{ transform: rotate(360deg); }
-}
-
-
-/* Mantén tu “pop” si querés (opcional) */
-.sun.play{
-  animation: sunPop 450ms ease-out;
-}
-
-.sunFace{
-  transform-origin: center;
-}
-
-/* rebote al click (cuando el sol está en play) */
-.sun.play .sunFace{
-  animation: sunFaceBounce 520ms ease-out 1;
-}
-
-@keyframes sunFaceBounce{
-  0%   { transform: translateY(0) scale(1); }
-  35%  { transform: translateY(-6px) scale(1.03); }
-  70%  { transform: translateY(0) scale(0.99); }
-  100% { transform: translateY(0) scale(1); }
-}
-
-
-/* Nubes */
-.clouds.play{
-  animation: cloudDrift 700ms ease-in-out;
-}
-@keyframes cloudDrift{
-  0%{ transform: translateX(0); }
-  50%{ transform: translateX(10px); }
-  100%{ transform: translateX(0); }
-}
-/* ✅ Área donde “llueve” (ajustá posición si querés) */
-.dropField{
-  position: absolute;
-  left: 46%;
-  top: 14%;
-  width: 34%;
-  height: 22%;
-  pointer-events: none;
-  z-index: 12; /* arriba de capas, abajo de hotspots igual da */
-  opacity: 0;
-}
-
-/* gotita individual */
-.drop{
-  position: absolute;
-  left: calc(6% + (var(--i) * 12%));
-  top: 0%;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.9);
-
-  transform: translateY(0);
-  opacity: 0;
-}
-
-/* ✅ solo cuando tocás nubes */
-.clouds.play .dropField{
-  opacity: 1;
-}
-
-.clouds.play .drop{
-  animation: drizzle 650ms ease-out;
-  animation-delay: calc(var(--i) * 35ms);
-}
-
-@keyframes drizzle{
-  0%{ transform: translateY(0); opacity: 0; }
-  15%{ opacity: .9; }
-  100%{ transform: translateY(22px); opacity: 0; }
-}
-
-.cloudDrops{
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;            /* por defecto NO se ven */
-  z-index: 20;           /* por arriba de la imagen de nubes */
-}
-
-/* “8 gotitas” cerca de las nubes (coordenadas en % del lienzo) */
-.cloudDrops::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 32% 16% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 36% 17% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 40% 16% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 86% 22% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 89% 23% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 92% 22% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 28% 15% / 10px 10px no-repeat,
-    radial-gradient(circle, rgba(74,144,194,.55) 0 55%, transparent 56%) 95% 23% / 10px 10px no-repeat;
-}
-
-/* Aparecen SOLO al click */
-.clouds.play .cloudDrops{
-  opacity: 1;
-  animation: dropsFall 1100ms ease-out forwards; /* más lento y más largo */
-}
-
-@keyframes dropsFall{
-  0%   { transform: translateY(0); opacity: 0; }
-  10%  { opacity: 1; }
-  75%  { opacity: 1; }
-  100% { transform: translateY(26px); opacity: 0; }
-}
-
-
-/* Pájaros + alas */
-.birds.play{
-  animation: birdsFly 650ms ease-out;
-}
-.birds.play .wingR{ animation: flapR 280ms ease-in-out 0ms 2; }
-.birds.play .wingL{ animation: flapL 280ms ease-in-out 40ms 2; }
-@keyframes birdsFly{
-  0%{ transform: translate(0,0); }
-  60%{ transform: translate(16px,-10px); }
-  100%{ transform: translate(0,0); }
-}
-@keyframes flapR{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(10deg); }
-  100%{ transform: rotate(0deg); }
-}
-@keyframes flapL{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(-10deg); }
-  100%{ transform: rotate(0deg); }
-}
-
-/* Árbol hojas */
-.tree.play{
-  animation: treeWiggle 650ms ease-in-out;
-}
-@keyframes treeWiggle{
-  0%{ transform: rotate(0deg); }
-  25%{ transform: rotate(-1.2deg); }
-  55%{ transform: rotate(1.2deg); }
-  100%{ transform: rotate(0deg); }
-}
-
-/* Niños */
-.kids.play{
-  animation: kidsPop 420ms ease-out;
-}
-.kids.play .armR{ animation: armWave 380ms ease-in-out; }
-.kids.play .armL{ animation: armWave 380ms ease-in-out 60ms; }
-@keyframes kidsPop{
-  0%{ transform: translateY(0); }
-  45%{ transform: translateY(-6px); }
-  100%{ transform: translateY(0); }
-}
-@keyframes armWave{
-  0%{ transform: rotate(0deg); }
-  50%{ transform: rotate(8deg); }
-  100%{ transform: rotate(0deg); }
-}
-
-/* Pelota */
-.ball.play{
-  animation: ballBump 520ms ease-out;
-}
-@keyframes ballBump{
-  0%{ transform: translate(0,0); }
-  35%{ transform: translate(8px,-8px); }
-  100%{ transform: translate(0,0); }
-}
-
-/* Lupa */
-.magnifier.play{
-  animation: lupaTap 420ms ease-out;
-}
-@keyframes lupaTap{
-  0%{ transform: scale(1); }
-  45%{ transform: scale(1.04); }
-  100%{ transform: scale(1); }
-}
-
-/* ✅ Casa/cartel: animación suave cuando toca hotspot house */
-.house.play{
-  animation: housePop 520ms ease-out;
-}
-@keyframes housePop{
-  0%{ transform: scale(1); }
-  45%{ transform: scale(1.04); }
-  100%{ transform: scale(1); }
-}
-
-/* ====== OVERLAY DESBLOQUEO (blur + botón) ====== */
-.unlockOverlay{
-    pointer-events: auto;
-    position: absolute;
-    inset: 0;
-    z-index: 120;
-    display: grid;
-    place-items: center;
-    background: rgba(255,255,255,.35);
-    backdrop-filter: blur(6px);
-}
-
-.unlockOverlay{
-  animation: unlockFadeIn 300ms ease-out;
-}
-
-@keyframes unlockFadeIn{
-  from{ opacity: 0; }
-  to{ opacity: 1; }
-}
-
-.unlockCard{
-    position: relative;
-    width: min(360px, 92%);
-    padding: 16px 14px;
-    border-radius: 18px;
-    background: rgba(255,255,255,.88);
-    box-shadow: 0 18px 44px rgba(0,0,0,.14);
-    display: grid;
-    gap: 10px;
-    text-align: center;
-    z-index: 1;
-}
-
-.unlockTitle{
-  font-weight: 900;
-  color: var(--ui-text);
-  font-size: 18px;
-}
-.unlockSubtitle{
-  color: rgba(15, 23, 42, .72);
-  font-size: 14px;
-  margin-top: -6px;
-}
-
-.unlockClose{
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 16px;
-    opacity: .7;
-    z-index: 2;
-    pointer-events: auto;
-}
-.unlockClose:hover{ opacity: 1; }
-
-/* ✅ FIX: botón del overlay con buen contraste */
-.unlockCard :global(button){
-  background: var(--ui-primary, #4a90c2);
-  color: #fff;
-  border: 0;
-  opacity: 1;
-}
-
-.unlockCard :global(button):hover{
-  filter: brightness(.95);
-}
-
-.unlockCard :global(button):active{
-  transform: translateY(1px);
-}
-
-/* por si tu Button renderiza un <a> dentro */
-.unlockCard :global(a){
-  color: inherit;
-  text-decoration: none;
-}
-
+/* Texto / progreso */
 .sideInfo{
   display: grid;
   gap: 8px;
@@ -477,36 +74,10 @@
   font-weight: 600;
 }
 
-/* Mobile: primero panel (título/sub), después escena */
-.side { order: 1; }
-.sceneSection { order: 2; }
-
-/* Desktop: panel izquierda, escena derecha (como lo tenías) */
-@media (min-width: 900px){
-  .side { order: 1; }
-  .sceneSection { order: 2; }
-}
-
-@media (min-width: 900px){
-  .side { order: 1; }
-  .sceneSection { order: 2; }
-}
-
-.skipHint{
-  margin: 6px 6px 0 auto;
-  font-size: 12px;
-  color: var(--ui-muted);
-  cursor: pointer;
-  user-select: none;
-  width: fit-content;
-}
-
-.skipHint:hover{
-  text-decoration: underline;
-}
-
+/* CTA “O seguí sin jugar →” */
 .skipHint{
   margin-top: 8px;
+  margin-left: auto;
   background: transparent;
   border: 0;
   padding: 0;
@@ -515,6 +86,7 @@
   font-size: 12px;
   color: var(--ui-muted);
   cursor: pointer;
+  user-select: none;
   text-decoration: none;
 }
 
@@ -527,3 +99,7 @@
   outline-offset: 3px;
   border-radius: 8px;
 }
+
+/* ====== RESTO FULL WIDTH ====== */
+.rest{ margin-top: 18px; }
+.hidden{ display: none; }
