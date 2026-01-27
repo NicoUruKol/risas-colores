@@ -552,3 +552,41 @@ CTA
     transition: none !important;
   }
 }
+
+/* ==============================
+Mobile: bajar protagonismo del aside
+============================== */
+
+@media (max-width: 768px) {
+  .sideShell {
+    padding: 0.9rem 0.95rem;
+    border-radius: 22px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.1px;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    margin-top: 0.45rem;
+  }
+
+  .skipHint {
+    margin-top: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .sideInfo {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+  }
+
+  .sideUnlocked {
+    font-size: 0.85rem;
+  }
+}
