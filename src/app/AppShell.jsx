@@ -6,6 +6,8 @@ import BackgroundDecor2 from "../components/layout/BackgroundDecor2";
 import MobileDecor from "../components/layout/MobileDecor";          
 import { CartProvider } from "../context/CartContext";
 import ScrollToTop from "../routes/ScrollToTop";
+import Header2 from "../components/layout/Header2";
+import Header3 from "../components/layout/Header3";
 
 
 function isMobile() {
@@ -37,6 +39,8 @@ function isMobile() {
                 <div className="relative z-10">
                 <ScrollToTop/>
                 <Header />
+                <Header2/>
+                <Header3/>
                 <main>
                     <Outlet />
                 </main>
