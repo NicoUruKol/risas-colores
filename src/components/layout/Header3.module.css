@@ -9,9 +9,9 @@
 
 .inner{
   height: 84px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
   gap: 10px;
 }
 
@@ -241,6 +241,42 @@
 }
 
 @media (max-width: 420px){
-  .logoImg{ width: 84px; height: 72px; }
-  .brandLine1{ font-size: 1.12rem; }
+  .right{
+    display: flex;
+    flex-direction: column;   /* ✅ uno arriba del otro */
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .cart{
+    line-height: 1;
+    font-size: 0.9rem;
+  }
+
+  .brand{
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .brandText{
+    min-width: 0;
+  }
+
+  .brandLine1{
+    font-size: 1.05rem;
+    white-space: normal;      /* ✅ permite romper línea si hace falta */
+    text-align: center;
+  }
+
+  .brandLine2{
+    font-size: 0.78rem;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .logoImg{
+    width: 84px;
+    height: 72px;
+  }
 }
+
