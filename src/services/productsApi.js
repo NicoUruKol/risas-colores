@@ -1,16 +1,36 @@
-import { packs, products } from "../data/mockProducts";
+//ESTO VUELA POR EL BACKEND
+import { products as mockProducts } from "../data/mockProducts";
 
-const wait = (ms) => new Promise((r) => setTimeout(r, ms)); // simula red
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function listBySala(sala) {
-    await wait(150);
-    return {
-    packs: packs.filter((p) => p.sala === sala),
-    products: products.filter((p) => p.sala === sala),
-    };
-}
+export const listAll = async () => {
+  await delay(120);
+  return mockProducts.filter((p) => p.active !== false);
+};
 
-export async function getById(id) {
-    await wait(120);
-    return packs.find((p) => p.id === id) || products.find((p) => p.id === id) || null;
-}
+export const getById = async (id) => {
+  await delay(120);
+  return mockProducts.find((p) => p.id === id && p.active !== false) ?? null;
+};
+
+// ===== ADMIN CRUD (mock) =====
+export const adminList = async () => {
+  await delay(120);
+  return [...mockProducts];
+};
+
+export const adminCreate = async (payload) => {
+  await delay(120);
+  const id = payload.id?.trim() || crypto.randomUUID();
+  return { ...payload, id, type: "product" };
+};
+
+export const adminUpdate = async (id, payload) => {
+  await delay(120);
+  return { ...payload, id, type: "product" };
+};
+
+export const adminDelete = async (id) => {
+  await delay(120);
+  return { ok: true, id };
+};

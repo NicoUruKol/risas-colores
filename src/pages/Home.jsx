@@ -1,5 +1,4 @@
-// Home.jsx
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
@@ -12,29 +11,32 @@ import Hero2 from "../assets/Hero2.webp";
 import Hero3 from "../assets/Hero3.webp";
 
 export default function Home() {
-    const heroSlides = [
+    const heroSlides = useMemo(
+        () => [
         {
-        img: Hero1,
-        title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
-        subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
-        cta1: { to: "/el-jardin", label: "Conocer el jardín" },
-        cta2: { to: "/uniformes", label: "Comprar uniformes" },
+            img: Hero1,
+            title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
+            subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
+            cta1: { to: "/el-jardin", label: "Conocer el jardín" },
+            cta2: { to: "/uniformes", label: "Comprar uniformes" },
         },
         {
-        img: Hero2,
-        title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
-        subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
-        cta1: { to: "/el-jardin", label: "Ver propuesta" },
-        cta2: { to: "/uniformes", label: "Ver uniformes" },
+            img: Hero2,
+            title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
+            subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
+            cta1: { to: "/el-jardin", label: "Ver propuesta" },
+            cta2: { to: "/uniformes", label: "Ver uniformes" },
         },
         {
-        img: Hero3,
-        title: "Un lugar donde cada niño se siente seguro para crecer",
-        subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
-        cta1: { to: "/el-jardin", label: "Más información" },
-        cta2: { to: "/uniformes", label: "Ir a la tienda" },
+            img: Hero3,
+            title: "Un lugar donde cada niño se siente seguro para crecer",
+            subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
+            cta1: { to: "/el-jardin", label: "Más información" },
+            cta2: { to: "/uniformes", label: "Ir a la tienda" },
         },
-    ];
+        ],
+        []
+    );
 
     const homeRef = useRef(null);
     const benefitsSentinelRef = useRef(null);
@@ -43,7 +45,7 @@ export default function Home() {
     const [heroTick, setHeroTick] = useState(0);
     const [heroIndex, setHeroIndex] = useState(0);
 
-    const currentHero = heroSlides[heroIndex];
+    const currentHero = heroSlides[heroIndex] ?? heroSlides[0];
 
     useEffect(() => {
         const el = benefitsSentinelRef.current;
@@ -76,6 +78,15 @@ export default function Home() {
         if (e.target === e.currentTarget) e.currentTarget.focus();
     };
 
+    // ✅ handler estable, evita updates inútiles (corta loops)
+    const handleHeroChange = useCallback((next) => {
+        setHeroIndex((prev) => {
+        if (prev === next) return prev;
+        return next;
+        });
+        setHeroTick((t) => t + 1);
+    }, []);
+
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <div className={styles.bg} />
@@ -89,10 +100,7 @@ export default function Home() {
             >
             <HeroCarousel
                 images={heroSlides.map((s) => s.img)}
-                onChange={(next) => {
-                setHeroIndex(next);
-                setHeroTick((t) => t + 1);
-                }}
+                onChange={handleHeroChange}
             />
 
             <div key={heroTick} className={styles.heroTextAnim}>
