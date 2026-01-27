@@ -51,9 +51,9 @@
 }
 
 /* ==============================
-   Shells (Hero / Beneficios / Familias)
-   Mobile: reposo naranja -> tap blanco (queda)
-   Desktop: reposo sin caja -> hover blanco
+Shells (Hero / Beneficios / Familias)
+Mobile: reposo naranja -> tap blanco (queda)
+Desktop: reposo sin caja -> hover blanco
 ============================== */
 
 .heroCard,
@@ -109,7 +109,7 @@
 }
 
 /* ==============================
-   Hero layers
+Hero layers
 ============================== */
 
 .heroCard::before {
@@ -173,7 +173,7 @@
 }
 
 /* ==============================
-   Hero buttons
+Hero buttons
 ============================== */
 
 .heroActions button { color: #3a3a3a; }
@@ -225,7 +225,7 @@
 }
 
 /* ==============================
-   Beneficios cards
+  Beneficios cards
 ============================== */
 
 .softCard {
@@ -258,7 +258,7 @@
 .benefitCard:hover { --soft-tint: rgba(246,166,90,0.32); }
 
 /* ==============================
-   Familias
+Familias
 ============================== */
 
 .btnTextDark {
