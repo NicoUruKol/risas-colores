@@ -1,13 +1,20 @@
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    border-bottom: 1px solid rgba(229,231,235,0.9);
+.header{
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  border-bottom: 1px solid rgba(246,166,90,0.22);
 
-  /* glass suave, combina con el home */
-    background: rgba(255,255,255,0.82);
-    backdrop-filter: blur(8px);
+  /* naranjita cálido light */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(246,166,90,0.14) 0%,
+      rgba(255,255,255,0.92) 60%
+    );
+
+  backdrop-filter: blur(10px);
 }
+
 
 .inner {
     height: 72px;
