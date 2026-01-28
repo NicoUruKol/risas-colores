@@ -275,12 +275,15 @@ export default function SceneInteractiva({
                 <Button
                     variant="primary"
                     onClick={() => {
-                    setShowUnlockModal(false);
-                    onGoToNext?.();
+                        setShowUnlockModal(false);      // 1) cerrar YA
+                        requestAnimationFrame(() => {   // 2) scrollear en el próximo frame
+                        onGoToNext?.();
+                        });
                     }}
-                >
+                    >
                     Descubrí el jardín ↓
                 </Button>
+
 
                 <button
                     type="button"

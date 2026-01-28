@@ -197,56 +197,58 @@ Shell base (criterio Home)
   margin: 0.75rem 0 0;
   color: var(--ui-muted);
   font-size: 0.98rem;
+  font-weight: bold;
   line-height: 1.5;
 }
 
-/* Skip button like Home */
-.skipHint {
+/* Skip */
+.skipHint{
   position: relative;
   z-index: 1;
 
-  margin-top: 0.9rem;
-  width: 100%;
+  margin: 8px 6px 0 auto;
+  background: transparent;
+  border: 0;
+  padding: 0;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  width: fit-content;
 
-  padding: 0.9rem 1rem;
-  border-radius: 16px;
-
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(0,0,0,0.08);
-  color: #3a3a3a;
-
-  font-weight: 800;
-  letter-spacing: 0.2px;
-
+  font-size: 12px;
+  color: var(--ui-muted);
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+  user-select: none;
+  text-decoration: none;
 }
 
-.arrow {
+.skipHint:hover{
+  text-decoration: underline;
+}
+
+.skipHint:focus-visible{
+  outline: 2px solid rgba(74,144,194,.45);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.arrow{
   display: inline-block;
-  transition: transform 160ms ease;
+  transform: translateX(0);
 }
-
-.skipHint:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px rgba(0,0,0,0.18);
-  filter: saturate(1.05);
-}
-
-.skipHint:hover .arrow { transform: translateX(3px); }
-
-.skipHint:active {
-  transform: translateY(0);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+.skipHint:hover .arrow{
+  transform: translateX(2px);
 }
 
 @media (max-width: 640px) {
   .skipHint { min-height: 48px; }
+}
+
+@media (max-width: 768px) {
+  .skipHint{
+    margin: 6px 6px 0 auto;
+    font-size: 12px;
+    padding: 0;            
+    border-radius: 8px;    
+  }
 }
 
 .sideInfo {

@@ -12,37 +12,60 @@ export default function ElJardin() {
     const nextSectionRef = useRef(null);
     const [unlocked, setUnlocked] = useState(false);
 
-    const smoothScrollTo = (targetY, duration = 1100) => {
-        const startY = window.pageYOffset;
+    const scrollAnimRef = useRef(null);
+
+    const smoothScrollTo = (targetY, duration = 1400) => {
+
+        if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
+
+        const startY = window.scrollY || window.pageYOffset || 0;
         const diff = targetY - startY;
         const start = performance.now();
 
         const easeInOut = (t) =>
-        t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
         const step = (now) => {
-        const elapsed = now - start;
-        const t = Math.min(1, elapsed / duration);
-        const eased = easeInOut(t);
-        window.scrollTo(0, startY + diff * eased);
-        if (t < 1) requestAnimationFrame(step);
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / duration);
+            const eased = easeInOut(t);
+
+            window.scrollTo(0, startY + diff * eased);
+
+            if (t < 1) {
+            scrollAnimRef.current = requestAnimationFrame(step);
+            } else {
+            scrollAnimRef.current = null;
+            }
         };
 
-        requestAnimationFrame(step);
+        scrollAnimRef.current = requestAnimationFrame(step);
     };
 
     const goToNext = () => {
         const el = nextSectionRef.current;
         if (!el) return;
 
-        const headerEl = document.querySelector("header");
-        const headerH = headerEl?.getBoundingClientRect?.().height ?? 0;
+        const headerH = (document.querySelector("header")?.getBoundingClientRect()?.height) ?? 0;
+        const y1 = el.getBoundingClientRect().top + window.scrollY - headerH - 12;
 
-        const targetY =
-        el.getBoundingClientRect().top + window.pageYOffset - headerH - 12;
+        const distance = Math.abs(y1 - window.scrollY);
+        const duration = Math.min(2000, Math.max(1100, distance * 0.7));
 
-        smoothScrollTo(targetY, 1100);
+
+        smoothScrollTo(y1, duration);
+
+
+        requestAnimationFrame(() => {
+            const headerH2 = (document.querySelector("header")?.getBoundingClientRect()?.height) ?? 0;
+            const y2 = el.getBoundingClientRect().top + window.scrollY - headerH2 - 12;
+            window.scrollTo(0, y2); 
+        });
     };
+
+
+
+
 
     const skipToContent = () => {
         setUnlocked(true);
@@ -62,7 +85,7 @@ export default function ElJardin() {
                 <p className={styles.subtitle}>
                     {unlocked
                     ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
-                    : "Tocá la escena y desbloqueá el recorrido."}
+                    : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
                 </p>
 
                 <button
