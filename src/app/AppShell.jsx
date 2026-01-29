@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import Header from "../components/layout/Header";
+//import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import BackgroundDecor2 from "../components/layout/BackgroundDecor2"; 
 import MobileDecor from "../components/layout/MobileDecor";          
 import { CartProvider } from "../context/CartContext";
 import ScrollToTop from "../routes/ScrollToTop";
-import Header2 from "../components/layout/Header2";
+//import Header2 from "../components/layout/Header2";
 import Header3 from "../components/layout/Header3";
 
 
@@ -38,8 +38,8 @@ function isMobile() {
                 {/* CONTENIDO ARRIBA */}
                 <div className="relative z-10">
                 <ScrollToTop/>
-                <Header />
-                <Header2/>
+                {/*<Header />
+                <Header2/>*/}
                 <Header3/>
                 <main>
                     <Outlet />

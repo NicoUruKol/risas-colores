@@ -5,9 +5,12 @@ import Button from "../ui/Button";
 import { useCart } from "../../context/CartContext";
 import styles from "./Header3.module.css";
 import logo from "../../assets/logoDesat.webp";
+import whatsappIcon from "../../assets/whatsapp.svg";
 
 export default function Header3() {
     const { count } = useCart();
+    const hasItems = Number(count) > 0;
+
     const [open, setOpen] = useState(false);
     const location = useLocation();
     const drawerRef = useRef(null);
@@ -24,7 +27,6 @@ export default function Header3() {
         };
         window.addEventListener("keydown", onKeyDown);
 
-        // Lock scroll (simple y efectivo)
         const prev = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
@@ -42,7 +44,6 @@ export default function Header3() {
     return (
         <header className={styles.header}>
         <Container className={styles.inner}>
-            {/* Izquierda: botón menú */}
             <button
             type="button"
             className={styles.burger}
@@ -55,7 +56,6 @@ export default function Header3() {
             <span className={styles.burgerLine} />
             </button>
 
-            {/* Centro: Brand protagonista */}
             <Link to="/" className={styles.brand} aria-label="Ir al inicio">
             <img src={logo} alt="Risas y Colores" className={styles.logoImg} />
             <div className={styles.brandText}>
@@ -68,24 +68,49 @@ export default function Header3() {
             </Link>
 
             {/* Derecha: carrito + CTA */}
+            {hasItems ? (
             <div className={styles.right}>
-            <Link to="/carrito" className={styles.cart} aria-label="Ir al carrito">
+                <Link to="/carrito" className={styles.cart} aria-label="Ir al carrito">
                 🛒 <span className={styles.cartCount}>({count})</span>
-            </Link>
+                </Link>
 
-            <Link to="/uniformes" className={styles.buyLink}>
+                <Link to="/uniformes" className={styles.buyLink}>
                 <Button variant="primary" size="sm" className={styles.buyBtn}>
-                Comprar <span className={styles.arrow}>→</span>
+                    Comprar <span className={styles.arrow}>→</span>
                 </Button>
-            </Link>
+                </Link>
             </div>
+            ) : (
+            <div className={styles.right}>
+                {/* WhatsApp pill */}
+                <a
+                className={styles.pill}
+                href="https://wa.me/5491152499974?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0ASomos%20una%20familia%20interesada%20en%20conocer%20m%C3%A1s%20sobre%20el%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias%21"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Abrir WhatsApp"
+                >
+                <img
+                    className={styles.pillIcon}
+                    src={whatsappIcon}
+                    alt=""
+                    aria-hidden="true"
+                />
+                <span className={styles.pillLabel}>WhatsApp</span>
+                </a>
+            </div>
+            )}
         </Container>
 
         <div className={styles.bottomConfetti} aria-hidden="true" />
 
         {/* Drawer */}
         <div className={`${styles.drawerWrap} ${open ? styles.open : ""}`}>
-            <button className={styles.overlay} aria-label="Cerrar menú" onClick={() => setOpen(false)} />
+            <button
+            className={styles.overlay}
+            aria-label="Cerrar menú"
+            onClick={() => setOpen(false)}
+            />
 
             <aside
             ref={drawerRef}
@@ -101,28 +126,38 @@ export default function Header3() {
                 </button>
             </div>
 
+            {/* Links principales (sin repetición) */}
             <nav className={styles.drawerNav}>
                 <NavLink to="/el-jardin" className={navLinkClass} onClick={() => setOpen(false)}>
                 El Jardín
                 </NavLink>
+
                 <NavLink to="/uniformes" className={navLinkClass} onClick={() => setOpen(false)}>
                 Uniformes
                 </NavLink>
+
+                {/* Carrito SOLO si hay items */}
+                {hasItems && (
                 <NavLink to="/carrito" className={navLinkClass} onClick={() => setOpen(false)}>
-                Carrito <span className={styles.drawerCount}>({count})</span>
+                    Carrito <span className={styles.drawerCount}>({count})</span>
                 </NavLink>
+                )}
             </nav>
 
-            <div className={styles.drawerCtas}>
-                <Link to="/uniformes" onClick={() => setOpen(false)}>
-                <Button variant="primary" className={styles.ctaPrimary}>
-                    Comprar uniformes <span className={styles.ctaArrow}>→</span>
-                </Button>
+            {/* Acciones inferiores (sin botones con recuadro) */}
+            <div className={styles.drawerActions}>
+                {hasItems ? (
+                <Link to="/carrito" className={styles.actionPrimary} onClick={() => setOpen(false)}>
+                    Ir al carrito <span className={styles.actionMeta}>({count})</span>
                 </Link>
-                <Link to="/el-jardin" onClick={() => setOpen(false)}>
-                <Button variant="ghost" className={styles.ctaGhost}>
-                    Conocer el jardín
-                </Button>
+                ) : (
+                <Link to="/uniformes" className={styles.actionPrimary} onClick={() => setOpen(false)}>
+                    Ver uniformes
+                </Link>
+                )}
+
+                <Link to="/" className={styles.actionSecondary} onClick={() => setOpen(false)}>
+                Inicio
                 </Link>
             </div>
             </aside>

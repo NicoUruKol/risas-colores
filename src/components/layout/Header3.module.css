@@ -4,12 +4,12 @@
   z-index: 999;
   border-bottom: 1px solid rgba(200,182,226,0.35);
 
-  /* lila Montessori light */
+  /* naranja light */
   background:
     linear-gradient(
       180deg,
-      rgba(200,182,226,0.14) 0%,
-      rgba(255,255,255,0.9) 60%
+      rgba(246,166,90,0.14) 0%,
+      rgba(255,255,255,0.92) 60%
     );
 
   backdrop-filter: blur(10px);
@@ -285,6 +285,93 @@
   .logoImg{
     width: 84px;
     height: 72px;
+  }
+}
+
+/* Acciones inferiores del drawer (sin botones) */
+.drawerActions{
+  margin-top: 10px;
+  padding: 10px 6px 6px;
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.actionPrimary{
+  text-decoration: none;
+  font-weight: 950;
+  color: var(--ui-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 2px;
+}
+
+.actionPrimary:hover{
+  color: var(--brand-secondary);
+}
+
+.actionMeta{
+  color: var(--ui-muted);
+  font-weight: 900;
+}
+
+.actionSecondary{
+  text-decoration: none;
+  font-weight: 800;
+  color: var(--ui-muted);
+  padding: 8px 2px;
+}
+
+.actionSecondary:hover{
+  color: var(--ui-text);
+}
+
+/* Ya no usamos estos en el drawer (los podés borrar si querés) */
+.drawerCtas{ display: none; }
+/* WhatsApp pill en header */
+.pill{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.pill:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.14);
+}
+
+.pillIcon{
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.pillLabel{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* En mobile muy chico, solo ícono */
+@media (max-width: 420px){
+  .pillLabel{
+    display: none;
+  }
+
+  .pill{
+    padding: 10px;
   }
 }
 

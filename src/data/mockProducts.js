@@ -1,13 +1,24 @@
+import remera from "../assets/catalogo/remera.webp"
+import remeraPuesta from "../assets/catalogo/remeraEnNino.webp"
+import buzo from "../assets/catalogo/buzo.webp"
+import buzoPuesto from "../assets/catalogo/buzoConNina.webp"
+import pantalon from "../assets/catalogo/pantalon.webp"
+import pantalonPuesto from "../assets/catalogo/pantalonConNino.webp"
+import mochila from "../assets/catalogo/mochila.webp"
+import mochilaPuesta from "../assets/catalogo/mochilaNino.webp"
 
 export const products = [
     {
         id: "remera",
         type: "product",
         name: "Remera",
-        description: "Remera azul con logo en naranja.",
+        description: "Remera naranja con logo.",
         price: 8500,
         talles: ["1", "2", "3", "4", "5"],
-        image: "/img/remera.jpg",
+        image: {
+                producto: remera,
+                puesta: remeraPuesta,
+            },
         stock: 999,
         active: true,
     },
@@ -18,7 +29,10 @@ export const products = [
         description: "Pantalón azul.",
         price: 12500,
         talles: ["1", "2", "3", "4", "5"],
-        image: "/img/pantalon.jpg",
+        image: {
+                producto: pantalon,
+                puesta: pantalonPuesto,
+            },
         stock: 999,
         active: true,
     },
@@ -28,8 +42,11 @@ export const products = [
         name: "Buzo",
         description: "Buzo azul con logo en naranja.",
         price: 16500,
-        talles: ["2", "3", "4", "5"], // ejemplo: no tiene talle 1
-        image: "/img/buzo.jpg",
+        talles: ["1", "2", "3", "4", "5"], 
+        image: {
+                producto: buzo,
+                puesta: buzoPuesto,
+            },
         stock: 999,
         active: true,
     },
@@ -40,7 +57,10 @@ export const products = [
         description: "Mochila azul con logo en naranja.",
         price: 18000,
         talles: ["Único"],
-        image: "/img/mochila.jpg",
+        image: {
+                producto: mochila,
+                puesta: mochilaPuesta,
+            },
         stock: 999,
         active: true,
     },

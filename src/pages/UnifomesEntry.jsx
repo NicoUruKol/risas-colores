@@ -31,9 +31,7 @@ export default function UniformesEntry() {
         <Container className="grid gap-6">
             <section className="grid gap-3 text-center">
             <Badge variant="blue">Tienda</Badge>
-            <h1 className="text-3xl font-extrabold text-ui-text">
-                Uniformes del jardín
-            </h1>
+            <h1 className="text-3xl font-extrabold text-ui-text">Uniformes del jardín</h1>
             <p className="text-ui-muted">
                 Elegí un producto y después seleccioná el talle disponible (1 a 5) en el detalle.
             </p>
@@ -45,34 +43,37 @@ export default function UniformesEntry() {
             </Card>
             ) : (
             <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {products.map((p) => (
-                <Card key={p.id} className="p-4">
-                    <ImageBox src={p.image} alt={p.name} />
+                {products.map((p) => {
+                const imgSrc = p?.image?.producto ?? p?.image; //soporta objeto o string
+
+                return (
+                    <Card key={p.id} className="p-4">
+                    <ImageBox src={imgSrc} alt={p.name} />
+
                     <div className="mt-3 flex items-start justify-between gap-3">
-                    <div>
+                        <div>
                         <div className="font-bold text-ui-text">{p.name}</div>
                         <div className="text-xs text-ui-muted mt-1">
-                        {p.talles?.includes("Único")
-                            ? "Talle: Único"
-                            : `Talles: ${p.talles.join(" · ")}`}
+                            {p.talles?.includes("Único") ? "Talle: Único" : `Talles: ${p.talles.join(" · ")}`}
                         </div>
-                    </div>
-                    <div className="font-extrabold text-brand-orange">
+                        </div>
+
+                        <div className="font-extrabold text-brand-orange">
                         ${Number(p.price || 0).toLocaleString("es-AR")}
-                    </div>
+                        </div>
                     </div>
 
                     <Link to={`/producto/${p.id}`} className="mt-4 block">
-                    <Button variant="secondary" className="w-full">
+                        <Button variant="secondary" className="w-full">
                         Ver detalle
-                    </Button>
+                        </Button>
                     </Link>
-                </Card>
-                ))}
+                    </Card>
+                );
+                })}
             </section>
             )}
         </Container>
         </main>
     );
-}
-
+    }
