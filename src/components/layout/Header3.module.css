@@ -374,4 +374,173 @@
     padding: 10px;
   }
 }
+/* ===== Fix iPhone / pantallas angostas ===== */
+@media (max-width: 430px){
+  /* 1) Aseguramos que el layout tenga espacio real para el icono de WhatsApp */
+  .inner{
+    grid-template-columns: 44px 1fr 48px; /* derecha más controlada */
+    gap: 8px;
+  }
 
+  .right{
+    justify-self: end;
+  }
+
+  /* 2) El pill en modo "icon-only" real (sin comerse ancho) */
+  .pill{
+    padding: 10px;        /* más compacto */
+    min-width: 44px;      /* tap target */
+    border-radius: 14px;
+  }
+
+  .pillLabel{
+    display: none;        /* ya lo tenías, lo refuerzo */
+  }
+
+  .pillIcon{
+    width: 20px;
+    height: 20px;
+  }
+
+  /* 3) El brand puede achicarse sin invadir */
+  .brand{
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .logoImg{
+    width: 72px;
+    height: 60px;
+  }
+
+  .brandText{
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* 4) Clampeamos con ellipsis para que no "pise" al WhatsApp */
+  .brandLine1,
+  .brandLine2{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .brandLine1{
+    font-size: 1.02rem;
+  }
+
+  .brandLine2{
+    font-size: 0.76rem;
+  }
+}
+/* ===== Fix definitivo: evitar solapes (rangos 360–520px) ===== */
+
+/* 1) Grid estable en mobile/tablet chico */
+@media (max-width: 560px){
+  .inner{
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .brand{
+    min-width: 0;
+  }
+
+  .brandText{
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .brandLine1,
+  .brandLine2{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* 2) En anchos "complicados" (como 453px): pill SOLO ÍCONO */
+@media (max-width: 520px){
+  .pill{
+    padding: 10px;
+    min-width: 44px;
+    border-radius: 14px;
+  }
+
+  .pillLabel{
+    display: none;
+  }
+
+  .pillIcon{
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* 3) Ajuste de logo/texto para que no coma espacio */
+@media (max-width: 520px){
+  .logoImg{
+    width: 74px;
+    height: 60px;
+  }
+
+  .brandLine1{
+    font-size: 1.02rem;
+  }
+
+  .brandLine2{
+    font-size: 0.76rem;
+  }
+}
+
+/* 4) Recién desde acá volvemos a mostrar "WhatsApp" */
+@media (min-width: 521px){
+  .pillLabel{
+    display: inline;
+  }
+
+  .pill{
+    padding: 10px 14px;
+  }
+}
+
+/* ===== Ultra mobile: solo logo (sin texto) ===== */
+@media (max-width: 360px){
+  .inner{
+    grid-template-columns: 44px 1fr 48px;
+    gap: 8px;
+    height: 76px;
+  }
+
+  .brand{
+    justify-content: center; /* logo centrado */
+    gap: 0;
+  }
+
+  .brandText{
+    display: none; /* ✅ se va el texto */
+  }
+
+  .logoImg{
+    width: 78px;
+    height: 62px;
+  }
+
+  /* WhatsApp siempre icon-only acá */
+  .pill{
+    padding: 10px;
+    min-width: 44px;
+    border-radius: 14px;
+  }
+
+  .pillLabel{
+    display: none;
+  }
+
+  .pillIcon{
+    width: 20px;
+    height: 20px;
+  }
+}
