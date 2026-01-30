@@ -1,0 +1,238 @@
+/* ===== Galería ===== */
+.gallery {
+  position: relative;
+  display: grid;
+  gap: 10px;
+}
+
+.imgButton {
+  position: relative;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+}
+
+.zoomHint {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: rgba(0,0,0,.75);
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(0,0,0,.12);
+  backdrop-filter: blur(6px);
+}
+
+.navLeft,
+.navRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.navLeft { left: 10px; }
+.navRight { right: 10px; }
+
+.dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.18);
+  background: rgba(0,0,0,.12);
+  cursor: pointer;
+}
+
+.dotActive {
+  background: rgba(0,0,0,.45);
+}
+
+/* ===== CTA legibles (onda Home) ===== */
+.ctaReadable {
+  color: #2b2b2b !important;
+}
+
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ctaRow > a {
+  display: inline-block;
+}
+
+/* ===== Controles (mobile-first) ===== */
+.controlsGrid {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+@media (min-width: 768px) {
+  .controlsGrid {
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+  }
+}
+
+.controlBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.controlLabel {
+  font-size: 14px;
+  color: rgba(0,0,0,.55);
+}
+
+.select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.85);
+  color: #2b2b2b;
+  outline: none;
+}
+
+.select:focus {
+  box-shadow: 0 0 0 4px rgba(74,144,194,.25);
+  border-color: rgba(74,144,194,.35);
+}
+
+/* ===== Stepper (alineado) ===== */
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(6px);
+  width: fit-content;
+}
+
+.stepperBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.qtyValue {
+  min-width: 36px;
+  text-align: center;
+  font-weight: 800;
+  color: #2b2b2b;
+}
+
+/* ===== Descripción ===== */
+.descBox {
+  border-radius: 18px;
+  border: 1px solid rgba(229,231,235,.90);
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(246,166,90,.08));
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+  padding: 12px 14px;
+}
+
+.descTitle {
+  font-weight: 800;
+  color: #2b2b2b;
+  font-size: 14px;
+}
+
+.descText {
+  margin-top: 6px;
+  color: rgba(0,0,0,.62);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* ===== Modal ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.72);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modalContent {
+  position: relative;
+  max-width: min(1000px, 96vw);
+  max-height: 92vh;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.modalImg {
+  width: 100%;
+  height: auto;
+  max-height: 92vh;
+  object-fit: contain;
+  display: block;
+  background: rgba(0,0,0,.15);
+}
+
+.modalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  cursor: pointer;
+}
+
+.modalNavLeft,
+.modalNavRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  cursor: pointer;
+  font-size: 28px;
+  display: grid;
+  place-items: center;
+}
+
+.modalNavLeft { left: 10px; }
+.modalNavRight { right: 10px; }

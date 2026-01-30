@@ -68,38 +68,38 @@ export default function Header3() {
             </Link>
 
             {/* Derecha: carrito + CTA */}
-            {hasItems ? (
-            <div className={styles.right}>
-                <Link to="/carrito" className={styles.cart} aria-label="Ir al carrito">
-                🛒 <span className={styles.cartCount}>({count})</span>
-                </Link>
+                {hasItems ? (
+                <div className={styles.right}>
+                    <Link to="/carrito" className={styles.cart} aria-label="Ir al carrito">
+                    🛒 <span className={styles.cartCount}>({count})</span>
+                    </Link>
 
-                <Link to="/uniformes" className={styles.buyLink}>
-                <Button variant="primary" size="sm" className={styles.buyBtn}>
-                    Comprar <span className={styles.arrow}>→</span>
-                </Button>
-                </Link>
-            </div>
-            ) : (
-            <div className={styles.right}>
-                {/* WhatsApp pill */}
-                <a
-                className={styles.pill}
-                href="https://wa.me/5491152499974?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0ASomos%20una%20familia%20interesada%20en%20conocer%20m%C3%A1s%20sobre%20el%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias%21"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Abrir WhatsApp"
-                >
-                <img
-                    className={styles.pillIcon}
-                    src={whatsappIcon}
-                    alt=""
-                    aria-hidden="true"
-                />
-                <span className={styles.pillLabel}>WhatsApp</span>
-                </a>
-            </div>
-            )}
+                    <Link to="/uniformes" className={styles.buyLink}>
+                    <Button variant="primary" size="sm" className={styles.buyBtn}>
+                        Comprar <span className={styles.arrow}>→</span>
+                    </Button>
+                    </Link>
+                </div>
+                ) : (
+                <div className={styles.right}>
+                    {/* WhatsApp pill */}
+                    <a
+                    className={styles.pill}
+                    href="https://wa.me/5491152499974?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0ASomos%20una%20familia%20interesada%20en%20conocer%20m%C3%A1s%20sobre%20el%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias%21"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Abrir WhatsApp"
+                    >
+                    <img
+                        className={styles.pillIcon}
+                        src={whatsappIcon}
+                        alt=""
+                        aria-hidden="true"
+                    />
+                    <span className={styles.pillLabel}>WhatsApp</span>
+                    </a>
+                </div>
+                )}
         </Container>
 
         <div className={styles.bottomConfetti} aria-hidden="true" />
@@ -146,7 +146,7 @@ export default function Header3() {
 
             {/* Acciones inferiores (sin botones con recuadro) */}
             <div className={styles.drawerActions}>
-                {hasItems ? (
+                {/*{hasItems ? (
                 <Link to="/carrito" className={styles.actionPrimary} onClick={() => setOpen(false)}>
                     Ir al carrito <span className={styles.actionMeta}>({count})</span>
                 </Link>
@@ -154,7 +154,7 @@ export default function Header3() {
                 <Link to="/uniformes" className={styles.actionPrimary} onClick={() => setOpen(false)}>
                     Ver uniformes
                 </Link>
-                )}
+                )}*/}
 
                 <Link to="/" className={styles.actionSecondary} onClick={() => setOpen(false)}>
                 Inicio

@@ -1,0 +1,119 @@
+/* ==============================
+Gallery shell (onda Home)
+============================== */
+
+.gallery{
+  position: relative;
+  display: grid;
+  gap: 10px;
+}
+
+.media{
+  width: 100%;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+}
+
+/* ==============================
+Button (sin outline feo)
+============================== */
+
+.imgButton{
+  position: relative;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: 22px;
+}
+
+.imgButton:disabled{
+  cursor: default;
+  opacity: .7;
+}
+
+.imgButton:focus{
+  outline: none;
+}
+
+.imgButton:focus-visible{
+  box-shadow: 0 0 0 4px rgba(74,144,194,.25);
+  border-radius: 22px;
+}
+
+/* ==============================
+Zoom hint
+============================== */
+
+.zoomHint{
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: rgba(0,0,0,.75);
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(0,0,0,.10);
+  backdrop-filter: blur(8px);
+}
+
+/* ==============================
+Arrows
+============================== */
+
+.navLeft,
+.navRight{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: rgba(255,255,255,.82);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  color: rgba(0,0,0,.72);
+  transition: transform 160ms ease, box-shadow 200ms ease;
+}
+
+.navLeft{ left: 10px; }
+.navRight{ right: 10px; }
+
+@media (hover: hover) and (pointer: fine){
+  .navLeft:hover,
+  .navRight:hover{
+    transform: translateY(-50%) scale(1.04);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.10);
+  }
+}
+
+/* ==============================
+Dots
+============================== */
+
+.dots{
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dot{
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.18);
+  background: rgba(0,0,0,.12);
+  cursor: pointer;
+}
+
+.dotActive{
+  background: rgba(0,0,0,.45);
+}

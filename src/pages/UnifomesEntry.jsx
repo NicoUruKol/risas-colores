@@ -1,3 +1,4 @@
+// src/pages/UniformesEntry.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
@@ -6,6 +7,7 @@ import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import ImageBox from "../components/ui/ImageBox";
 import { listAll } from "../services/productsApi";
+import styles from "./UniformesEntry.module.css";
 
 export default function UniformesEntry() {
     const [products, setProducts] = useState([]);
@@ -27,10 +29,13 @@ export default function UniformesEntry() {
     }, []);
 
     return (
-        <main className="py-10">
+        <main className={`py-10 ${styles.stage}`}>
+        <div className={styles.bg} />
         <Container className="grid gap-6">
-            <section className="grid gap-3 text-center">
-            <Badge variant="blue">Tienda</Badge>
+            <section className={`${styles.headerShell} grid gap-3 text-center p-5`}>
+            <div className="grid justify-center">
+                <Badge variant="blue">Tienda</Badge>
+            </div>
             <h1 className="text-3xl font-extrabold text-ui-text">Uniformes del jardín</h1>
             <p className="text-ui-muted">
                 Elegí un producto y después seleccioná el talle disponible (1 a 5) en el detalle.
@@ -38,42 +43,46 @@ export default function UniformesEntry() {
             </section>
 
             {loading ? (
-            <Card className="p-5">
+            <Card className={`p-5 ${styles.productCard}`}>
                 <p className="text-ui-muted">Cargando…</p>
             </Card>
             ) : (
             <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {products.map((p) => {
-                const imgSrc = p?.image?.producto ?? p?.image; //soporta objeto o string
-
-                return (
-                    <Card key={p.id} className="p-4">
-                    <ImageBox src={imgSrc} alt={p.name} />
+                {products.map((p) => (
+                <Card key={p.id} className={`p-4 ${styles.productCard}`}>
+                    <ImageBox
+                    src={p.image?.producto ?? p.image}
+                    alt={p.name}
+                    fit="contain"
+                    tone="soft"
+                    bordered={false}
+                    rounded="xl"
+                    className={styles.media}
+                    />
 
                     <div className="mt-3 flex items-start justify-between gap-3">
-                        <div>
+                    <div>
                         <div className="font-bold text-ui-text">{p.name}</div>
                         <div className="text-xs text-ui-muted mt-1">
-                            {p.talles?.includes("Único") ? "Talle: Único" : `Talles: ${p.talles.join(" · ")}`}
-                        </div>
-                        </div>
-
-                        <div className="font-extrabold text-brand-orange">
-                        ${Number(p.price || 0).toLocaleString("es-AR")}
+                        {p.talles?.includes("Único") ? "Talle: Único" : `Talles: ${p.talles.join(" · ")}`}
                         </div>
                     </div>
 
+                    <div className={`font-extrabold text-brand-orange ${styles.price}`}>
+                        ${Number(p.price || 0).toLocaleString("es-AR")}
+                    </div>
+                    </div>
+
                     <Link to={`/producto/${p.id}`} className="mt-4 block">
-                        <Button variant="secondary" className="w-full">
-                        Ver detalle
-                        </Button>
+                    <Button variant="ghost" className={`${styles.cta} ${styles.ctaReadable}`}>
+                        Ver detalle <span className={styles.ctaArrow}>→</span>
+                    </Button>
                     </Link>
-                    </Card>
-                );
-                })}
+                </Card>
+                ))}
             </section>
             )}
         </Container>
         </main>
     );
-    }
+}
