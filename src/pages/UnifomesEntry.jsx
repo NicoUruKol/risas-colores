@@ -49,16 +49,18 @@ export default function UniformesEntry() {
             ) : (
             <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {products.map((p) => (
-                <Card key={p.id} className={`p-4 ${styles.productCard}`}>
-                    <ImageBox
-                    src={p.image?.producto ?? p.image}
-                    alt={p.name}
-                    fit="contain"
-                    tone="soft"
-                    bordered={false}
-                    rounded="xl"
-                    className={styles.media}
-                    />
+                    <Card key={p.id} className={`p-4 ${styles.productCard}`}>
+                        <Link to={`/producto/${p.id}`}>
+                            <ImageBox
+                            src={p.image?.producto ?? p.image}
+                            alt={p.name}
+                            fit="contain"
+                            tone="soft"
+                            bordered={false}
+                            rounded="xl"
+                            className={styles.media}
+                            />
+                        </Link>
 
                     <div className="mt-3 flex items-start justify-between gap-3">
                     <div>
@@ -74,9 +76,9 @@ export default function UniformesEntry() {
                     </div>
 
                     <Link to={`/producto/${p.id}`} className="mt-4 block">
-                    <Button variant="ghost" className={`${styles.cta} ${styles.ctaReadable}`}>
-                        Ver detalle <span className={styles.ctaArrow}>→</span>
-                    </Button>
+                        <Button variant="ghost" className={`${styles.cta} ${styles.ctaReadable}`}>
+                            Ver detalle <span className={styles.ctaArrow}>→</span>
+                        </Button>
                     </Link>
                 </Card>
                 ))}

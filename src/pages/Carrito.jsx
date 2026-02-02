@@ -3,6 +3,7 @@ import Container from "../components/layout/Container";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { useCart } from "../context/CartContext";
+import styles from "./Carrito.module.css";
 
 export default function Carrito() {
     const navigate = useNavigate();
@@ -14,79 +15,133 @@ export default function Carrito() {
     };
 
     return (
-        <main className="py-10">
-        <Container className="grid gap-6 max-w-[900px]">
-            <div className="flex items-center justify-between gap-4">
-                <h1 className="text-2xl font-extrabold text-ui-text">Carrito</h1>
+        <main className={styles.stage}>
+        <div className={styles.bg} aria-hidden="true" />
+        <Container className={styles.page}>
+            {/* Header */}
+            <div className={styles.headerShell}>
+            <div className={styles.headerRow}>
+                <h1 className={styles.title}>Carrito</h1>
                 <Link to="/uniformes">
-                    <Button variant="ghost" size="sm">Seguir comprando</Button>
+                    <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                            <span className={styles.ctaIcon}>←</span>
+                            Seguir comprando
+                    </Button>
                 </Link>
+            </div>
             </div>
 
             {items.length === 0 ? (
-            <Card className="p-6">
-                <p className="text-ui-muted">Tu carrito está vacío.</p>
-                <div className="mt-4">
-                    <Link to="/uniformes">
-                        <Button variant="primary">Ver uniformes</Button>
-                    </Link>
+            <Card className={`${styles.productCard} ${styles.emptyCard}`}>
+                <p className={styles.muted}>Tu carrito está vacío.</p>
+                <div className={styles.emptyActions}>
+                <Link to="/uniformes">
+                    <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                            <span className={styles.ctaIcon}>←</span>
+                            Ver uniformes
+                    </Button>
+                </Link>
                 </div>
             </Card>
             ) : (
             <>
-                <div className="grid gap-3">
-                    {items.map((it) => (
-                        <Card key={`${it.id}-${it.talle}`} className="p-4">
-                            <div className="grid gap-4 md:grid-cols-[88px_1fr_auto] items-center">
-                                <div className="w-[88px] h-[88px] bg-gray-200 border border-ui-border rounded-md" />
-                                <div>
-                                    <div className="font-extrabold text-ui-text">{it.name}</div>
-                                    <div className="text-sm text-ui-muted mt-1">
-                                        Talle: <span className="font-semibold text-ui-text">{it.talle ?? "Único"}</span>
-                                    </div>
-                                    <div className="text-sm text-ui-muted mt-1">
-                                        ${it.price.toLocaleString("es-AR")} c/u
-                                    </div>
-                                </div>
+                {/* Items */}
+                <div className={styles.list}>
+                {items.map((it) => (
+                    <Card
+                    key={`${it.id}-${it.talle ?? "U"}`}
+                    className={`${styles.productCard} ${styles.itemCard}`}
+                    >
+                    <div className={styles.itemGrid}>
+                        <div className={styles.mediaBox}>
+                        {it.avatar ? (
+                            <img
+                            className={styles.mediaImg}
+                            src={it.avatar}
+                            alt={it.name}
+                            loading="lazy"
+                            />
+                        ) : (
+                            <div className={styles.mediaPlaceholder} />
+                        )}
+                        </div>
 
-                                <div className="flex flex-col items-end gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <Button variant="ghost" size="sm" onClick={() => updateQty(it.id, it.talle, it.qty - 1)}>−</Button>
-                                            <div className="min-w-[44px] text-center font-bold">
-                                                {it.qty}
-                                            </div>
-                                        <Button variant="ghost" size="sm" onClick={() => updateQty(it.id, it.talle, it.qty + 1)}>+</Button>
-                                    </div>
+                        <div className={styles.info}>
+                        <div className={styles.name}>{it.name}</div>
 
-                                    <div className="font-extrabold text-brand-orange">
-                                        ${(it.price * it.qty).toLocaleString("es-AR")}
-                                    </div>
+                        <div className={styles.metaRow}>
+                            <span className={styles.metaLabel}>Talle</span>
+                            <span className={styles.metaValue}>
+                            {it.talle ?? "Único"}
+                            </span>
+                        </div>
 
-                                    <button
-                                        className="text-xs font-semibold text-state-error hover:underline"
-                                        onClick={() => removeItem(it.id, it.talle)}
-                                    >
-                                        Quitar
-                                    </button>
-                                </div>
-                            </div>
-                        </Card>
-                    ))}
+                        <div className={styles.metaRow}>
+                            <span className={styles.metaLabel}>Precio</span>
+                            <span className={`${styles.metaValue} ${styles.priceEach}`}>
+                            ${it.price.toLocaleString("es-AR")} c/u
+                            </span>
+                        </div>
+                        </div>
+
+                        <div className={styles.right}>
+                        <div className={styles.qtyRow}>
+                            <Button
+                            variant="ghost"
+                            size="sm"
+                            className={styles.qtyBtn}
+                            onClick={() => updateQty(it.id, it.talle, it.qty - 1)}
+                            >
+                            −
+                            </Button>
+
+                            <div className={styles.qtyVal}>{it.qty}</div>
+
+                            <Button
+                            variant="ghost"
+                            size="sm"
+                            className={styles.qtyBtn}
+                            onClick={() => updateQty(it.id, it.talle, it.qty + 1)}
+                            >
+                            +
+                            </Button>
+                        </div>
+
+                        <div className={styles.lineTotal}>
+                            ${(it.price * it.qty).toLocaleString("es-AR")}
+                        </div>
+
+                        <button
+                            className={styles.remove}
+                            onClick={() => removeItem(it.id, it.talle)}
+                        >
+                            Quitar
+                        </button>
+                        </div>
+                    </div>
+                    </Card>
+                ))}
                 </div>
 
-                <Card className="p-5">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm text-ui-muted">Total</div>
-                        <div className="text-2xl font-extrabold text-ui-text">
-                            ${total.toLocaleString("es-AR")}
+                {/* Summary */}
+                <Card className={`${styles.productCard} ${styles.summaryCard}`}>
+                    <div className={styles.summaryRow}>
+                        <div className={styles.summaryLabel}>Total</div>
+                        <div className={styles.summaryValue}>
+                        ${total.toLocaleString("es-AR")}
                         </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-3 justify-end">
+                    <div className={styles.summaryActions}>
                         <Link to="/uniformes">
-                            <Button variant="ghost">Agregar más</Button>
+                            <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                                    <span className={styles.ctaIcon}>+</span>
+                                    Agregar más
+                            </Button>
                         </Link>
-                        <Button variant="primary" onClick={goCheckout}>Finalizar compra</Button>
+                            <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`} onClick={goCheckout}>
+                                Finalizar compra
+                            </Button>
                     </div>
                 </Card>
             </>

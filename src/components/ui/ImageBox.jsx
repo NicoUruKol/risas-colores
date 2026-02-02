@@ -1,4 +1,3 @@
-// src/components/ui/ImageBox.jsx
 export default function ImageBox({
     src,
     alt = "",

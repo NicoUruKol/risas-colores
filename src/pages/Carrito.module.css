@@ -1,10 +1,11 @@
 /* ==============================
-Stage + Background
+Stage + Background (onda Home)
 ============================== */
 
 .stage {
   position: relative;
   overflow: hidden;
+  padding: 40px 0;
 }
 
 .bg {
@@ -63,6 +64,21 @@ Stage + Background
       linear-gradient(to bottom, rgba(74,144,194,0), rgba(74,144,194,.30), rgba(74,144,194,0)) 50% 0 / 10px 220px repeat-y,
       linear-gradient(to bottom, rgba(200,182,226,0), rgba(177,132,240,.30), rgba(200,182,226,0)) 80% 0 / 7px 200px repeat-y;
   }
+}
+
+/* ==============================
+Layout
+============================== */
+
+.page {
+  display: grid;
+  gap: 18px;
+  max-width: 900px;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
 }
 
 /* ==============================
@@ -132,8 +148,27 @@ Header shell
   .headerShell:hover::after  { opacity: 0.35; }
 }
 
+.headerRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ui-text, #222);
+}
+
+.headerLink { flex: 0 0 auto; }
+
 /* ==============================
-Product cards
+Product cards (misma onda)
 ============================== */
 
 .productCard {
@@ -170,41 +205,245 @@ Product cards
 }
 
 /* ==============================
-Media + CTA
+Item card layout
 ============================== */
 
-.media {
+.itemCard { padding: 14px; }
+
+.itemGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+@media (max-width: 640px) {
+  .itemGrid {
+    grid-template-columns: 78px 1fr;
+    grid-template-areas:
+      "media info"
+      "right right";
+    align-items: start;
+  }
+
+  .right {
+    grid-area: right;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+}
+
+.mediaBox {
+  width: 92px;
+  height: 92px;
   border-radius: 22px;
   background: rgba(255,255,255,0.78);
   box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+  overflow: hidden;
 }
 
-.price {
+@media (max-width: 640px) {
+  .mediaBox { width: 78px; height: 78px; border-radius: 18px; }
+}
+
+.mediaImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mediaPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.info {
+  min-width: 0;
+}
+
+.name {
+  font-weight: 900;
+  color: var(--ui-text, #222);
+  line-height: 1.2;
+}
+
+.metaRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metaLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ui-muted, rgba(0,0,0,0.55));
+  letter-spacing: 0.02em;
+}
+
+.metaValue {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ui-text, #222);
+}
+
+.priceEach {
   text-shadow: 0 1px 0 rgba(255,255,255,0.6);
 }
 
-.cta {
-  width: 100%;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(0,0,0,0.08);
-  color: #2b2b2b;
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 190px;
+}
+
+@media (max-width: 640px) {
+  .right { min-width: 0; }
+}
+
+.qtyRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qtyBtn {
+  border-radius: 14px !important;
+}
+
+.qtyVal {
+  min-width: 44px;
+  text-align: center;
+  font-weight: 900;
+  color: var(--ui-text, #222);
+}
+
+.lineTotal {
+  font-weight: 900;
+  color: var(--brand-orange, #f6a65a);
+}
+
+.remove {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--state-error, #c0392b);
+  cursor: pointer;
+}
+
+.remove:hover { text-decoration: underline; }
+
+/* ==============================
+Empty state
+============================== */
+
+.emptyCard { padding: 18px; }
+
+.muted {
+  color: var(--ui-muted, rgba(0,0,0,0.55));
+  font-weight: 700;
+}
+
+.emptyActions { margin-top: 14px; }
+
+/* ==============================
+Summary card
+============================== */
+
+.summaryCard { padding: 16px 18px; }
+
+.summaryRow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summaryLabel {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ui-muted, rgba(0,0,0,0.55));
+}
+
+.summaryValue {
+  font-size: 24px;
+  font-weight: 950;
+  color: var(--ui-text, #222);
+}
+
+.summaryActions {
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .ctaReadable {
   color: #2b2b2b !important;
+  border: 1px solid rgba(0,0,0,.10);
 }
 
-.ctaArrow {
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.ctaRow > a {
+  display: inline-block;
+}
+
+/* Botón con micro-animación */
+.ctaBtn{
+  border-radius: 16px;
+  letter-spacing: 0.2px;
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.ctaBtn:active{
+  transform: translateY(0);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+
+@media (hover: hover) and (pointer: fine){
+  .ctaBtn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.18);
+    filter: saturate(1.05);
+  }
+}
+
+/* Icono izquierdo para "Volver" */
+.ctaIcon{
   display: inline-block;
   margin-left: 8px;
   transition: transform 160ms ease;
 }
 
-.cta:hover .ctaArrow {
-  transform: translateX(3px);
-}
-
-@media (max-width: 640px) {
-  .cta { min-height: 48px; }
+@media (hover: hover) and (pointer: fine){
+  .ctaBtn:hover .ctaIcon{
+    transform: translateX(-3px);
+  }
 }

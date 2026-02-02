@@ -1,4 +1,3 @@
-// src/pages/ProductoDetalle.jsx
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Container from "../components/layout/Container";
@@ -80,8 +79,9 @@ export default function ProductoDetalle() {
         <Container className="grid gap-6 max-w-[860px]">
             <div className="flex items-center justify-between gap-4">
             <Link to="/uniformes">
-                <Button variant="ghost" size="sm" className={styles.backBtn}>
-                ← Volver
+                <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                        <span className={styles.ctaIcon}>←</span>
+                        Volver
                 </Button>
             </Link>
             {!loading && item && <Badge variant="blue">Producto</Badge>}
@@ -96,8 +96,12 @@ export default function ProductoDetalle() {
                 <p className="text-ui-muted">No encontramos este producto.</p>
                 <div className="mt-3">
                 <Link to="/uniformes">
-                    <Button variant="secondary">Volver</Button>
+                    <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                        <span className={styles.ctaIcon}>←</span>
+                        " Volver"
+                    </Button>
                 </Link>
+
                 </div>
             </Card>
             ) : (
@@ -173,16 +177,23 @@ export default function ProductoDetalle() {
                     </div>
 
                     <div className={styles.ctaRow}>
-                    <Button variant="primary" onClick={handleAdd} className={styles.ctaPrimary}>
-                        Agregar al carrito <span className={styles.ctaArrow}>→</span>
-                    </Button>
-
-                    <Link to="/carrito">
-                        <Button variant="ghost" className={`${styles.ctaReadable} ${styles.ctaSoft}`}>
-                        Ir al carrito <span className={styles.ctaArrow}>→</span>
+                        <Button
+                            variant="secondary"
+                            className={`${styles.ctaReadable} ${styles.ctaBtn}`}
+                            onClick={handleAdd}
+                        >
+                            Agregar al carrito
+                            <span className={styles.ctaArrow}>→</span>
                         </Button>
-                    </Link>
+
+                        <Link to="/carrito">
+                            <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                                Ir al carrito
+                                <span className={styles.ctaArrow}>→</span>
+                            </Button>
+                        </Link>
                     </div>
+
                 </div>
                 </div>
 
