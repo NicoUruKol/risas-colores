@@ -5,6 +5,8 @@ import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
+import SEO from "../components/seo/SEO";
+
 
 import Hero1 from "../assets/Hero1.webp";
 import Hero2 from "../assets/Hero2.webp";
@@ -89,6 +91,11 @@ export default function Home() {
 
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
+            <SEO
+                title="Educación, juego y cuidado"
+                description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
+                path="/"
+            />
         <div className={styles.bg} />
 
         <Container className="relative z-10 grid gap-10">
