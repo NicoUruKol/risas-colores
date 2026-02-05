@@ -8,6 +8,8 @@ import { getById } from "../services/productsApi";
 import { useCart } from "../context/CartContext";
 import ProductoDetalleCarousel from "..//components/producto/ProductoDetalleCarousel";
 import ImageZoomModal from "../components/producto/ImageZoomModal";
+import AddToCartConfirmModal from "../components/producto/AddToCartConfirmModal";
+
 import styles from "./ProductosDetalle.module.css";
 
 export default function ProductoDetalle() {
@@ -23,6 +25,8 @@ export default function ProductoDetalle() {
 
     const [imgIndex, setImgIndex] = useState(0);
     const [zoomOpen, setZoomOpen] = useState(false);
+
+    const [addedOpen, setAddedOpen] = useState(false);
 
     useEffect(() => {
         let alive = true;
@@ -70,8 +74,9 @@ export default function ProductoDetalle() {
     const handleAdd = () => {
         if (!item) return;
         addItem({ id: item.id, name: item.name, price: item.price }, { talle, qty });
-        navigate("/carrito");
+        setAddedOpen(true);
     };
+
 
     return (
         <main className={`py-10 ${styles.stage}`}>
@@ -205,6 +210,20 @@ export default function ProductoDetalle() {
                 onClose={() => setZoomOpen(false)}
                 onPrev={prevImg}
                 onNext={nextImg}
+                />
+                <AddToCartConfirmModal
+                    open={addedOpen}
+                    title="Agregado al carrito"
+                    text="¿Querés seguir comprando o finalizar la compra?"
+                    onClose={() => setAddedOpen(false)}
+                    onContinue={() => {
+                        setAddedOpen(false);
+                        navigate("/uniformes");
+                    }}
+                    onCheckout={() => {
+                        setAddedOpen(false);
+                        navigate("/carrito");
+                    }}
                 />
             </Card>
             )}

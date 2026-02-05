@@ -1,4 +1,3 @@
-// src/pages/Contacto.jsx
 import { useMemo, useState } from "react";
 import Container from "../components/layout/Container";
 import styles from "./Contacto.module.css";
@@ -97,53 +96,53 @@ export default function Contacto() {
 
             <form className={styles.form} onSubmit={onSubmit}>
                 <div className={styles.grid2}>
-                <label className={styles.field}>
-                    <span className={styles.label}>Nombre *</span>
-                    <input
-                    name="nombre"
-                    value={data.nombre}
-                    onChange={onChange}
-                    className={styles.input}
-                    placeholder="Tu nombre"
-                    autoComplete="name"
-                    />
-                    {errors.nombre && <span className={styles.err}>{errors.nombre}</span>}
-                </label>
+                    <label className={styles.field}>
+                        <span className={styles.label}>Nombre *</span>
+                        <input
+                            name="nombre"
+                            value={data.nombre}
+                            onChange={onChange}
+                            className={styles.input}
+                            placeholder="Tu nombre"
+                            autoComplete="name"
+                        />
+                        {errors.nombre && <span className={styles.err}>{errors.nombre}</span>}
+                    </label>
 
                 <label className={styles.field}>
                     <span className={styles.label}>Email *</span>
                     <input
-                    name="email"
-                    value={data.email}
-                    onChange={onChange}
-                    className={styles.input}
-                    placeholder="tuemail@ejemplo.com"
-                    autoComplete="email"
+                        name="email"
+                        value={data.email}
+                        onChange={onChange}
+                        className={styles.input}
+                        placeholder="tuemail@ejemplo.com"
+                        autoComplete="email"
                     />
                     {errors.email && <span className={styles.err}>{errors.email}</span>}
                 </label>
                 </div>
 
                 <div className={styles.grid2}>
-                <label className={styles.field}>
-                    <span className={styles.label}>Teléfono (opcional)</span>
-                    <input
-                    name="telefono"
-                    value={data.telefono}
-                    onChange={onChange}
-                    className={styles.input}
-                    placeholder="Ej: 11 1234 5678"
-                    autoComplete="tel"
-                    />
-                </label>
+                    <label className={styles.field}>
+                        <span className={styles.label}>Teléfono (opcional)</span>
+                        <input
+                        name="telefono"
+                        value={data.telefono}
+                        onChange={onChange}
+                        className={styles.input}
+                        placeholder="Ej: 11 1234 5678"
+                        autoComplete="tel"
+                        />
+                    </label>
 
                 <label className={styles.field}>
                     <span className={styles.label}>Motivo</span>
                     <select
-                    name="motivo"
-                    value={data.motivo}
-                    onChange={onChange}
-                    className={styles.input}
+                        name="motivo"
+                        value={data.motivo}
+                        onChange={onChange}
+                        className={styles.input}
                     >
                     <option>Consulta</option>
                     <option>Inscripción</option>
@@ -155,40 +154,45 @@ export default function Contacto() {
                 </div>
 
                 <label className={styles.field}>
-                <span className={styles.label}>Mensaje *</span>
-                <textarea
-                    name="mensaje"
-                    value={data.mensaje}
-                    onChange={onChange}
-                    className={styles.textarea}
-                    placeholder="Escribí tu consulta..."
-                    rows={6}
-                />
-                {errors.mensaje && <span className={styles.err}>{errors.mensaje}</span>}
+                    <span className={styles.label}>Mensaje *</span>
+                    <textarea
+                        name="mensaje"
+                        value={data.mensaje}
+                        onChange={onChange}
+                        className={styles.textarea}
+                        placeholder="Escribí tu consulta..."
+                        rows={6}
+                    />
+                    {errors.mensaje && <span className={styles.err}>{errors.mensaje}</span>}
                 </label>
 
                 {/* Honeypot anti-spam (invisible) */}
-                <input
-                type="text"
-                name="_gotcha"
-                tabIndex="-1"
-                autoComplete="off"
-                className={styles.gotcha}
-                />
+                    <input
+                    type="text"
+                    name="_gotcha"
+                    tabIndex="-1"
+                    autoComplete="off"
+                    className={styles.gotcha}
+                    />
 
                 <div className={styles.actions}>
-                <button
-                    className={styles.btn}
-                    type="submit"
-                    disabled={status === "sending"}
-                >
-                    {status === "sending" ? "Enviando..." : "Enviar consulta"}
-                    <span className={styles.arrow}>→</span>
-                </button>
+                    <button
+                        className={styles.btn}
+                        type="submit"
+                        disabled={status === "sending"}
+                    >
+                        {status === "sending" ? "Enviando..." : "Enviar consulta"}
+                        <span className={styles.arrow}>→</span>
+                    </button>
 
-                <a className={styles.alt} href="https://wa.me/549XXXXXXXXXX" target="_blank" rel="noreferrer">
+                    <a
+                    className={styles.alt}
+                    href="https://wa.me/5491152499974?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0ASomos%20una%20familia%20interesada%20en%20conocer%20m%C3%A1s%20sobre%20el%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%BFPodemos%20coordinar%20una%20visita%20o%20recibir%20m%C3%A1s%20informaci%C3%B3n%3F%0A%0A%C2%A1Gracias!"
+                    target="_blank"
+                    rel="noreferrer"
+                    >
                     O escribir por WhatsApp
-                </a>
+                    </a>
                 </div>
             </form>
             </section>
