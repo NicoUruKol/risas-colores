@@ -2,6 +2,8 @@
 import { useMemo, useState } from "react";
 import Container from "../components/layout/Container";
 import styles from "./Contacto.module.css";
+import SEO from "../components/seo/SEO";
+
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -67,6 +69,12 @@ export default function Contacto() {
 
     return (
         <main className={styles.page}>
+            <SEO
+            title="Contacto"
+            description="Contactanos para conocer más sobre el Jardín Maternal Risas y Colores. Estamos para acompañarte y responder tus dudas."
+            path="/contacto"
+            />
+
         <Container className={styles.inner}>
             <header className={styles.header}>
             <h1 className={styles.title}>Contacto</h1>

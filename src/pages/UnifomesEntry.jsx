@@ -8,6 +8,8 @@ import Badge from "../components/ui/Badge";
 import ImageBox from "../components/ui/ImageBox";
 import { listAll } from "../services/productsApi";
 import styles from "./UniformesEntry.module.css";
+import SEO from "../components/seo/SEO";
+
 
 export default function UniformesEntry() {
     const [products, setProducts] = useState([]);
@@ -30,6 +32,12 @@ export default function UniformesEntry() {
 
     return (
         <main className={`py-10 ${styles.stage}`}>
+            <SEO
+            title="Uniformes"
+            description="Uniformes del Jardín Maternal Risas y Colores. Prendas y packs por temporada."
+            path="/uniformes"
+            />
+
         <div className={styles.bg} />
         <Container className="grid gap-6">
             <section className={`${styles.headerShell} grid gap-3 text-center p-5`}>

@@ -8,6 +8,8 @@ import { CartProvider } from "../context/CartContext";
 import ScrollToTop from "../routes/ScrollToTop";
 //import Header2 from "../components/layout/Header2";
 import Header3 from "../components/layout/Header3";
+import CookieBanner from "../components/cookies/cookieBanner";
+
 
 
 function isMobile() {
@@ -46,6 +48,7 @@ function isMobile() {
                 </main>
                 <Footer />
                 </div>
+                <CookieBanner />
             </div>
         </CartProvider>
     );

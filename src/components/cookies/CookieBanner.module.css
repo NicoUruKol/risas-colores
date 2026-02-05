@@ -1,0 +1,93 @@
+.banner {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+
+  max-width: 360px;
+  padding: 1rem 1.1rem;
+
+  background: #ffffff;
+  border-radius: 20px;
+  border: 2px solid rgba(200, 182, 226, 0.6);
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+
+  font-family: inherit;
+}
+
+/* Detalle superior tipo confeti */
+.banner::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 6px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(
+    90deg,
+    #f6a65a,
+    #4a90c2,
+    #c8b6e2
+  );
+}
+
+.text {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #3b3b3b;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.btn {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Botón aceptar */
+.accept {
+  background: #4a90c2;
+  color: white;
+  box-shadow: 0 3px 0 #3a7cb0;
+}
+
+.accept:hover {
+  box-shadow: 0 4px 0 #3a7cb0;
+}
+
+/* Botón rechazar */
+.reject {
+  background: #f4f4f4;
+  color: #555;
+}
+
+.reject:hover {
+  background: #ececec;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+  .banner {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    max-width: none;
+  }
+}

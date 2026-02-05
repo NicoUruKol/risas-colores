@@ -4,6 +4,8 @@ import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
+import SEO from "../components/seo/SEO";
+
 
 import styles from "./ElJardin.module.css";
 import SceneInteractiva from "../components/scene/SceneInteractiva";
@@ -74,6 +76,12 @@ export default function ElJardin() {
 
     return (
         <main className={styles.page}>
+            <SEO
+            title="Nuestro Jardín"
+            description="Conocé la propuesta educativa del Jardín Maternal Risas y Colores, nuestros valores y el espacio donde los niños crecen acompañados."
+            path="/el-jardin"
+            />
+
             <div className={styles.bg} aria-hidden="true" />
 
         <Container>
