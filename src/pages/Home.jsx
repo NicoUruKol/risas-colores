@@ -9,7 +9,7 @@ import SEO from "../components/seo/SEO";
 
 import Hero1 from "../assets/Hero1.webp";
 import Hero2 from "../assets/Hero2.webp";
-import Hero3 from "../assets/Hero3.webp";
+//import Hero3 from "../assets/Hero3.webp";
 
 export default function Home() {
     const heroSlides = useMemo(
