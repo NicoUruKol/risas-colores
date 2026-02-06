@@ -1,9 +1,5 @@
-/* ElJardin.module.css */
-
-/* ElJardin.module.css */
-
 /* ==============================
-Page + Background similar Home
+Page + Background
 ============================== */
 
 .page {
@@ -83,13 +79,12 @@ Layout Side + Scene
 }
 
 /* ==============================
-Shell base (criterio Home)
+Shell base
 ============================== */
 
 .shell,
 .sideShell,
-.sceneShell,
-.benefitsShell {
+.sceneShell {
   position: relative;
   overflow: hidden;
   border-radius: 28px;
@@ -103,8 +98,7 @@ Shell base (criterio Home)
 
 .shell::before,
 .sideShell::before,
-.sceneShell::before,
-.benefitsShell::before {
+.sceneShell::before {
   content: "";
   position: absolute;
   inset: -60px;
@@ -119,8 +113,7 @@ Shell base (criterio Home)
 
 .shell::after,
 .sideShell::after,
-.sceneShell::after,
-.benefitsShell::after {
+.sceneShell::after {
   content: "";
   position: absolute;
   inset: -80px;
@@ -136,9 +129,7 @@ Shell base (criterio Home)
   .sideShell:active,
   .sideShell:focus-within,
   .sceneShell:active,
-  .sceneShell:focus-within,
-  .benefitsShell:active,
-  .benefitsShell:focus-within {
+  .sceneShell:focus-within {
     background-color: rgba(255,255,255,0.88);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
   }
@@ -147,8 +138,7 @@ Shell base (criterio Home)
 @media (hover: hover) and (pointer: fine) {
   .shell,
   .sideShell,
-  .sceneShell,
-  .benefitsShell {
+  .sceneShell {
     background-color: transparent;
     box-shadow: none;
     border-color: transparent;
@@ -161,17 +151,14 @@ Shell base (criterio Home)
   .sideShell::before,
   .sideShell::after,
   .sceneShell::before,
-  .sceneShell::after,
-  .benefitsShell::before,
-  .benefitsShell::after {
+  .sceneShell::after {
     opacity: 0;
     transition: opacity 260ms ease;
   }
 
   .shell:hover,
   .sideShell:hover,
-  .sceneShell:hover,
-  .benefitsShell:hover {
+  .sceneShell:hover {
     background-color: rgba(255,255,255,0.88);
     transform: translateY(-2px);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
@@ -182,13 +169,11 @@ Shell base (criterio Home)
 
   .shell:hover::before,
   .sideShell:hover::before,
-  .sceneShell:hover::before,
-  .benefitsShell:hover::before { opacity: 0.9; }
+  .sceneShell:hover::before { opacity: 0.9; }
 
   .shell:hover::after,
   .sideShell:hover::after,
-  .sceneShell:hover::after,
-  .benefitsShell:hover::after { opacity: 0.35; }
+  .sceneShell:hover::after { opacity: 0.35; }
 }
 
 /* ==============================
@@ -317,7 +302,7 @@ Resto (bloqueo + entrada)
 }
 
 /* ==============================
-Sections (rest)
+Sections
 ============================== */
 
 .section {
@@ -409,7 +394,7 @@ Intro
 }
 
 /* ==============================
-Cards (criterio Home softCard)
+Cards
 ============================== */
 
 .softCard {
@@ -456,9 +441,64 @@ Cards (criterio Home softCard)
   line-height: 1.5;
 }
 
-.faqQ {
+/* ==============================
+Por qué elegirnos (reveal por item)
+============================== */
+
+.whyGrid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.whyItem {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 520ms ease, transform 520ms ease;
+  transition-delay: var(--d, 0ms);
+  will-change: opacity, transform;
+}
+
+.whyItem[data-in="1"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.whyHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.whyTitle {
   font-weight: 900;
   color: var(--ui-text);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+/* Texto “se desarrolla hacia abajo” cuando entra en viewport */
+.whyBody {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: max-height 650ms ease, opacity 520ms ease, transform 520ms ease;
+  will-change: max-height, opacity, transform;
+}
+
+.whyItem[data-in="1"] .whyBody {
+  max-height: 240px;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: var(--d, 0ms);
+}
+
+.whyText {
+  margin: 0.55rem 0 0;
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
 }
 
 /* ==============================
@@ -476,34 +516,6 @@ Grids
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-
-.cardsGrid2 {
-  display: grid;
-  gap: 0.9rem;
-  align-items: stretch;
-}
-
-@media (min-width: 768px) {
-  .cardsGrid2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ==============================
-Beneficios
-============================== */
-
-.benefitCard {
-  --soft-tint: rgba(25,157,252,0.14);
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 450ms ease, transform 450ms ease;
-  transition-delay: var(--d, 0ms);
-  will-change: transform, opacity;
-}
-
-.benefitCard[data-in="1"] { opacity: 1; transform: translateY(0); }
-.benefitCard:hover { --soft-tint: rgba(246,166,90,0.32); }
 
 /* ==============================
 Gallery
@@ -584,15 +596,20 @@ Responsive + Reduced motion
   .bg::after {
     animation: none !important;
   }
+
   .shell,
   .sideShell,
   .sceneShell,
   .skipHint,
-  .softCard,
-  .benefitsShell {
+  .softCard {
     transition: none !important;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .softCard { transition: none !important; }
+}
+
 
 /* ==============================
 Mobile: bajar protagonismo del aside

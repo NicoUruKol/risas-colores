@@ -91,200 +91,243 @@ export default function ElJardin() {
         return () => io.disconnect();
     }, []);
 
-    const sectionRevealStyle = {
-        opacity: benefitsIn ? 1 : 0,
-        transform: benefitsIn ? "translateY(0)" : "translateY(18px)",
-        transition: "opacity 700ms ease, transform 700ms ease",
-        willChange: "opacity, transform",
-    };
+    const whyRefs = useRef([]);
+    const [whyIn, setWhyIn] = useState([false, false, false, false]);
 
-    const focusOnlyIfBackground = (e) => {
-        if (e.target === e.currentTarget) e.currentTarget.focus();
-    };
+    useEffect(() => {
+    if (!unlocked) return;
+
+    const els = whyRefs.current.filter(Boolean);
+    if (!els.length) return;
+
+    setWhyIn([false, false, false, false]);
+
+    const io = new IntersectionObserver(
+        (entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const idx = Number(entry.target.dataset.idx);
+
+            setWhyIn((prev) => {
+            if (prev[idx]) return prev;
+            const next = [...prev];
+            next[idx] = true;
+            return next;
+            });
+
+            io.unobserve(entry.target);
+        });
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -20% 0px" }
+    );
+
+    requestAnimationFrame(() => {
+        els.forEach((el) => io.observe(el));
+    });
+
+    return () => io.disconnect();
+    }, [unlocked]);
+
+
 
     return (
         <main className={styles.page}>
-            <SEO
-                title="Nuestro Jardín"
-                description="Conocé la propuesta educativa del Jardín Maternal Risas y Colores, nuestros valores y el espacio donde los niños crecen acompañados."
-                path="/el-jardin"
-            />
+        <SEO
+            title="Nuestro Jardín"
+            description="Conocé la propuesta educativa del Jardín Maternal Risas y Colores, nuestros valores y el espacio donde los niños crecen acompañados."
+            path="/el-jardin"
+        />
 
-            <div className={styles.bg} aria-hidden="true" />
+        <div className={styles.bg} aria-hidden="true" />
 
-            <Container>
-                <section className={styles.layout}>
-                    <aside className={styles.side}>
-                        <div className={styles.sideShell}>
-                            <h1 className={styles.title}>Descubrí Risas y Colores</h1>
+        <Container>
+            <section className={styles.layout}>
+            <aside className={styles.side}>
+                <div className={styles.sideShell}>
+                <h1 className={styles.title}>Descubrí Risas y Colores</h1>
 
-                            <p className={styles.subtitle}>
-                                {unlocked
-                                ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
-                                : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
-                            </p>
+                <p className={styles.subtitle}>
+                    {unlocked
+                    ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
+                    : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
+                </p>
 
-                            <button type="button" className={styles.skipHint} onClick={skipToContent}>
-                                O seguí sin jugar <span className={styles.arrow} aria-hidden>→</span>
-                            </button>
+                <button type="button" className={styles.skipHint} onClick={skipToContent}>
+                    O seguí sin jugar <span className={styles.arrow} aria-hidden>→</span>
+                </button>
 
-                            <div className={styles.sideInfo}>
-                                {unlocked && (
-                                <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
-                                )}
-                            </div>
-                        </div>
-                    </aside>
+                <div className={styles.sideInfo}>
+                    {unlocked && <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>}
+                </div>
+                </div>
+            </aside>
 
-                    <div className={styles.sceneShell}>
-                        <SceneInteractiva
-                        minUnlock={3}
-                        unlockedExternal={unlocked}
-                        onUnlocked={() => setUnlocked(true)}
-                        onGoToNext={goToNext}
-                        onSkip={() => setUnlocked(true)}
-                        />
-                    </div>
-                </section>
-            </Container>
-
-            <div
-                ref={nextSectionRef}
-                className={`${styles.restWrap} ${
-                unlocked ? styles.restWrapIn : styles.restWrapLocked
-                }`}
-            >
-                <Container>
-                    <section className={`${styles.shell} ${styles.introShell}`}>
-                        <div className={styles.introGrid}>
-                        <div className={styles.introLeft}>
-                            <Badge variant="blue">Jardín materno infantil</Badge>
-
-                            <h2 className={styles.h2}>Un lugar seguro, cálido y creativo para crecer</h2>
-
-                            <p className={styles.pMuted}>
-                            Acompañamos a las familias en la primera infancia con propuestas
-                            pensadas para cada etapa: juego, vínculo, exploración y hábitos.
-                            </p>
-
-                            <div className={styles.actions}>
-                            <Link to="/uniformes" className={styles.linkReset}>
-                                <Button variant="primary">Comprar uniformes</Button>
-                            </Link>
-                            </div>
-                        </div>
-
-                        <div className={styles.mediaMock} />
-                        </div>
-                    </section>
-
-                    <section className={styles.section}>
-                        <h2 className={styles.h3}>Nuestra propuesta</h2>
-
-                        <div className={styles.cardsGrid3}>
-                        <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                            <div className={styles.icon}>🧩</div>
-                            <div className={styles.cardTitle}>Aprender jugando</div>
-                            <p className={styles.cardText}>
-                            Actividades lúdicas para desarrollar autonomía, lenguaje y motricidad.
-                            </p>
-                        </Card>
-
-                        <Card className={`${styles.softCard} ${styles.softOrange}`}>
-                            <div className={styles.icon}>🤍</div>
-                            <div className={styles.cardTitle}>Cuidado y vínculo</div>
-                            <p className={styles.cardText}>
-                            Acompañamiento afectivo y rutinas que brindan seguridad y confianza.
-                            </p>
-                        </Card>
-
-                        <Card className={`${styles.softCard} ${styles.softPurple}`}>
-                            <div className={styles.icon}>🌈</div>
-                            <div className={styles.cardTitle}>Ambiente amable</div>
-                            <p className={styles.cardText}>
-                            Espacios pensados para explorar, crear y compartir en comunidad.
-                            </p>
-                        </Card>
-                        </div>
-                    </section>
-
-                    {/* Sentinel (tiene que estar ANTES del bloque que querés revelar) */}
-                    <div ref={benefitsSentinelRef} className="h-1" />
-
-                    {/* Beneficios (sumo styles.section para que tenga el mismo margin-top/gap que el resto) */}
-                    <section
-                        tabIndex={0}
-                        onPointerDown={focusOnlyIfBackground}
-                        style={sectionRevealStyle}
-                        className={`${styles.section} ${styles.benefitsShell} p-5 md:p-6`}
-                    >
-                        <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ui-text)]">
-                        ¿Por qué elegirnos?
-                        </h2>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                        {[
-                            "Proyecto educativo",
-                            "Equipo docente",
-                            "Espacios seguros",
-                            "Acompañamiento familiar",
-                        ].map((t, i) => (
-                            <Card
-                            key={t}
-                            data-in={benefitsIn ? "1" : "0"}
-                            style={{ "--d": `${i * 120}ms` }}
-                            className={`
-                                p-6 transition-transform duration-200 hover:-translate-y-1
-                                ${styles.softCard} ${styles.softPurple} ${styles.benefitCard}
-                                ${i === 1 ? "md:translate-x-2" : ""}
-                                ${i === 2 ? "md:-translate-x-2" : ""}
-                            `}
-                            >
-                            <div className="font-semibold text-[var(--ui-text)] text-base md:text-lg">
-                                {t}
-                            </div>
-                            <p className="text-sm text-[var(--ui-muted)] mt-1">
-                                Texto breve (1 línea) que refuerce confianza.
-                            </p>
-                            </Card>
-                        ))}
-                        </div>
-                    </section>
-
-                    <section className={styles.section}>
-                        <div className={styles.sectionHead}>
-                        <div>
-                            <h2 className={styles.h3}>Conocé el espacio</h2>
-                            <p className={styles.smallMuted}>Imágenes del jardín.</p>
-                        </div>
-                        <Badge variant="orange">Galería</Badge>
-                        </div>
-
-                        <div className={styles.galleryGrid}>
-                        <div className={styles.galleryItem} />
-                        <div className={styles.galleryItem} />
-                        <div className={styles.galleryItem} />
-                        </div>
-                    </section>
-
-                    <section className={`${styles.shell} ${styles.ctaShell}`}>
-                        <h3 className={styles.ctaTitle}>¿Listos para empezar?</h3>
-                        <p className={styles.smallMuted}>
-                        Conocé el catálogo de uniformes y resolvé la compra en minutos.
-                        </p>
-
-                        <div className={styles.ctaActions}>
-                        <Link to="/uniformes" className={styles.linkReset}>
-                            <Button variant="primary">Ir a Uniformes</Button>
-                        </Link>
-                        <Link to="/" className={styles.linkReset}>
-                            <Button variant="secondary">Volver al inicio</Button>
-                        </Link>
-                        </div>
-                    </section>
-                    </Container>
-
+            <div className={styles.sceneShell}>
+                <SceneInteractiva
+                minUnlock={3}
+                unlockedExternal={unlocked}
+                onUnlocked={() => setUnlocked(true)}
+                onGoToNext={goToNext}
+                onSkip={() => setUnlocked(true)}
+                />
             </div>
+            </section>
+        </Container>
+
+        <div
+            ref={nextSectionRef}
+            className={`${styles.restWrap} ${unlocked ? styles.restWrapIn : styles.restWrapLocked}`}
+        >
+            <Container>
+            {/* ==============================
+            Intro
+            ============================== */}
+            <section className={`${styles.shell} ${styles.introShell}`}>
+                <div className={styles.introGrid}>
+                <div className={styles.introLeft}>
+                    <Badge variant="blue">Jardín materno infantil</Badge>
+
+                    <h2 className={styles.h2}>Un lugar seguro, cálido y creativo para crecer</h2>
+
+                    <p className={styles.pMuted}>
+                    Acompañamos a las familias en la primera infancia con propuestas
+                    pensadas para cada etapa: juego, vínculo, exploración y hábitos.
+                    </p>
+
+                    <div className={styles.actions}>
+                    <Link to="/uniformes" className={styles.linkReset}>
+                        <Button variant="primary">Comprar uniformes</Button>
+                    </Link>
+                    </div>
+                </div>
+
+                <div className={styles.mediaMock} />
+                </div>
+            </section>
+
+            {/* ==============================
+            Propuesta
+            ============================== */}
+            <section className={styles.section}>
+                <h2 className={styles.h3}>Nuestra propuesta</h2>
+
+                <div className={styles.cardsGrid3}>
+                <Card className={`${styles.softCard} ${styles.softBlue}`}>
+                    <div className={styles.icon}>🧩</div>
+                    <div className={styles.cardTitle}>Aprender jugando</div>
+                    <p className={styles.cardText}>
+                    Actividades lúdicas para desarrollar autonomía, lenguaje y motricidad.
+                    </p>
+                </Card>
+
+                <Card className={`${styles.softCard} ${styles.softOrange}`}>
+                    <div className={styles.icon}>🤍</div>
+                    <div className={styles.cardTitle}>Cuidado y vínculo</div>
+                    <p className={styles.cardText}>
+                    Acompañamiento afectivo y rutinas que brindan seguridad y confianza.
+                    </p>
+                </Card>
+
+                <Card className={`${styles.softCard} ${styles.softPurple}`}>
+                    <div className={styles.icon}>🌈</div>
+                    <div className={styles.cardTitle}>Ambiente amable</div>
+                    <p className={styles.cardText}>
+                    Espacios pensados para explorar, crear y compartir en comunidad.
+                    </p>
+                </Card>
+                </div>
+            </section>
+
+            {/* ==============================
+            Sentinel (reveal Por qué elegirnos)
+            ============================== */}
+            <div ref={benefitsSentinelRef} className="h-1" />
+
+            {/* ==============================
+            Por qué elegirnos (bloques narrativos)
+            ============================== */}
+            <section className={styles.section} aria-label="Por qué elegirnos">
+            <h2 className={styles.h3}>¿Por qué elegirnos?</h2>
+
+            <div className={styles.whyGrid}>
+                {[
+                {
+                    t: "Proyecto educativo",
+                    d: "Nuestra propuesta pedagógica acompaña a cada niño y niña respetando sus tiempos, intereses y necesidades. El juego es el eje central del aprendizaje, promoviendo la autonomía, la exploración y el desarrollo integral.",
+                },
+                {
+                    t: "Acompañamiento familiar",
+                    d: "Creemos en el trabajo conjunto con las familias. Mantenemos una comunicación constante, con seguimiento personalizado y espacios de intercambio que fortalecen el vínculo entre el jardín y el hogar.",
+                },
+                {
+                    t: "Espacios seguros",
+                    d: "El jardín está diseñado especialmente para la primera infancia, priorizando la seguridad, el cuidado y el bienestar emocional en cada ambiente.",
+                },
+                {
+                    t: "Salas y funcionamiento",
+                    d: "Las salas están organizadas por edades, con propuestas acordes a cada etapa del desarrollo. En cada una se trabajan rutinas, juegos y actividades pensadas para acompañar el crecimiento de forma gradual y respetuosa.",
+                },
+                ].map((item, i) => (
+                <div
+                    key={item.t}
+                    data-idx={i}
+                    ref={(el) => (whyRefs.current[i] = el)}
+                    className={`${styles.softCard} ${styles.softPurple} ${styles.whyItem}`}
+                    data-in={whyIn[i] ? "1" : "0"}
+                    style={{ "--d": `${i * 90}ms` }}
+                >
+                    <div className={styles.whyHead}>
+                    <div className={styles.whyTitle}>{item.t}</div>
+                    </div>
+
+                    <div className={styles.whyBody}>
+                    <p className={styles.whyText}>{item.d}</p>
+                    </div>
+                </div>
+                ))}
+            </div>
+            </section>
+
+
+            {/* ==============================
+            Galería
+            ============================== */}
+            <section className={styles.section}>
+                <div className={styles.sectionHead}>
+                <div>
+                    <h2 className={styles.h3}>Conocé el espacio</h2>
+                    <p className={styles.smallMuted}>Imágenes del jardín.</p>
+                </div>
+                <Badge variant="orange">Galería</Badge>
+                </div>
+
+                <div className={styles.galleryGrid}>
+                <div className={styles.galleryItem} />
+                <div className={styles.galleryItem} />
+                <div className={styles.galleryItem} />
+                </div>
+            </section>
+
+            {/* ==============================
+            CTA
+            ============================== */}
+            <section className={`${styles.shell} ${styles.ctaShell}`}>
+                <h3 className={styles.ctaTitle}>¿Listos para empezar?</h3>
+                <p className={styles.smallMuted}>
+                Conocé el catálogo de uniformes y resolvé la compra en minutos.
+                </p>
+
+                <div className={styles.ctaActions}>
+                <Link to="/uniformes" className={styles.linkReset}>
+                    <Button variant="primary">Ir a Uniformes</Button>
+                </Link>
+                <Link to="/" className={styles.linkReset}>
+                    <Button variant="secondary">Volver al inicio</Button>
+                </Link>
+                </div>
+            </section>
+            </Container>
+        </div>
         </main>
     );
 }

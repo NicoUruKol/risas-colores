@@ -10,7 +10,7 @@ import AppShell from "./AppShell";
 
 import Home from "../pages/Home";
 import ElJardin from "../pages/ElJardin";
-import Contacto from "../pages/Contacto";
+//import Contacto from "../pages/Contacto";
 
 import UniformesEntry from "../pages/UnifomesEntry";
 import ProductoDetalle from "../pages/ProductosDetalle";
@@ -28,7 +28,7 @@ const routes = [
     children: [
       { path: "/", element: <Home /> },
       { path: "/el-jardin", element: <ElJardin /> },
-      { path: "/contacto", element: <Contacto /> },
+     // { path: "/contacto", element: <Contacto /> },
 
       { path: "/uniformes", element: <UniformesEntry /> },
       { path: "/producto/:id", element: <ProductoDetalle /> },

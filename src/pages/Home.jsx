@@ -1,9 +1,8 @@
-
 import { useRef, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
+//import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
@@ -20,7 +19,7 @@ export default function Home() {
             title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
             subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
             cta1: { to: "/el-jardin", label: "Conocer el jardín" },
-            cta2: { to: "/uniformes", label: "Comprar uniformes" },
+            cta2: { to: "/uniformes", label: "Ir a la tienda" },
         },
         {
             img: Hero2,
@@ -29,13 +28,13 @@ export default function Home() {
             cta1: { to: "/el-jardin", label: "Ver propuesta" },
             cta2: { to: "/uniformes", label: "Ver uniformes" },
         },
-        {
+        /*{
             img: Hero3,
             title: "Un lugar donde cada niño se siente seguro para crecer",
             subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
             cta1: { to: "/el-jardin", label: "Más información" },
-            cta2: { to: "/uniformes", label: "Ir a la tienda" },
-        },
+            cta2: { to: "/uniformes", label: "Comprar uniformes" },
+        },*/
         ],
         []
     );
@@ -56,6 +55,90 @@ export default function Home() {
         setHeroTick((t) => t + 1);
     }, []);
 
+    const [activeTopic, setActiveTopic] = useState(null); // index o null
+    const [openQ, setOpenQ] = useState({});
+
+
+    const toggleTopic = (tIdx) => {
+        setActiveTopic((prev) => (prev === tIdx ? null : tIdx));
+        setOpenQ({}); // cerramos preguntas al cambiar de tema (orden visual)
+        };
+
+        const toggleQuestion = (tIdx, qIdx) => {
+        setOpenQ((prev) => ({
+            ...prev,
+            [tIdx]: prev[tIdx] === qIdx ? -1 : qIdx,
+        }));
+        };
+
+
+    const faqs = useMemo(
+        () => [
+            {
+            topic: "Ingreso y contacto",
+            items: [
+                {
+                q: "¿Cómo coordino una entrevista o visita?",
+                a: "Podés escribirnos por WhatsApp o completar el formulario de contacto. Coordinamos una entrevista personalizada para que conozcas el jardín y podamos responder todas tus dudas.",
+                },
+                {
+                q: "¿Cómo puedo pedir información?",
+                a: "A través de WhatsApp, formulario web o redes. Siempre respondemos de manera directa y personalizada.",
+                },
+            ],
+            },
+            {
+            topic: "Propuesta y metodología",
+            items: [
+                {
+                q: "¿Qué metodología utiliza el jardín?",
+                a: "Trabajamos con una propuesta pedagógica basada en el juego, el vínculo afectivo y el respeto por los tiempos de cada niño y niña.",
+                },
+                {
+                q: "¿En qué línea educativa se basa la propuesta?",
+                a: "Nuestra mirada está centrada en la primera infancia, priorizando el desarrollo emocional, social y cognitivo en un entorno cuidado y estimulante.",
+                },
+            ],
+            },
+            {
+            topic: "Seguridad y emergencias",
+            items: [
+                {
+                q: "¿Qué pasa si un niño o niña se lastima?",
+                a: "Ante cualquier situación, se actúa de forma inmediata siguiendo los protocolos del jardín y se avisa a la familia de manera directa.",
+                },
+                {
+                q: "¿El jardín cuenta con protocolos de emergencia?",
+                a: "Sí. Contamos con protocolos de seguridad y emergencia establecidos para garantizar el cuidado de todos los niños y niñas.",
+                },
+                {
+                q: "¿Qué nivel de seguridad tiene el jardín?",
+                a: "El espacio está preparado especialmente para la primera infancia, con medidas de seguridad acordes a cada etapa.",
+                },
+            ],
+            },
+            {
+            topic: "Marco institucional",
+            items: [
+                {
+                q: "¿El jardín está habilitado?",
+                a: "Sí, el jardín cuenta con la habilitación correspondiente para funcionar como jardín maternal.",
+                },
+                {
+                q: "¿Está incorporado a la enseñanza oficial?",
+                a: "El jardín maternal no funciona como escuela formal. Su objetivo es acompañar la primera infancia desde el cuidado, el juego y el desarrollo integral.",
+                },
+                {
+                q: "¿Cuál es la diferencia entre jardín maternal y guardería?",
+                a: "Un jardín maternal no solo cuida, sino que acompaña el desarrollo infantil a través de una propuesta pedagógica pensada para cada etapa.",
+                },
+            ],
+            },
+        ],
+        []
+        );
+
+
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <SEO
@@ -67,6 +150,9 @@ export default function Home() {
         <div className={styles.bg} />
 
         <Container className="relative z-10 grid gap-10">
+            {/* ==============================
+            Hero
+            ============================== */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
@@ -107,38 +193,75 @@ export default function Home() {
             </div>
             </section>
 
-            <section className={styles.section}>
-            <h2 className={styles.h3}>Preguntas frecuentes</h2>
+            {/* ==============================
+            FAQ (4 temas)
+            ============================== */}
+            <section className={`${styles.faqShell} p-6 md:p-7 grid gap-4`} aria-label="Preguntas frecuentes">
+                <div className={styles.faqHead}>
+                    <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
+                    <p className={styles.faqSub}>Resolvemos dudas rápidas antes de coordinar una visita.</p>
+                </div>
 
-            <div className={styles.cardsGrid2}>
-                <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                <div className={styles.faqQ}>¿Qué edades reciben?</div>
-                <p className={styles.cardText}>Desde lactantes y salas por edad (consultar salas).</p>
-                </Card>
+                <div className={styles.faqTopics}>
+                    {faqs.map((group, tIdx) => {
+                    const topicOpen = activeTopic === tIdx;
 
-                <Card className={`${styles.softCard} ${styles.softOrange}`}>
-                <div className={styles.faqQ}>¿Cómo coordino una visita?</div>
-                <p className={styles.cardText}>
-                    Podés contactarnos por WhatsApp o completar un formulario.
-                </p>
-                </Card>
+                    return (
+                        <div
+                        key={group.topic}
+                        data-tone={tIdx % 3}
+                        className={`
+                            ${styles.faqTopic}
+                            ${topicOpen ? styles.faqTopicActive : ""}
+                        `}
+                        >
+                        <button
+                            type="button"
+                            className={styles.faqTopicBtn}
+                            aria-expanded={topicOpen}
+                            onClick={() => toggleTopic(tIdx)}
+                        >
+                            <span className={styles.faqTopicTitle}>{group.topic}</span>
+                            <span className={styles.faqPlus} aria-hidden="true">+</span>
+                        </button>
 
-                <Card className={`${styles.softCard} ${styles.softPurple}`}>
-                <div className={styles.faqQ}>¿Cómo compro uniformes?</div>
-                <p className={styles.cardText}>
-                    Entrás a Uniformes, elegís sala, talle y agregás al carrito.
-                </p>
-                </Card>
+                        <div
+                            className={styles.faqTopicPanel}
+                            hidden={!topicOpen}
+                        >
+                            <div className={styles.faqInner}>
+                            {group.items.map((item, qIdx) => {
+                                const qOpen = (openQ[tIdx] ?? -1) === qIdx;
 
-                <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                <div className={styles.faqQ}>¿Hacen envíos?</div>
-                <p className={styles.cardText}>
-                    Podés definir retiro en el jardín o envío a domicilio (según lo que decidan).
-                </p>
-                </Card>
-            </div>
-            </section>
+                                return (
+                                <div key={item.q} className={styles.faqQItem}>
+                                    <button
+                                    type="button"
+                                    className={styles.faqQBtn}
+                                    aria-expanded={qOpen}
+                                    onClick={() => toggleQuestion(tIdx, qIdx)}
+                                    >
+                                    <span className={styles.faqQText}>{item.q}</span>
+                                    <span className={styles.faqChevron} aria-hidden="true">+</span>
+                                    </button>
 
+                                    <div className={styles.faqA} hidden={!qOpen}>
+                                    <p className={styles.cardText}>{item.a}</p>
+                                    </div>
+                                </div>
+                                );
+                            })}
+                            </div>
+                        </div>
+                        </div>
+                    );
+                    })}
+                </div>
+                </section>
+
+            {/* ==============================
+            Familias actuales
+            ============================== */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
@@ -163,3 +286,4 @@ export default function Home() {
         </main>
     );
 }
+

@@ -1,3 +1,4 @@
+{/*
 import { useMemo, useState } from "react";
 import Container from "../components/layout/Container";
 import styles from "./Contacto.module.css";
@@ -166,7 +167,7 @@ export default function Contacto() {
                     {errors.mensaje && <span className={styles.err}>{errors.mensaje}</span>}
                 </label>
 
-                {/* Honeypot anti-spam (invisible) */}
+                {/* Honeypot anti-spam (invisible) *//*}
                     <input
                     type="text"
                     name="_gotcha"
@@ -201,3 +202,4 @@ export default function Contacto() {
         </main>
     );
 }
+*/}

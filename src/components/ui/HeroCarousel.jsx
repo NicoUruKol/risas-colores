@@ -5,13 +5,11 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
     const [index, setIndex] = useState(0);
     const startX = useRef(null);
 
-    // ✅ guardar el callback más reciente sin meterlo en deps
     const onChangeRef = useRef(onChange);
     useEffect(() => {
         onChangeRef.current = onChange;
     }, [onChange]);
 
-    // ✅ mantener index válido si cambia images
     useEffect(() => {
         setIndex((i) => {
         if (images.length === 0) return 0;
@@ -19,15 +17,11 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
         });
     }, [images.length]);
 
-    // ✅ notificar al padre SOLO cuando cambia index (sin loop)
     const lastNotified = useRef(null);
     useEffect(() => {
         if (images.length === 0) return;
-
-        // evita notificar dos veces el mismo index (StrictMode/mount)
         if (lastNotified.current === index) return;
         lastNotified.current = index;
-
         onChangeRef.current?.(index);
     }, [index, images.length]);
 
@@ -50,7 +44,6 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
         setIndex((i) => (i - 1 + images.length) % images.length);
     }, [images.length]);
 
-    // autoplay
     useEffect(() => {
         if (images.length <= 1) return;
 
@@ -61,7 +54,6 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
         return () => clearInterval(id);
     }, [images.length, interval]);
 
-    // swipe mobile
     const onTouchStart = (e) => {
         startX.current = e.touches[0].clientX;
     };
@@ -85,15 +77,19 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
         onTouchEnd={onTouchEnd}
         aria-roledescription="carousel"
         >
-        {images.map((src, i) => (
+        <div className={styles.viewport}>
+            {images.map((src, i) => (
             <img
-            key={`${src}-${i}`}
-            src={src}
-            alt=""
-            className={`${styles.slide} ${i === index ? styles.active : ""}`}
-            draggable={false}
+                key={`${src}-${i}`}
+                src={src}
+                alt=""
+                draggable={false}
+                className={`${styles.slide} ${i === index ? styles.active : ""}`}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
             />
-        ))}
+            ))}
+        </div>
 
         <div className={styles.dots}>
             {images.map((_, i) => (
