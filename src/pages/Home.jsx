@@ -79,11 +79,11 @@ export default function Home() {
             items: [
                 {
                 q: "¿Cómo coordino una entrevista o visita?",
-                a: "Podés escribirnos por WhatsApp o completar el formulario de contacto. Coordinamos una entrevista personalizada para que conozcas el jardín y podamos responder todas tus dudas.",
+                a: "Podés escribirnos por WhatsApp. Coordinamos una entrevista personalizada para que conozcas el jardín y podamos responder todas tus dudas.",
                 },
                 {
                 q: "¿Cómo puedo pedir información?",
-                a: "A través de WhatsApp, formulario web o redes. Siempre respondemos de manera directa y personalizada.",
+                a: "A través de WhatsApp o redes. Siempre respondemos de manera directa y personalizada.",
                 },
             ],
             },
