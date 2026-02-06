@@ -1,11 +1,16 @@
 /* ElJardin.module.css */
 
+/* ElJardin.module.css */
+
+/* ==============================
+Page + Background similar Home
+============================== */
+
 .page {
   position: relative;
   padding: 1.25rem 0 3rem;
 }
 
-/* ===== Background similar Home ===== */
 .bg {
   position: absolute;
   inset: -80px;
@@ -49,7 +54,10 @@
   50%     { transform: translateY(18px); }
 }
 
-/* ===== Layout Side + Scene ===== */
+/* ==============================
+Layout Side + Scene
+============================== */
+
 .layout {
   display: grid;
   gap: 1rem;
@@ -80,24 +88,23 @@ Shell base (criterio Home)
 
 .shell,
 .sideShell,
-.sceneShell {
+.sceneShell,
+.benefitsShell {
   position: relative;
   overflow: hidden;
   border-radius: 28px;
-
   border: 1px solid rgba(229,231,235,0.90);
   background-color: rgba(246,166,90,0.05);
   box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-
   transition: transform 220ms ease, box-shadow 260ms ease, background-color 260ms ease, border-color 260ms ease;
 }
 
 .shell::before,
 .sideShell::before,
-.sceneShell::before {
+.sceneShell::before,
+.benefitsShell::before {
   content: "";
   position: absolute;
   inset: -60px;
@@ -112,7 +119,8 @@ Shell base (criterio Home)
 
 .shell::after,
 .sideShell::after,
-.sceneShell::after {
+.sceneShell::after,
+.benefitsShell::after {
   content: "";
   position: absolute;
   inset: -80px;
@@ -128,7 +136,9 @@ Shell base (criterio Home)
   .sideShell:active,
   .sideShell:focus-within,
   .sceneShell:active,
-  .sceneShell:focus-within {
+  .sceneShell:focus-within,
+  .benefitsShell:active,
+  .benefitsShell:focus-within {
     background-color: rgba(255,255,255,0.88);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
   }
@@ -137,7 +147,8 @@ Shell base (criterio Home)
 @media (hover: hover) and (pointer: fine) {
   .shell,
   .sideShell,
-  .sceneShell {
+  .sceneShell,
+  .benefitsShell {
     background-color: transparent;
     box-shadow: none;
     border-color: transparent;
@@ -150,14 +161,17 @@ Shell base (criterio Home)
   .sideShell::before,
   .sideShell::after,
   .sceneShell::before,
-  .sceneShell::after {
+  .sceneShell::after,
+  .benefitsShell::before,
+  .benefitsShell::after {
     opacity: 0;
     transition: opacity 260ms ease;
   }
 
   .shell:hover,
   .sideShell:hover,
-  .sceneShell:hover {
+  .sceneShell:hover,
+  .benefitsShell:hover {
     background-color: rgba(255,255,255,0.88);
     transform: translateY(-2px);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
@@ -168,14 +182,19 @@ Shell base (criterio Home)
 
   .shell:hover::before,
   .sideShell:hover::before,
-  .sceneShell:hover::before { opacity: 0.9; }
+  .sceneShell:hover::before,
+  .benefitsShell:hover::before { opacity: 0.9; }
 
   .shell:hover::after,
   .sideShell:hover::after,
-  .sceneShell:hover::after { opacity: 0.35; }
+  .sceneShell:hover::after,
+  .benefitsShell:hover::after { opacity: 0.35; }
 }
 
-/* ===== Side ===== */
+/* ==============================
+Side
+============================== */
+
 .sideShell {
   padding: 1.25rem;
 }
@@ -201,18 +220,14 @@ Shell base (criterio Home)
   line-height: 1.5;
 }
 
-/* Skip */
 .skipHint{
   position: relative;
   z-index: 1;
-
   margin: 8px 6px 0 auto;
   background: transparent;
   border: 0;
   padding: 0;
-
   width: fit-content;
-
   font-size: 12px;
   color: var(--ui-muted);
   cursor: pointer;
@@ -234,6 +249,7 @@ Shell base (criterio Home)
   display: inline-block;
   transform: translateX(0);
 }
+
 .skipHint:hover .arrow{
   transform: translateX(2px);
 }
@@ -246,8 +262,8 @@ Shell base (criterio Home)
   .skipHint{
     margin: 6px 6px 0 auto;
     font-size: 12px;
-    padding: 0;            
-    border-radius: 8px;    
+    padding: 0;
+    border-radius: 8px;
   }
 }
 
@@ -265,7 +281,10 @@ Shell base (criterio Home)
   color: var(--ui-text);
 }
 
-/* ===== Scene ===== */
+/* ==============================
+Scene
+============================== */
+
 .sceneShell {
   padding: 0.75rem;
 }
@@ -307,7 +326,10 @@ Sections (rest)
   gap: 0.9rem;
 }
 
-/* Intro */
+/* ==============================
+Intro
+============================== */
+
 .introShell {
   padding: 1.25rem;
 }
@@ -315,7 +337,6 @@ Sections (rest)
 .introGrid {
   position: relative;
   z-index: 1;
-
   display: grid;
   gap: 1.25rem;
   align-items: center;
@@ -372,7 +393,6 @@ Sections (rest)
   color: inherit;
 }
 
-/* placeholder imagen/video */
 .mediaMock {
   position: relative;
   z-index: 1;
@@ -441,15 +461,13 @@ Cards (criterio Home softCard)
   color: var(--ui-text);
 }
 
-/* grids */
+/* ==============================
+Grids
+============================== */
+
 .cardsGrid3 {
   display: grid;
   gap: 0.9rem;
-  align-items: stretch;
-}
-
-.cardsGrid2,
-.galleryGrid {
   align-items: stretch;
 }
 
@@ -462,6 +480,7 @@ Cards (criterio Home softCard)
 .cardsGrid2 {
   display: grid;
   gap: 0.9rem;
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
@@ -469,6 +488,22 @@ Cards (criterio Home softCard)
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* ==============================
+Beneficios
+============================== */
+
+.benefitCard {
+  --soft-tint: rgba(25,157,252,0.14);
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 450ms ease, transform 450ms ease;
+  transition-delay: var(--d, 0ms);
+  will-change: transform, opacity;
+}
+
+.benefitCard[data-in="1"] { opacity: 1; transform: translateY(0); }
+.benefitCard:hover { --soft-tint: rgba(246,166,90,0.32); }
 
 /* ==============================
 Gallery
@@ -484,6 +519,7 @@ Gallery
 .galleryGrid {
   display: grid;
   gap: 0.9rem;
+  align-items: stretch;
 }
 
 @media (min-width: 768px) {
@@ -529,7 +565,10 @@ CTA
   flex-wrap: wrap;
 }
 
-/* Responsive bg tuning */
+/* ==============================
+Responsive + Reduced motion
+============================== */
+
 @media (max-width: 768px) {
   .bg { inset: 0; }
   .bg::before {
@@ -540,7 +579,6 @@ CTA
   }
 }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .bg::before,
   .bg::after {
@@ -550,7 +588,8 @@ CTA
   .sideShell,
   .sceneShell,
   .skipHint,
-  .softCard {
+  .softCard,
+  .benefitsShell {
     transition: none !important;
   }
 }

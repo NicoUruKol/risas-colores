@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Badge from "../components/ui/Badge";
 import SEO from "../components/seo/SEO";
-
 
 import styles from "./ElJardin.module.css";
 import SceneInteractiva from "../components/scene/SceneInteractiva";
@@ -17,7 +16,6 @@ export default function ElJardin() {
     const scrollAnimRef = useRef(null);
 
     const smoothScrollTo = (targetY, duration = 1400) => {
-
         if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
 
         const startY = window.scrollY || window.pageYOffset || 0;
@@ -25,20 +23,20 @@ export default function ElJardin() {
         const start = performance.now();
 
         const easeInOut = (t) =>
-            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
         const step = (now) => {
-            const elapsed = now - start;
-            const t = Math.min(1, elapsed / duration);
-            const eased = easeInOut(t);
+        const elapsed = now - start;
+        const t = Math.min(1, elapsed / duration);
+        const eased = easeInOut(t);
 
-            window.scrollTo(0, startY + diff * eased);
+        window.scrollTo(0, startY + diff * eased);
 
-            if (t < 1) {
+        if (t < 1) {
             scrollAnimRef.current = requestAnimationFrame(step);
-            } else {
+        } else {
             scrollAnimRef.current = null;
-            }
+        }
         };
 
         scrollAnimRef.current = requestAnimationFrame(step);
@@ -48,215 +46,245 @@ export default function ElJardin() {
         const el = nextSectionRef.current;
         if (!el) return;
 
-        const headerH = (document.querySelector("header")?.getBoundingClientRect()?.height) ?? 0;
+        const headerH =
+        document.querySelector("header")?.getBoundingClientRect()?.height ?? 0;
         const y1 = el.getBoundingClientRect().top + window.scrollY - headerH - 12;
 
         const distance = Math.abs(y1 - window.scrollY);
         const duration = Math.min(2000, Math.max(1100, distance * 0.7));
 
-
         smoothScrollTo(y1, duration);
 
-
         requestAnimationFrame(() => {
-            const headerH2 = (document.querySelector("header")?.getBoundingClientRect()?.height) ?? 0;
-            const y2 = el.getBoundingClientRect().top + window.scrollY - headerH2 - 12;
-            window.scrollTo(0, y2); 
+        const headerH2 =
+            document.querySelector("header")?.getBoundingClientRect()?.height ?? 0;
+        const y2 = el.getBoundingClientRect().top + window.scrollY - headerH2 - 12;
+        window.scrollTo(0, y2);
         });
     };
-
-
-
-
 
     const skipToContent = () => {
         setUnlocked(true);
         requestAnimationFrame(() => goToNext());
     };
 
+    const benefitsSentinelRef = useRef(null);
+    const [benefitsIn, setBenefitsIn] = useState(false);
+
+    useEffect(() => {
+        const el = benefitsSentinelRef.current;
+        if (!el) return;
+
+        const io = new IntersectionObserver(
+        ([entry]) => {
+            if (entry.isIntersecting) {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => setBenefitsIn(true));
+            });
+            io.disconnect();
+            }
+        },
+        { threshold: 0, rootMargin: "200px 0px -10% 0px" }
+        );
+
+        io.observe(el);
+        return () => io.disconnect();
+    }, []);
+
+    const sectionRevealStyle = {
+        opacity: benefitsIn ? 1 : 0,
+        transform: benefitsIn ? "translateY(0)" : "translateY(18px)",
+        transition: "opacity 700ms ease, transform 700ms ease",
+        willChange: "opacity, transform",
+    };
+
+    const focusOnlyIfBackground = (e) => {
+        if (e.target === e.currentTarget) e.currentTarget.focus();
+    };
+
     return (
         <main className={styles.page}>
             <SEO
-            title="Nuestro Jardín"
-            description="Conocé la propuesta educativa del Jardín Maternal Risas y Colores, nuestros valores y el espacio donde los niños crecen acompañados."
-            path="/el-jardin"
+                title="Nuestro Jardín"
+                description="Conocé la propuesta educativa del Jardín Maternal Risas y Colores, nuestros valores y el espacio donde los niños crecen acompañados."
+                path="/el-jardin"
             />
 
             <div className={styles.bg} aria-hidden="true" />
 
-        <Container>
-            <section className={styles.layout}>
-            <aside className={styles.side}>
-                <div className={styles.sideShell}>
-                <h1 className={styles.title}>Descubrí Risas y Colores</h1>
-
-                <p className={styles.subtitle}>
-                    {unlocked
-                    ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
-                    : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
-                </p>
-
-                <button
-                    type="button"
-                    className={styles.skipHint}
-                    onClick={skipToContent}
-                >
-                    O seguí sin jugar <span className={styles.arrow} aria-hidden>→</span>
-                </button>
-
-                <div className={styles.sideInfo}>
-                    {unlocked && (
-                    <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
-                    )}
-                </div>
-                </div>
-            </aside>
-
-            <div className={styles.sceneShell}>
-                <SceneInteractiva
-                minUnlock={3}
-                unlockedExternal={unlocked}
-                onUnlocked={() => setUnlocked(true)}
-                onGoToNext={goToNext}
-                onSkip={() => setUnlocked(true)}
-                />
-            </div>
-            </section>
-        </Container>
-
-        {/* ====== RESTO DEL COMPONENTE ====== */}
-        <div
-            ref={nextSectionRef}
-            className={`${styles.restWrap} ${unlocked ? styles.restWrapIn : styles.restWrapLocked}`}
-        >
             <Container>
-            {/* Intro */}
-            <section className={`${styles.shell} ${styles.introShell}`}>
-                <div className={styles.introGrid}>
-                <div className={styles.introLeft}>
-                    <Badge variant="blue">Jardín materno infantil</Badge>
+                <section className={styles.layout}>
+                    <aside className={styles.side}>
+                        <div className={styles.sideShell}>
+                            <h1 className={styles.title}>Descubrí Risas y Colores</h1>
 
-                    <h2 className={styles.h2}>
-                    Un lugar seguro, cálido y creativo para crecer
-                    </h2>
+                            <p className={styles.subtitle}>
+                                {unlocked
+                                ? "¡Genial! Ahora podés seguir explorando la escena o bajar a conocer más."
+                                : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
+                            </p>
 
-                    <p className={styles.pMuted}>
-                    Acompañamos a las familias en la primera infancia con propuestas
-                    pensadas para cada etapa: juego, vínculo, exploración y hábitos.
-                    </p>
+                            <button type="button" className={styles.skipHint} onClick={skipToContent}>
+                                O seguí sin jugar <span className={styles.arrow} aria-hidden>→</span>
+                            </button>
 
-                    <div className={styles.actions}>
-                    <Link to="/uniformes" className={styles.linkReset}>
-                        <Button variant="primary">Comprar uniformes</Button>
-                    </Link>
+                            <div className={styles.sideInfo}>
+                                {unlocked && (
+                                <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>
+                                )}
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div className={styles.sceneShell}>
+                        <SceneInteractiva
+                        minUnlock={3}
+                        unlockedExternal={unlocked}
+                        onUnlocked={() => setUnlocked(true)}
+                        onGoToNext={goToNext}
+                        onSkip={() => setUnlocked(true)}
+                        />
                     </div>
-                </div>
-
-                <div className={styles.mediaMock} />
-                </div>
-            </section>
-
-            {/* Propuesta */}
-            <section className={styles.section}>
-                <h2 className={styles.h3}>Nuestra propuesta</h2>
-
-                <div className={styles.cardsGrid3}>
-                <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                    <div className={styles.icon}>🧩</div>
-                    <div className={styles.cardTitle}>Aprender jugando</div>
-                    <p className={styles.cardText}>
-                    Actividades lúdicas para desarrollar autonomía, lenguaje y motricidad.
-                    </p>
-                </Card>
-
-                <Card className={`${styles.softCard} ${styles.softOrange}`}>
-                    <div className={styles.icon}>🤍</div>
-                    <div className={styles.cardTitle}>Cuidado y vínculo</div>
-                    <p className={styles.cardText}>
-                    Acompañamiento afectivo y rutinas que brindan seguridad y confianza.
-                    </p>
-                </Card>
-
-                <Card className={`${styles.softCard} ${styles.softPurple}`}>
-                    <div className={styles.icon}>🌈</div>
-                    <div className={styles.cardTitle}>Ambiente amable</div>
-                    <p className={styles.cardText}>
-                    Espacios pensados para explorar, crear y compartir en comunidad.
-                    </p>
-                </Card>
-                </div>
-            </section>
-
-            {/* Galería */}
-            <section className={styles.section}>
-                <div className={styles.sectionHead}>
-                <div>
-                    <h2 className={styles.h3}>Conocé el espacio</h2>
-                    <p className={styles.smallMuted}>Imágenes del jardín.</p>
-                </div>
-                <Badge variant="orange">Galería</Badge>
-                </div>
-
-                <div className={styles.galleryGrid}>
-                <div className={styles.galleryItem} />
-                <div className={styles.galleryItem} />
-                <div className={styles.galleryItem} />
-                </div>
-            </section>
-
-            {/* FAQ */}
-            <section className={styles.section}>
-                <h2 className={styles.h3}>Preguntas frecuentes</h2>
-
-                <div className={styles.cardsGrid2}>
-                <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                    <div className={styles.faqQ}>¿Qué edades reciben?</div>
-                    <p className={styles.cardText}>
-                    Desde lactantes y salas por edad (consultar salas).
-                    </p>
-                </Card>
-
-                <Card className={`${styles.softCard} ${styles.softOrange}`}>
-                    <div className={styles.faqQ}>¿Cómo coordino una visita?</div>
-                    <p className={styles.cardText}>
-                    Podés contactarnos por WhatsApp o completar un formulario.
-                    </p>
-                </Card>
-
-                <Card className={`${styles.softCard} ${styles.softPurple}`}>
-                    <div className={styles.faqQ}>¿Cómo compro uniformes?</div>
-                    <p className={styles.cardText}>
-                    Entrás a Uniformes, elegís sala, talle y agregás al carrito.
-                    </p>
-                </Card>
-
-                <Card className={`${styles.softCard} ${styles.softBlue}`}>
-                    <div className={styles.faqQ}>¿Hacen envíos?</div>
-                    <p className={styles.cardText}>
-                    Podés definir retiro en el jardín o envío a domicilio (según lo que decidan).
-                    </p>
-                </Card>
-                </div>
-            </section>
-
-            {/* CTA */}
-            <section className={`${styles.shell} ${styles.ctaShell}`}>
-                <h3 className={styles.ctaTitle}>¿Listos para empezar?</h3>
-                <p className={styles.smallMuted}>
-                Conocé el catálogo de uniformes y resolvé la compra en minutos.
-                </p>
-
-                <div className={styles.ctaActions}>
-                <Link to="/uniformes" className={styles.linkReset}>
-                    <Button variant="primary">Ir a Uniformes</Button>
-                </Link>
-                <Link to="/" className={styles.linkReset}>
-                    <Button variant="secondary">Volver al inicio</Button>
-                </Link>
-                </div>
-            </section>
+                </section>
             </Container>
-        </div>
+
+            <div
+                ref={nextSectionRef}
+                className={`${styles.restWrap} ${
+                unlocked ? styles.restWrapIn : styles.restWrapLocked
+                }`}
+            >
+                <Container>
+                    <section className={`${styles.shell} ${styles.introShell}`}>
+                        <div className={styles.introGrid}>
+                        <div className={styles.introLeft}>
+                            <Badge variant="blue">Jardín materno infantil</Badge>
+
+                            <h2 className={styles.h2}>Un lugar seguro, cálido y creativo para crecer</h2>
+
+                            <p className={styles.pMuted}>
+                            Acompañamos a las familias en la primera infancia con propuestas
+                            pensadas para cada etapa: juego, vínculo, exploración y hábitos.
+                            </p>
+
+                            <div className={styles.actions}>
+                            <Link to="/uniformes" className={styles.linkReset}>
+                                <Button variant="primary">Comprar uniformes</Button>
+                            </Link>
+                            </div>
+                        </div>
+
+                        <div className={styles.mediaMock} />
+                        </div>
+                    </section>
+
+                    <section className={styles.section}>
+                        <h2 className={styles.h3}>Nuestra propuesta</h2>
+
+                        <div className={styles.cardsGrid3}>
+                        <Card className={`${styles.softCard} ${styles.softBlue}`}>
+                            <div className={styles.icon}>🧩</div>
+                            <div className={styles.cardTitle}>Aprender jugando</div>
+                            <p className={styles.cardText}>
+                            Actividades lúdicas para desarrollar autonomía, lenguaje y motricidad.
+                            </p>
+                        </Card>
+
+                        <Card className={`${styles.softCard} ${styles.softOrange}`}>
+                            <div className={styles.icon}>🤍</div>
+                            <div className={styles.cardTitle}>Cuidado y vínculo</div>
+                            <p className={styles.cardText}>
+                            Acompañamiento afectivo y rutinas que brindan seguridad y confianza.
+                            </p>
+                        </Card>
+
+                        <Card className={`${styles.softCard} ${styles.softPurple}`}>
+                            <div className={styles.icon}>🌈</div>
+                            <div className={styles.cardTitle}>Ambiente amable</div>
+                            <p className={styles.cardText}>
+                            Espacios pensados para explorar, crear y compartir en comunidad.
+                            </p>
+                        </Card>
+                        </div>
+                    </section>
+
+                    {/* Sentinel (tiene que estar ANTES del bloque que querés revelar) */}
+                    <div ref={benefitsSentinelRef} className="h-1" />
+
+                    {/* Beneficios (sumo styles.section para que tenga el mismo margin-top/gap que el resto) */}
+                    <section
+                        tabIndex={0}
+                        onPointerDown={focusOnlyIfBackground}
+                        style={sectionRevealStyle}
+                        className={`${styles.section} ${styles.benefitsShell} p-5 md:p-6`}
+                    >
+                        <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ui-text)]">
+                        ¿Por qué elegirnos?
+                        </h2>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                        {[
+                            "Proyecto educativo",
+                            "Equipo docente",
+                            "Espacios seguros",
+                            "Acompañamiento familiar",
+                        ].map((t, i) => (
+                            <Card
+                            key={t}
+                            data-in={benefitsIn ? "1" : "0"}
+                            style={{ "--d": `${i * 120}ms` }}
+                            className={`
+                                p-6 transition-transform duration-200 hover:-translate-y-1
+                                ${styles.softCard} ${styles.softPurple} ${styles.benefitCard}
+                                ${i === 1 ? "md:translate-x-2" : ""}
+                                ${i === 2 ? "md:-translate-x-2" : ""}
+                            `}
+                            >
+                            <div className="font-semibold text-[var(--ui-text)] text-base md:text-lg">
+                                {t}
+                            </div>
+                            <p className="text-sm text-[var(--ui-muted)] mt-1">
+                                Texto breve (1 línea) que refuerce confianza.
+                            </p>
+                            </Card>
+                        ))}
+                        </div>
+                    </section>
+
+                    <section className={styles.section}>
+                        <div className={styles.sectionHead}>
+                        <div>
+                            <h2 className={styles.h3}>Conocé el espacio</h2>
+                            <p className={styles.smallMuted}>Imágenes del jardín.</p>
+                        </div>
+                        <Badge variant="orange">Galería</Badge>
+                        </div>
+
+                        <div className={styles.galleryGrid}>
+                        <div className={styles.galleryItem} />
+                        <div className={styles.galleryItem} />
+                        <div className={styles.galleryItem} />
+                        </div>
+                    </section>
+
+                    <section className={`${styles.shell} ${styles.ctaShell}`}>
+                        <h3 className={styles.ctaTitle}>¿Listos para empezar?</h3>
+                        <p className={styles.smallMuted}>
+                        Conocé el catálogo de uniformes y resolvé la compra en minutos.
+                        </p>
+
+                        <div className={styles.ctaActions}>
+                        <Link to="/uniformes" className={styles.linkReset}>
+                            <Button variant="primary">Ir a Uniformes</Button>
+                        </Link>
+                        <Link to="/" className={styles.linkReset}>
+                            <Button variant="secondary">Volver al inicio</Button>
+                        </Link>
+                        </div>
+                    </section>
+                    </Container>
+
+            </div>
         </main>
     );
 }

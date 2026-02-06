@@ -1,3 +1,4 @@
+{/*}
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Container from "./Container";
@@ -51,7 +52,7 @@ export default function Header2() {
     return (
         <header className={styles.header}>
         <Container className={styles.inner}>
-            {/* Brand (más prota) */}
+            {/* Brand (más prota) *//*}
             <Link to="/" className={styles.brand} aria-label="Ir al inicio">
             <div className={styles.logoWrap} aria-hidden="true">
                 <img src={logo} alt="" className={styles.logoImg} />
@@ -66,7 +67,7 @@ export default function Header2() {
             </div>
             </Link>
 
-            {/* Acciones + Menú desplegable (desktop y mobile) */}
+            {/* Acciones + Menú desplegable (desktop y mobile) *//*}
             <div className={styles.actions}>
             <Link to="/carrito" className={styles.cart} aria-label="Ir al carrito">
                 🛒 <span className={styles.cartCount}>({count})</span>
@@ -98,7 +99,7 @@ export default function Header2() {
 
         <div className={styles.bottomConfetti} aria-hidden="true" />
 
-        {/* Panel desplegable */}
+        {/* Panel desplegable *//*}
         <div className={`${styles.menuWrap} ${open ? styles.open : ""}`}>
             <div className={styles.overlay} aria-hidden="true" />
             <div
@@ -144,3 +145,4 @@ export default function Header2() {
         </header>
     );
 }
+*/}

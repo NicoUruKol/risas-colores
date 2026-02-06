@@ -1,12 +1,8 @@
-/* Home.module.css */
-
-/* Stage */
 .stage {
   position: relative;
   overflow: hidden;
 }
 
-/* Background */
 .bg {
   position: absolute;
   inset: -80px;
@@ -51,33 +47,25 @@
 }
 
 /* ==============================
-Shells (Hero / Beneficios / Familias)
-Mobile: reposo naranja -> tap blanco (queda)
-Desktop: reposo sin caja -> hover blanco
+Shells (Hero / FAQ / Familias)
 ============================== */
 
 .heroCard,
-.benefitsShell,
 .familiasShell {
   position: relative;
   overflow: hidden;
   border-radius: 28px;
-
   border: 1px solid rgba(229,231,235,0.90);
   background-color: rgba(246,166,90,0.05);
   box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
-
   transition: transform 220ms ease, box-shadow 260ms ease, background-color 260ms ease, border-color 260ms ease;
 }
 
 @media (hover: none) and (pointer: coarse) {
   .heroCard:active,
   .heroCard:focus-within,
-  .benefitsShell:active,
-  .benefitsShell:focus-within,
   .familiasShell:active,
   .familiasShell:focus-within {
     background-color: rgba(255,255,255,0.88);
@@ -87,7 +75,6 @@ Desktop: reposo sin caja -> hover blanco
 
 @media (hover: hover) and (pointer: fine) {
   .heroCard,
-  .benefitsShell,
   .familiasShell {
     background-color: transparent;
     box-shadow: none;
@@ -97,7 +84,6 @@ Desktop: reposo sin caja -> hover blanco
   }
 
   .heroCard:hover,
-  .benefitsShell:hover,
   .familiasShell:hover {
     background-color: rgba(255,255,255,0.88);
     transform: translateY(-2px);
@@ -146,7 +132,6 @@ Hero layers
   .heroCard:hover::after  { opacity: 0.35; }
 }
 
-/* Hero title micro */
 .heroTitle {
   transition: transform 220ms ease, letter-spacing 220ms ease;
 }
@@ -158,7 +143,10 @@ Hero layers
   }
 }
 
-/* Hero text anim */
+/* ==============================
+Hero text anim
+============================== */
+
 .heroTextAnim {
   animation: heroTextIn 520ms ease-out both;
 }
@@ -225,16 +213,49 @@ Hero buttons
 }
 
 /* ==============================
-  Beneficios cards
+Sections helpers (para FAQ)
+============================== */
+
+.section {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--ui-text);
+}
+
+.cardsGrid2 {
+  display: grid;
+  gap: 0.9rem;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .cardsGrid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ==============================
+Cards (mismo criterio que ElJardin)
 ============================== */
 
 .softCard {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 1.15rem 1.2rem;
   border-radius: 28px 26px 30px 24px;
   background: linear-gradient(180deg, rgba(255,255,255,0.62), var(--soft-tint, rgba(246,166,90,0.10)));
   border: 1px solid rgba(229,231,235,0.85);
   backdrop-filter: blur(1px);
   box-shadow: 0 12px 26px rgba(0,0,0,0.06);
   transition: background 260ms ease, box-shadow 260ms ease, transform 220ms ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .softCard:hover {
@@ -245,17 +266,17 @@ Hero buttons
 .softBlue   { --soft-tint: rgba(74,144,194,0.14); }
 .softPurple { --soft-tint: rgba(177,132,240,0.16); }
 
-.benefitCard {
-  --soft-tint: rgba(25,157,252,0.14);
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 450ms ease, transform 450ms ease;
-  transition-delay: var(--d, 0ms);
-  will-change: transform, opacity;
+.faqQ {
+  font-weight: 900;
+  color: var(--ui-text);
 }
 
-.benefitCard[data-in="1"] { opacity: 1; transform: translateY(0); }
-.benefitCard:hover { --soft-tint: rgba(246,166,90,0.32); }
+.cardText {
+  margin-top: 0.35rem;
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
 
 /* ==============================
 Familias
@@ -265,7 +286,10 @@ Familias
   color: #2b2b2b !important;
 }
 
-/* Responsive bg tuning */
+/* ==============================
+Responsive bg tuning
+============================== */
+
 @media (max-width: 768px) {
   .bg { inset: 0; }
   .bg::before {

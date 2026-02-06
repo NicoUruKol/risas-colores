@@ -1,4 +1,5 @@
-import { useRef, useEffect, useMemo, useState, useCallback } from "react";
+
+import { useRef, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
@@ -6,7 +7,6 @@ import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
-
 
 import Hero1 from "../assets/Hero1.webp";
 import Hero2 from "../assets/Hero2.webp";
@@ -41,65 +41,32 @@ export default function Home() {
     );
 
     const homeRef = useRef(null);
-    const benefitsSentinelRef = useRef(null);
 
-    const [benefitsIn, setBenefitsIn] = useState(false);
     const [heroTick, setHeroTick] = useState(0);
     const [heroIndex, setHeroIndex] = useState(0);
 
     const currentHero = heroSlides[heroIndex] ?? heroSlides[0];
 
-    useEffect(() => {
-        const el = benefitsSentinelRef.current;
-        if (!el) return;
-
-        const io = new IntersectionObserver(
-        ([entry]) => {
-            if (entry.isIntersecting) {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => setBenefitsIn(true));
-            });
-            io.disconnect();
-            }
-        },
-        { threshold: 0, rootMargin: "200px 0px -10% 0px" }
-        );
-
-        io.observe(el);
-        return () => io.disconnect();
-    }, []);
-
-    const sectionRevealStyle = {
-        opacity: benefitsIn ? 1 : 0,
-        transform: benefitsIn ? "translateY(0)" : "translateY(18px)",
-        transition: "opacity 700ms ease, transform 700ms ease",
-        willChange: "opacity, transform",
-    };
-
     const focusOnlyIfBackground = (e) => {
         if (e.target === e.currentTarget) e.currentTarget.focus();
     };
 
-    // ✅ handler estable, evita updates inútiles (corta loops)
     const handleHeroChange = useCallback((next) => {
-        setHeroIndex((prev) => {
-        if (prev === next) return prev;
-        return next;
-        });
+        setHeroIndex((prev) => (prev === next ? prev : next));
         setHeroTick((t) => t + 1);
     }, []);
 
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
-            <SEO
-                title="Educación, juego y cuidado"
-                description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
-                path="/"
-            />
+        <SEO
+            title="Educación, juego y cuidado"
+            description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
+            path="/"
+        />
+
         <div className={styles.bg} />
 
         <Container className="relative z-10 grid gap-10">
-            {/* Hero */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
@@ -140,45 +107,38 @@ export default function Home() {
             </div>
             </section>
 
-            {/* Sentinel */}
-            <div ref={benefitsSentinelRef} className="h-1" />
+            <section className={styles.section}>
+            <h2 className={styles.h3}>Preguntas frecuentes</h2>
 
-            {/* Beneficios */}
-            <section
-            tabIndex={0}
-            onPointerDown={focusOnlyIfBackground}
-            style={sectionRevealStyle}
-            className={`${styles.benefitsShell} grid gap-4 p-5 md:p-6`}
-            >
-            <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ui-text)]">
-                ¿Por qué elegirnos?
-            </h2>
+            <div className={styles.cardsGrid2}>
+                <Card className={`${styles.softCard} ${styles.softBlue}`}>
+                <div className={styles.faqQ}>¿Qué edades reciben?</div>
+                <p className={styles.cardText}>Desde lactantes y salas por edad (consultar salas).</p>
+                </Card>
 
-            <div className="grid gap-4 md:grid-cols-2">
-                {["Proyecto educativo", "Equipo docente", "Espacios seguros", "Acompañamiento familiar"].map(
-                (t, i) => (
-                    <Card
-                    key={t}
-                    data-in={benefitsIn ? "1" : "0"}
-                    style={{ "--d": `${i * 120}ms` }}
-                    className={`
-                        p-6 transition-transform duration-200 hover:-translate-y-1
-                        ${styles.softCard} ${styles.softPurple} ${styles.benefitCard}
-                        ${i === 1 ? "md:translate-x-2" : ""}
-                        ${i === 2 ? "md:-translate-x-2" : ""}
-                    `}
-                    >
-                    <div className="font-semibold text-[var(--ui-text)] text-base md:text-lg">{t}</div>
-                    <p className="text-sm text-[var(--ui-muted)] mt-1">
-                        Texto breve (1 línea) que refuerce confianza.
-                    </p>
-                    </Card>
-                )
-                )}
+                <Card className={`${styles.softCard} ${styles.softOrange}`}>
+                <div className={styles.faqQ}>¿Cómo coordino una visita?</div>
+                <p className={styles.cardText}>
+                    Podés contactarnos por WhatsApp o completar un formulario.
+                </p>
+                </Card>
+
+                <Card className={`${styles.softCard} ${styles.softPurple}`}>
+                <div className={styles.faqQ}>¿Cómo compro uniformes?</div>
+                <p className={styles.cardText}>
+                    Entrás a Uniformes, elegís sala, talle y agregás al carrito.
+                </p>
+                </Card>
+
+                <Card className={`${styles.softCard} ${styles.softBlue}`}>
+                <div className={styles.faqQ}>¿Hacen envíos?</div>
+                <p className={styles.cardText}>
+                    Podés definir retiro en el jardín o envío a domicilio (según lo que decidan).
+                </p>
+                </Card>
             </div>
             </section>
 
-            {/* Familias actuales */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
