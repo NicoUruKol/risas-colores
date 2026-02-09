@@ -7,22 +7,22 @@ import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
 
-import Hero1 from "../assets/Hero1.webp";
-import Hero2 from "../assets/Hero2.webp";
+//import Hero1 from "../assets/Hero1.webp";
+//import Hero2 from "../assets/Hero2.webp";
 //import Hero3 from "../assets/Hero3.webp";
 
 export default function Home() {
     const heroSlides = useMemo(
         () => [
         {
-            img: Hero1,
+            img: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
             title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
             subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
             cta1: { to: "/el-jardin", label: "Conocer el jardín" },
             cta2: { to: "/uniformes", label: "Ir a la tienda" },
         },
         {
-            img: Hero2,
+            img: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
             title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
             subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
             cta1: { to: "/el-jardin", label: "Ver propuesta" },
