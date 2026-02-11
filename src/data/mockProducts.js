@@ -13,7 +13,7 @@ export const products = [
         type: "product",
         name: "Remera",
         description: "Remera naranja con logo.",
-        price: 8500,
+        price: 865660,
         talles: ["1", "2", "3", "4", "5"],
         image: {
                 producto: remera,

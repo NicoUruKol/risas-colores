@@ -5,6 +5,8 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { useCart } from "../context/CartContext";
 import { useState } from "react";
+import { createOrder } from "../services/ordersApi";
+
 
 export default function Checkout() {
     const navigate = useNavigate();
@@ -16,11 +18,32 @@ export default function Checkout() {
 
     const canPay = items.length > 0 && name && email && tel;
 
-    const handleConfirm = () => {
-        if (!canPay) return;
-        // integrar Mercado Pago / backend
-        navigate("/confirmacion");
-    };
+    const mapSize = (t) => (t === "Único" ? "U" : String(t || "").trim());
+
+    const handleConfirm = async () => {
+    if (!canPay) return;
+
+    try {
+        const payload = {
+        customer: { name, email, phone: tel },
+        items: items.map((it) => ({
+            code: it.id,            // ✅ ya es "010", "011" porque viene del backend
+            size: mapSize(it.talle),
+            qty: it.qty,
+        })),
+        };
+
+        const created = await createOrder(payload);
+
+        // redirigir al checkout (hoy fake-checkout, mañana MP real)
+        window.location.href = created.init_point;
+    } catch (err) {
+        // mínimo para debug (después lo estilizamos con SweetAlert)
+        console.error(err);
+        alert(err?.data?.message || err.message || "No se pudo crear la orden");
+    }
+};
+
 
     return (
         <main className="py-10">
