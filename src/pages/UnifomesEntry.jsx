@@ -44,24 +44,29 @@ export default function UniformesEntry() {
         setLoading(true);
 
         listAll()
-        .then((res) => {
+            .then((res) => {
             if (!alive) return;
-            setProducts(res);
+
+            const arr = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+            setProducts(arr);
             setLoading(false);
-        })
-        .catch(() => {
+            })
+            .catch((e) => {
+            console.error("listAll error:", e);
             if (!alive) return;
             setProducts([]);
             setLoading(false);
-        });
+            });
 
         return () => {
-        alive = false;
+            alive = false;
         };
-    }, []);
+        }, []);
+
 
     const view = useMemo(() => {
-        return products.map((p) => {
+        const base = Array.isArray(products) ? products : [];
+        return base.map((p) => {
         const sizes = getSizesFromVariants(p.variants);
         const price = getPriceFromVariants(p);
         const sizeLabel =

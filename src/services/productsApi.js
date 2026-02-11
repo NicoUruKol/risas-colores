@@ -1,36 +1,66 @@
-//ESTO VUELA POR EL BACKEND
-import { products as mockProducts } from "../data/mockProducts";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+const readJson = async (res) => {
+  const text = await res.text();
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return text;
+  }
+};
 
+const request = async (path, { method = "GET", body } = {}) => {
+  const res = await fetch(`${API_URL}${path}`, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await readJson(res);
+
+  if (!res.ok) {
+    const err = new Error(data?.message || `Error HTTP ${res.status}`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+
+  return data;
+};
+
+/* ==============================
+PUBLIC
+============================== */
 export const listAll = async () => {
-  await delay(120);
-  return mockProducts.filter((p) => p.active !== false);
+  const r = await request(`/api/products?active=true`);
+  return Array.isArray(r) ? r : r.data;
 };
 
 export const getById = async (id) => {
-  await delay(120);
-  return mockProducts.find((p) => p.id === id && p.active !== false) ?? null;
+  const r = await request(`/api/products/${id}`);
+  return r?.data ?? r;
 };
 
-// ===== ADMIN CRUD (mock) =====
+
+/* ==============================
+ADMIN CRUD
+============================== */
 export const adminList = async () => {
-  await delay(120);
-  return [...mockProducts];
+  const r = await request(`/api/products`);
+  return r.data;
 };
 
 export const adminCreate = async (payload) => {
-  await delay(120);
-  const id = payload.id?.trim() || crypto.randomUUID();
-  return { ...payload, id, type: "product" };
+  const r = await request(`/api/products`, { method: "POST", body: payload });
+  return r.data;
 };
 
 export const adminUpdate = async (id, payload) => {
-  await delay(120);
-  return { ...payload, id, type: "product" };
+  const r = await request(`/api/products/${id}`, { method: "PUT", body: payload });
+  return r.data;
 };
 
 export const adminDelete = async (id) => {
-  await delay(120);
-  return { ok: true, id };
+  const r = await request(`/api/products/${id}`, { method: "DELETE" });
+  return r.data;
 };
