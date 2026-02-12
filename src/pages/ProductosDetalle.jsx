@@ -102,9 +102,17 @@ export default function ProductoDetalle() {
 
     const images = useMemo(() => {
         if (!item) return [];
-        if (typeof item.avatar === "string" && item.avatar.trim()) return [item.avatar.trim()];
+        if (typeof item.avatar === "string") {
+            const s = item.avatar.trim();
+            return s ? [s] : [];
+        }
+        if (Array.isArray(item.avatar)) {
+            return item.avatar
+            .map((x) => String(x || "").trim())
+            .filter(Boolean);
+        }
         return [];
-    }, [item]);
+        }, [item]);
 
     useEffect(() => {
         setImgIndex((i) => Math.min(i, Math.max(0, images.length - 1)));
@@ -124,9 +132,10 @@ export default function ProductoDetalle() {
 
     const handleAdd = () => {
         if (!canAdd) return;
+        const mainImage = images[0] ?? "";
 
         addItem(
-        { id: item.id, name: item.name, price: unitPrice, avatar: item.avatar },
+        { id: item.id, name: item.name, price: unitPrice, avatar: mainImage },
         { talle, qty, max: stock }
         );
 

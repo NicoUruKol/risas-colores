@@ -10,6 +10,14 @@ export function CartProvider({ children }) {
         const safeQty = Math.max(1, Number(qty) || 1);
         const safeMax = Number.isFinite(Number(max)) ? Number(max) : undefined;
 
+        const avatar =
+            typeof product.avatar === "string"
+                ? product.avatar
+                : Array.isArray(product.avatar)
+                ? product.avatar[0]
+                : undefined;
+
+
         setItems((prev) => {
         const index = prev.findIndex((x) => x.id === product.id && x.talle === talle);
 
@@ -32,7 +40,7 @@ export function CartProvider({ children }) {
             id: product.id,
             name: product.name,
             price: Number(product.price),
-            avatar: product.avatar,
+            avatar: avatar,
             talle,
             qty: safeMax ? Math.min(safeQty, safeMax) : safeQty,
             max: safeMax,

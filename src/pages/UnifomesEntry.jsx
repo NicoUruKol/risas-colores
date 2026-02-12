@@ -110,7 +110,7 @@ export default function UniformesEntry() {
                 <Card key={p.id} className={`p-4 ${styles.productCard}`}>
                     <Link to={`/producto/${p.id}`}>
                     <ImageBox
-                        src={p.avatar}
+                        src={Array.isArray(p.avatar) ? p.avatar[0] : p.avatar}
                         alt={p.name}
                         fit="contain"
                         tone="soft"
