@@ -11,18 +11,17 @@ const formatTalles = (talles = []) => {
     if (!Array.isArray(talles) || talles.length === 0) return "-";
     if (talles.includes("Único")) return "Único";
     return talles.join(" · ");
-    };
+};
 
-    export default function AdminProductos() {
+export default function AdminProductos() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const load = () => {
+    const load = async () => {
         setLoading(true);
-        adminList().then((res) => {
+        const res = await adminList();
         setItems(res);
         setLoading(false);
-        });
     };
 
     useEffect(() => {
@@ -30,7 +29,6 @@ const formatTalles = (talles = []) => {
     }, []);
 
     const handleDelete = async (id) => {
-        // acá podés enchufar tu SweetAlert confirmar si querés
         await adminDelete(id);
         load();
     };
@@ -41,9 +39,11 @@ const formatTalles = (talles = []) => {
             <div className="flex items-start justify-between gap-4">
             <div>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className="text-2xl font-extrabold text-ui-text mt-2">Productos</h1>
+                <h1 className="text-2xl font-extrabold text-ui-text mt-2">
+                Productos
+                </h1>
                 <p className="text-sm text-ui-muted mt-2">
-                Gestioná Remera, Pantalón, Buzo y Mochila. Cada producto define sus talles disponibles.
+                Gestioná Remera, Pantalón, Buzo y Mochila.
                 </p>
             </div>
 
@@ -62,36 +62,70 @@ const formatTalles = (talles = []) => {
             </Card>
             ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {items.map((p) => (
-                <Card key={p.id} className="p-4">
-                    <ImageBox src={p.image} alt={p.name} />
+                {items.map((p) => {
+                // 👇 misma lógica que en ProductoDetalle
+                const images = (() => {
+                    if (typeof p.avatar === "string") {
+                    const s = p.avatar.trim();
+                    return s ? [s] : [];
+                    }
+                    if (Array.isArray(p.avatar)) {
+                    return p.avatar
+                        .map((x) => String(x || "").trim())
+                        .filter(Boolean);
+                    }
+                    return [];
+                })();
+
+                const cover = images[0] || "";
+
+                return (
+                    <Card key={p.id} className="p-4">
+                    <ImageBox src={cover} alt={p.name} />
+
                     <div className="mt-3 flex items-start justify-between gap-3">
-                    <div>
-                        <div className="font-bold text-ui-text">{p.name}</div>
-                        <div className="text-xs text-ui-muted mt-1">
-                        Talles: {formatTalles(p.talles)}
+                        <div>
+                        <div className="font-bold text-ui-text">
+                            {p.name}
                         </div>
+
                         <div className="text-xs text-ui-muted mt-1">
-                        Stock: {Number.isFinite(Number(p.stock)) ? Number(p.stock) : "-"}
-                        {" · "}
-                        Estado: {p.active === false ? "Inactivo" : "Activo"}
+                            Talles: {formatTalles(p.talles)}
                         </div>
-                    </div>
-                    <div className="font-extrabold text-brand-orange">
+
+                        <div className="text-xs text-ui-muted mt-1">
+                            Stock:{" "}
+                            {Number.isFinite(Number(p.stock))
+                            ? Number(p.stock)
+                            : "-"}
+                            {" · "}
+                            Estado: {p.active === false ? "Inactivo" : "Activo"}
+                        </div>
+                        </div>
+
+                        <div className="font-extrabold text-brand-orange">
                         ${Number(p.price || 0).toLocaleString("es-AR")}
-                    </div>
+                        </div>
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
-                    <Link to={`/admin/productos/${p.id}/editar`}>
-                        <Button variant="secondary" className="w-full">Editar</Button>
-                    </Link>
-                    <Button variant="ghost" className="w-full" onClick={() => handleDelete(p.id)}>
+                        <Link to={`/admin/productos/${p.id}/editar`}>
+                        <Button variant="ghost" className="w-full">
+                            Editar
+                        </Button>
+                        </Link>
+
+                        <Button
+                        variant="ghost"
+                        className="w-full"
+                        onClick={() => handleDelete(p.id)}
+                        >
                         Eliminar
-                    </Button>
+                        </Button>
                     </div>
-                </Card>
-                ))}
+                    </Card>
+                );
+                })}
             </div>
             )}
         </Container>
