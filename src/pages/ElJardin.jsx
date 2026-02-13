@@ -8,12 +8,36 @@ import SEO from "../components/seo/SEO";
 
 import styles from "./ElJardin.module.css";
 import SceneInteractiva from "../components/scene/SceneInteractiva";
+import { getElJardinGalleryContent } from "../services/apiContent";
 
 export default function ElJardin() {
     const nextSectionRef = useRef(null);
     const [unlocked, setUnlocked] = useState(false);
 
     const scrollAnimRef = useRef(null);
+
+    // ==============================
+    // Gallery (desde backend)
+    // ==============================
+    const [galleryItems, setGalleryItems] = useState([]);
+
+    useEffect(() => {
+        let alive = true;
+
+        getElJardinGalleryContent()
+        .then((data) => {
+            if (!alive) return;
+            const items = Array.isArray(data?.items) ? data.items : [];
+            setGalleryItems(items);
+        })
+        .catch(() => {
+            // fallback silencioso: se ven placeholders
+        });
+
+        return () => {
+        alive = false;
+        };
+    }, []);
 
     const smoothScrollTo = (targetY, duration = 1400) => {
         if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
@@ -95,40 +119,38 @@ export default function ElJardin() {
     const [whyIn, setWhyIn] = useState([false, false, false, false]);
 
     useEffect(() => {
-    if (!unlocked) return;
+        if (!unlocked) return;
 
-    const els = whyRefs.current.filter(Boolean);
-    if (!els.length) return;
+        const els = whyRefs.current.filter(Boolean);
+        if (!els.length) return;
 
-    setWhyIn([false, false, false, false]);
+        setWhyIn([false, false, false, false]);
 
-    const io = new IntersectionObserver(
+        const io = new IntersectionObserver(
         (entries) => {
-        entries.forEach((entry) => {
+            entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             const idx = Number(entry.target.dataset.idx);
 
             setWhyIn((prev) => {
-            if (prev[idx]) return prev;
-            const next = [...prev];
-            next[idx] = true;
-            return next;
+                if (prev[idx]) return prev;
+                const next = [...prev];
+                next[idx] = true;
+                return next;
             });
 
             io.unobserve(entry.target);
-        });
+            });
         },
         { threshold: 0.15, rootMargin: "0px 0px -20% 0px" }
-    );
+        );
 
-    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
         els.forEach((el) => io.observe(el));
-    });
+        });
 
-    return () => io.disconnect();
+        return () => io.disconnect();
     }, [unlocked]);
-
-
 
     return (
         <main className={styles.page}>
@@ -152,12 +174,23 @@ export default function ElJardin() {
                     : "Tocá la escena, jugá con nosotros y desbloqueá el recorrido."}
                 </p>
 
-                <button type="button" className={styles.skipHint} onClick={skipToContent}>
-                    O seguí sin jugar <span className={styles.arrow} aria-hidden>→</span>
+                <button
+                    type="button"
+                    className={styles.skipHint}
+                    onClick={skipToContent}
+                >
+                    O seguí sin jugar{" "}
+                    <span className={styles.arrow} aria-hidden>
+                    →
+                    </span>
                 </button>
 
                 <div className={styles.sideInfo}>
-                    {unlocked && <p className={styles.sideUnlocked}>¡Desbloqueaste el recorrido! 🌈</p>}
+                    {unlocked && (
+                    <p className={styles.sideUnlocked}>
+                        ¡Desbloqueaste el recorrido! 🌈
+                    </p>
+                    )}
                 </div>
                 </div>
             </aside>
@@ -176,18 +209,22 @@ export default function ElJardin() {
 
         <div
             ref={nextSectionRef}
-            className={`${styles.restWrap} ${unlocked ? styles.restWrapIn : styles.restWrapLocked}`}
+            className={`${styles.restWrap} ${
+            unlocked ? styles.restWrapIn : styles.restWrapLocked
+            }`}
         >
             <Container>
             {/* ==============================
-            Intro
-            ============================== */}
+                Intro
+                ============================== */}
             <section className={`${styles.shell} ${styles.introShell}`}>
                 <div className={styles.introGrid}>
                 <div className={styles.introLeft}>
                     <Badge variant="blue">Jardín materno infantil</Badge>
 
-                    <h2 className={styles.h2}>Un lugar seguro, cálido y creativo para crecer</h2>
+                    <h2 className={styles.h2}>
+                    Un lugar seguro, cálido y creativo para crecer
+                    </h2>
 
                     <p className={styles.pMuted}>
                     Acompañamos a las familias en la primera infancia con propuestas
@@ -206,8 +243,8 @@ export default function ElJardin() {
             </section>
 
             {/* ==============================
-            Propuesta
-            ============================== */}
+                Propuesta
+                ============================== */}
             <section className={styles.section}>
                 <h2 className={styles.h3}>Nuestra propuesta</h2>
 
@@ -239,59 +276,58 @@ export default function ElJardin() {
             </section>
 
             {/* ==============================
-            Sentinel (reveal Por qué elegirnos)
-            ============================== */}
+                Sentinel (reveal Por qué elegirnos)
+                ============================== */}
             <div ref={benefitsSentinelRef} className="h-1" />
 
             {/* ==============================
-            Por qué elegirnos (bloques narrativos)
-            ============================== */}
+                Por qué elegirnos (bloques narrativos)
+                ============================== */}
             <section className={styles.section} aria-label="Por qué elegirnos">
-            <h2 className={styles.h3}>¿Por qué elegirnos?</h2>
+                <h2 className={styles.h3}>¿Por qué elegirnos?</h2>
 
-            <div className={styles.whyGrid}>
+                <div className={styles.whyGrid}>
                 {[
-                {
+                    {
                     t: "Proyecto educativo",
                     d: "Nuestra propuesta pedagógica acompaña a cada niño y niña respetando sus tiempos, intereses y necesidades. El juego es el eje central del aprendizaje, promoviendo la autonomía, la exploración y el desarrollo integral.",
-                },
-                {
+                    },
+                    {
                     t: "Acompañamiento familiar",
                     d: "Creemos en el trabajo conjunto con las familias. Mantenemos una comunicación constante, con seguimiento personalizado y espacios de intercambio que fortalecen el vínculo entre el jardín y el hogar.",
-                },
-                {
+                    },
+                    {
                     t: "Espacios seguros",
                     d: "El jardín está diseñado especialmente para la primera infancia, priorizando la seguridad, el cuidado y el bienestar emocional en cada ambiente.",
-                },
-                {
+                    },
+                    {
                     t: "Salas y funcionamiento",
                     d: "Las salas están organizadas por edades, con propuestas acordes a cada etapa del desarrollo. En cada una se trabajan rutinas, juegos y actividades pensadas para acompañar el crecimiento de forma gradual y respetuosa.",
-                },
+                    },
                 ].map((item, i) => (
-                <div
+                    <div
                     key={item.t}
                     data-idx={i}
                     ref={(el) => (whyRefs.current[i] = el)}
                     className={`${styles.softCard} ${styles.softPurple} ${styles.whyItem}`}
                     data-in={whyIn[i] ? "1" : "0"}
                     style={{ "--d": `${i * 90}ms` }}
-                >
+                    >
                     <div className={styles.whyHead}>
-                    <div className={styles.whyTitle}>{item.t}</div>
+                        <div className={styles.whyTitle}>{item.t}</div>
                     </div>
 
                     <div className={styles.whyBody}>
-                    <p className={styles.whyText}>{item.d}</p>
+                        <p className={styles.whyText}>{item.d}</p>
                     </div>
-                </div>
+                    </div>
                 ))}
-            </div>
+                </div>
             </section>
 
-
             {/* ==============================
-            Galería
-            ============================== */}
+                Galería
+                ============================== */}
             <section className={styles.section}>
                 <div className={styles.sectionHead}>
                 <div>
@@ -302,15 +338,25 @@ export default function ElJardin() {
                 </div>
 
                 <div className={styles.galleryGrid}>
-                <div className={styles.galleryItem} />
-                <div className={styles.galleryItem} />
-                <div className={styles.galleryItem} />
+                {(galleryItems?.length ? galleryItems : [null, null, null]).map((it, idx) => (
+                    <div key={it?.public_id || idx} className={styles.galleryItem}>
+                    {it?.url ? (
+                        <img
+                        className={styles.galleryImg}
+                        src={it.url}
+                        alt={it.alt || "Galería del jardín"}
+                        loading="lazy"
+                        decoding="async"
+                        />
+                    ) : null}
+                    </div>
+                ))}
                 </div>
             </section>
 
             {/* ==============================
-            CTA
-            ============================== */}
+                CTA
+                ============================== */}
             <section className={`${styles.shell} ${styles.ctaShell}`}>
                 <h3 className={styles.ctaTitle}>¿Listos para empezar?</h3>
                 <p className={styles.smallMuted}>

@@ -1,15 +1,12 @@
-import { useRef, useMemo, useState, useCallback } from "react";
+import { useRef, useMemo, useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Container from "../components/layout/Container";
 import Button from "../components/ui/Button";
-//import Card from "../components/ui/Card";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
 
-//import Hero1 from "../assets/Hero1.webp";
-//import Hero2 from "../assets/Hero2.webp";
-//import Hero3 from "../assets/Hero3.webp";
+import { getHomeHeroContent } from "../services/apiContent";
 
 export default function Home() {
     const heroSlides = useMemo(
@@ -28,13 +25,6 @@ export default function Home() {
             cta1: { to: "/el-jardin", label: "Ver propuesta" },
             cta2: { to: "/uniformes", label: "Ver uniformes" },
         },
-        /*{
-            img: Hero3,
-            title: "Un lugar donde cada niño se siente seguro para crecer",
-            subtitle: "Cercanía con las familias y un equipo docente que acompaña.",
-            cta1: { to: "/el-jardin", label: "Más información" },
-            cta2: { to: "/uniformes", label: "Comprar uniformes" },
-        },*/
         ],
         []
     );
@@ -44,6 +34,43 @@ export default function Home() {
     const [heroTick, setHeroTick] = useState(0);
     const [heroIndex, setHeroIndex] = useState(0);
 
+    // ✅ Content desde backend (Firestore)
+    const [heroContent, setHeroContent] = useState({
+        title: "",
+        subtitle: "",
+        items: [],
+    });
+
+    useEffect(() => {
+        let alive = true;
+
+        getHomeHeroContent()
+        .then((data) => {
+            if (!alive) return;
+            const items = Array.isArray(data?.items) ? data.items : [];
+
+            setHeroContent({
+            title: data?.title || "",
+            subtitle: data?.subtitle || "",
+            items,
+            });
+        })
+        .catch(() => {
+            // fallback silencioso: se usan los hardcode
+        });
+
+        return () => {
+        alive = false;
+        };
+    }, []);
+
+    // Si hay config en backend → usamos esas imágenes, si no → hardcode
+    const heroImages =
+        heroContent.items?.length > 0
+        ? heroContent.items.map((it) => it.url).filter(Boolean)
+        : heroSlides.map((s) => s.img);
+
+    // CTAs siguen siendo los del slide (no hace falta llevarlo al back todavía)
     const currentHero = heroSlides[heroIndex] ?? heroSlides[0];
 
     const focusOnlyIfBackground = (e) => {
@@ -55,89 +82,90 @@ export default function Home() {
         setHeroTick((t) => t + 1);
     }, []);
 
-    const [activeTopic, setActiveTopic] = useState(null); // index o null
+    const [activeTopic, setActiveTopic] = useState(null);
     const [openQ, setOpenQ] = useState({});
-
 
     const toggleTopic = (tIdx) => {
         setActiveTopic((prev) => (prev === tIdx ? null : tIdx));
-        setOpenQ({}); // cerramos preguntas al cambiar de tema (orden visual)
-        };
+        setOpenQ({});
+    };
 
-        const toggleQuestion = (tIdx, qIdx) => {
+    const toggleQuestion = (tIdx, qIdx) => {
         setOpenQ((prev) => ({
-            ...prev,
-            [tIdx]: prev[tIdx] === qIdx ? -1 : qIdx,
+        ...prev,
+        [tIdx]: prev[tIdx] === qIdx ? -1 : qIdx,
         }));
-        };
-
+    };
 
     const faqs = useMemo(
         () => [
-            {
+        {
             topic: "Ingreso y contacto",
             items: [
-                {
+            {
                 q: "¿Cómo coordino una entrevista o visita?",
                 a: "Podés escribirnos por WhatsApp. Coordinamos una entrevista personalizada para que conozcas el jardín y podamos responder todas tus dudas.",
-                },
-                {
+            },
+            {
                 q: "¿Cómo puedo pedir información?",
                 a: "A través de WhatsApp o redes. Siempre respondemos de manera directa y personalizada.",
-                },
-            ],
             },
-            {
+            ],
+        },
+        {
             topic: "Propuesta y metodología",
             items: [
-                {
+            {
                 q: "¿Qué metodología utiliza el jardín?",
                 a: "Trabajamos con una propuesta pedagógica basada en el juego, el vínculo afectivo y el respeto por los tiempos de cada niño y niña.",
-                },
-                {
+            },
+            {
                 q: "¿En qué línea educativa se basa la propuesta?",
                 a: "Nuestra mirada está centrada en la primera infancia, priorizando el desarrollo emocional, social y cognitivo en un entorno cuidado y estimulante.",
-                },
-            ],
             },
-            {
+            ],
+        },
+        {
             topic: "Seguridad y emergencias",
             items: [
-                {
+            {
                 q: "¿Qué pasa si un niño o niña se lastima?",
                 a: "Ante cualquier situación, se actúa de forma inmediata siguiendo los protocolos del jardín y se avisa a la familia de manera directa.",
-                },
-                {
-                q: "¿El jardín cuenta con protocolos de emergencia?",
-                a: "Sí. Contamos con protocolos de seguridad y emergencia establecidos para garantizar el cuidado de todos los niños y niñas.",
-                },
-                {
-                q: "¿Qué nivel de seguridad tiene el jardín?",
-                a: "El espacio está preparado especialmente para la primera infancia, con medidas de seguridad acordes a cada etapa.",
-                },
-            ],
             },
             {
+                q: "¿El jardín cuenta con protocolos de emergencia?",
+                a: "Sí. Contamos con protocolos de seguridad y emergencia establecidos para garantizar el cuidado de todos los niños y niñas.",
+            },
+            {
+                q: "¿Qué nivel de seguridad tiene el jardín?",
+                a: "El espacio está preparado especialmente para la primera infancia, con medidas de seguridad acordes a cada etapa.",
+            },
+            ],
+        },
+        {
             topic: "Marco institucional",
             items: [
-                {
+            {
                 q: "¿El jardín está habilitado?",
                 a: "Sí, el jardín cuenta con la habilitación correspondiente para funcionar como jardín maternal.",
-                },
-                {
+            },
+            {
                 q: "¿Está incorporado a la enseñanza oficial?",
                 a: "El jardín maternal no funciona como escuela formal. Su objetivo es acompañar la primera infancia desde el cuidado, el juego y el desarrollo integral.",
-                },
-                {
+            },
+            {
                 q: "¿Cuál es la diferencia entre jardín maternal y guardería?",
                 a: "Un jardín maternal no solo cuida, sino que acompaña el desarrollo infantil a través de una propuesta pedagógica pensada para cada etapa.",
-                },
-            ],
             },
+            ],
+        },
         ],
         []
-        );
+    );
 
+    // ✅ Título/subtítulo desde backend (global), con fallback a hardcode del slide actual
+    const heroTitle = heroContent.title?.trim() || currentHero.title;
+    const heroSubtitle = heroContent.subtitle?.trim() || currentHero.subtitle;
 
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
@@ -151,27 +179,24 @@ export default function Home() {
 
         <Container className="relative z-10 grid gap-10">
             {/* ==============================
-            Hero
-            ============================== */}
+                Hero
+                ============================== */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
             className={`${styles.heroCard} p-6 md:p-8 grid gap-4`}
             >
-            <HeroCarousel
-                images={heroSlides.map((s) => s.img)}
-                onChange={handleHeroChange}
-            />
+            <HeroCarousel images={heroImages} onChange={handleHeroChange} />
 
             <div key={heroTick} className={styles.heroTextAnim}>
                 <h1
                 className={`text-[1.6rem] sm:text-2xl md:text-4xl font-extrabold leading-tight text-[var(--ui-text)] ${styles.heroTitle}`}
                 >
-                {currentHero.title}
+                {heroTitle}
                 </h1>
 
                 <p className="text-sm sm:text-base text-[var(--ui-muted)]">
-                {currentHero.subtitle}
+                {heroSubtitle}
                 </p>
 
                 <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
@@ -194,74 +219,71 @@ export default function Home() {
             </section>
 
             {/* ==============================
-            FAQ (4 temas)
-            ============================== */}
-            <section className={`${styles.faqShell} p-6 md:p-7 grid gap-4`} aria-label="Preguntas frecuentes">
-                <div className={styles.faqHead}>
-                    <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
-                    <p className={styles.faqSub}>Resolvemos dudas rápidas antes de coordinar una visita.</p>
-                </div>
+                FAQ (4 temas)
+                ============================== */}
+            <section
+            className={`${styles.faqShell} p-6 md:p-7 grid gap-4`}
+            aria-label="Preguntas frecuentes"
+            >
+            <div className={styles.faqHead}>
+                <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
+                <p className={styles.faqSub}>Resolvemos dudas rápidas antes de coordinar una visita.</p>
+            </div>
 
-                <div className={styles.faqTopics}>
-                    {faqs.map((group, tIdx) => {
-                    const topicOpen = activeTopic === tIdx;
+            <div className={styles.faqTopics}>
+                {faqs.map((group, tIdx) => {
+                const topicOpen = activeTopic === tIdx;
 
-                    return (
-                        <div
-                        key={group.topic}
-                        data-tone={tIdx % 3}
-                        className={`
-                            ${styles.faqTopic}
-                            ${topicOpen ? styles.faqTopicActive : ""}
-                        `}
-                        >
-                        <button
-                            type="button"
-                            className={styles.faqTopicBtn}
-                            aria-expanded={topicOpen}
-                            onClick={() => toggleTopic(tIdx)}
-                        >
-                            <span className={styles.faqTopicTitle}>{group.topic}</span>
-                            <span className={styles.faqPlus} aria-hidden="true">+</span>
-                        </button>
+                return (
+                    <div
+                    key={group.topic}
+                    data-tone={tIdx % 3}
+                    className={`${styles.faqTopic} ${topicOpen ? styles.faqTopicActive : ""}`}
+                    >
+                    <button
+                        type="button"
+                        className={styles.faqTopicBtn}
+                        aria-expanded={topicOpen}
+                        onClick={() => toggleTopic(tIdx)}
+                    >
+                        <span className={styles.faqTopicTitle}>{group.topic}</span>
+                        <span className={styles.faqPlus} aria-hidden="true">+</span>
+                    </button>
 
-                        <div
-                            className={styles.faqTopicPanel}
-                            hidden={!topicOpen}
-                        >
-                            <div className={styles.faqInner}>
-                            {group.items.map((item, qIdx) => {
-                                const qOpen = (openQ[tIdx] ?? -1) === qIdx;
+                    <div className={styles.faqTopicPanel} hidden={!topicOpen}>
+                        <div className={styles.faqInner}>
+                        {group.items.map((item, qIdx) => {
+                            const qOpen = (openQ[tIdx] ?? -1) === qIdx;
 
-                                return (
-                                <div key={item.q} className={styles.faqQItem}>
-                                    <button
-                                    type="button"
-                                    className={styles.faqQBtn}
-                                    aria-expanded={qOpen}
-                                    onClick={() => toggleQuestion(tIdx, qIdx)}
-                                    >
-                                    <span className={styles.faqQText}>{item.q}</span>
-                                    <span className={styles.faqChevron} aria-hidden="true">+</span>
-                                    </button>
+                            return (
+                            <div key={item.q} className={styles.faqQItem}>
+                                <button
+                                type="button"
+                                className={styles.faqQBtn}
+                                aria-expanded={qOpen}
+                                onClick={() => toggleQuestion(tIdx, qIdx)}
+                                >
+                                <span className={styles.faqQText}>{item.q}</span>
+                                <span className={styles.faqChevron} aria-hidden="true">+</span>
+                                </button>
 
-                                    <div className={styles.faqA} hidden={!qOpen}>
-                                    <p className={styles.cardText}>{item.a}</p>
-                                    </div>
+                                <div className={styles.faqA} hidden={!qOpen}>
+                                <p className={styles.cardText}>{item.a}</p>
                                 </div>
-                                );
-                            })}
                             </div>
+                            );
+                        })}
                         </div>
-                        </div>
-                    );
-                    })}
-                </div>
-                </section>
+                    </div>
+                    </div>
+                );
+                })}
+            </div>
+            </section>
 
             {/* ==============================
-            Familias actuales
-            ============================== */}
+                Familias actuales
+                ============================== */}
             <section
             tabIndex={0}
             onPointerDown={focusOnlyIfBackground}
@@ -286,4 +308,3 @@ export default function Home() {
         </main>
     );
 }
-

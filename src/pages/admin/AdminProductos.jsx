@@ -1,4 +1,3 @@
-// VUELA POR EL BACKEND
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Container from "../../components/layout/Container";
