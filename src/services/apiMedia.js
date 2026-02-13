@@ -9,29 +9,32 @@ const joinUrl = (base, path) => {
 };
 
 const getAdminToken = () =>
-    localStorage.getItem("token") || localStorage.getItem("adminToken") || "";
+    localStorage.getItem("adminToken") || localStorage.getItem("token") || "";
 
 const authHeaders = () => {
     const token = getAdminToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
-};
+    };
 
-export const mediaList = async (folder) => {
+    export const mediaList = async (folder) => {
     const r = await request(`/api/media/list?folder=${encodeURIComponent(folder)}`, {
         headers: authHeaders(),
     });
-    return r?.data ?? r;
+    return r?.items ?? []; // ✅
 };
 
 export const mediaUploadOne = async (folder, file) => {
     const fd = new FormData();
-    fd.append("file", file); // 👈 coincide con upload.single("file")
+    fd.append("file", file);
 
-    const res = await fetch(joinUrl(API_BASE, `/api/media/upload?folder=${encodeURIComponent(folder)}`), {
+    const res = await fetch(
+        joinUrl(API_BASE, `/api/media/upload?folder=${encodeURIComponent(folder)}`),
+        {
         method: "POST",
         headers: { ...authHeaders() },
         body: fd,
-    });
+        }
+    );
 
     const text = await res.text();
     let data;
@@ -44,13 +47,17 @@ export const mediaUploadOne = async (folder, file) => {
         throw err;
     }
 
-    return data?.item ?? data;
+    return data?.item ?? data; // ✅
 };
 
 export const mediaDelete = async (public_id) => {
-    const r = await request(`/api/media/delete?public_id=${encodeURIComponent(public_id)}`, {
+    const r = await request(
+        `/api/media/delete?public_id=${encodeURIComponent(public_id)}`,
+        {
         method: "DELETE",
         headers: authHeaders(),
-    });
-    return r?.data ?? r;
+        }
+    );
+    return r?.result ?? r; // ✅
 };
+
