@@ -5,6 +5,8 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
     const [index, setIndex] = useState(0);
     const startX = useRef(null);
 
+    const isMulti = images.length > 1;
+
     const onChangeRef = useRef(onChange);
     useEffect(() => {
         onChangeRef.current = onChange;
@@ -27,39 +29,42 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
 
     const goTo = useCallback(
         (next) => {
-        if (images.length === 0) return;
+        if (!isMulti) return;
         const safe = ((next % images.length) + images.length) % images.length;
         setIndex(safe);
         },
-        [images.length]
+        [images.length, isMulti]
     );
 
     const nextSlide = useCallback(() => {
-        if (images.length <= 1) return;
+        if (!isMulti) return;
         setIndex((i) => (i + 1) % images.length);
-    }, [images.length]);
+    }, [images.length, isMulti]);
 
     const prevSlide = useCallback(() => {
-        if (images.length <= 1) return;
+        if (!isMulti) return;
         setIndex((i) => (i - 1 + images.length) % images.length);
-    }, [images.length]);
+    }, [images.length, isMulti]);
 
     useEffect(() => {
-        if (images.length <= 1) return;
+        if (!isMulti) return;
 
         const id = setInterval(() => {
         setIndex((i) => (i + 1) % images.length);
         }, interval);
 
         return () => clearInterval(id);
-    }, [images.length, interval]);
+    }, [images.length, interval, isMulti]);
 
     const onTouchStart = (e) => {
+        if (!isMulti) return;
         startX.current = e.touches[0].clientX;
     };
 
     const onTouchEnd = (e) => {
+        if (!isMulti) return;
         if (startX.current == null) return;
+
         const dx = e.changedTouches[0].clientX - startX.current;
 
         if (Math.abs(dx) > 40) {
@@ -91,17 +96,19 @@ export default function HeroCarousel({ images = [], interval = 4500, onChange })
             ))}
         </div>
 
-        <div className={styles.dots}>
+        {isMulti && (
+            <div className={styles.dots}>
             {images.map((_, i) => (
-            <button
+                <button
                 key={i}
                 type="button"
                 className={`${styles.dot} ${i === index ? styles.dotActive : ""}`}
                 onClick={() => goTo(i)}
                 aria-label={`Ver imagen ${i + 1}`}
-            />
+                />
             ))}
-        </div>
+            </div>
+        )}
         </div>
     );
 }

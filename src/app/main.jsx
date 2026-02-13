@@ -1,26 +1,27 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  createBrowserRouter,
-  createHashRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import "../styles/globals.css";
 import AppShell from "./AppShell";
 
 import Home from "../pages/Home";
 import ElJardin from "../pages/ElJardin";
-//import Contacto from "../pages/Contacto";
-
 import UniformesEntry from "../pages/UnifomesEntry";
 import ProductoDetalle from "../pages/ProductosDetalle";
-
 import Carrito from "../pages/Carrito";
 import Checkout from "../pages/Checkout";
 import Confirmacion from "../pages/Confirmacion";
 
+import AdminLayout from "../pages/admin/AdminLayout";
 import AdminProductos from "../pages/admin/AdminProductos";
 import AdminProductoForm from "../pages/admin/AdminProductoForm";
+import AdminContenido from "../pages/admin/AdminContenido";
+import AdminPedidos from "../pages/admin/AdminPedidos";
+import AdminLogin from "../pages/admin/AdminLogin";
+
+import AdminProtected from "./components/auth/AdminProtected";
+import { AdminAuthProvider } from "../context/AdminAuthContext";
+
 
 const routes = [
   {
@@ -28,7 +29,6 @@ const routes = [
     children: [
       { path: "/", element: <Home /> },
       { path: "/el-jardin", element: <ElJardin /> },
-     // { path: "/contacto", element: <Contacto /> },
 
       { path: "/uniformes", element: <UniformesEntry /> },
       { path: "/producto/:id", element: <ProductoDetalle /> },
@@ -37,9 +37,28 @@ const routes = [
       { path: "/checkout", element: <Checkout /> },
       { path: "/confirmacion", element: <Confirmacion /> },
 
-      { path: "/admin/productos", element: <AdminProductos /> },
-      { path: "/admin/productos/nuevo", element: <AdminProductoForm /> },
-      { path: "/admin/productos/:id/editar", element: <AdminProductoForm /> },
+      // ✅ Login admin (público)
+      { path: "/admin/login", element: <AdminLogin /> },
+
+      // ✅ Todo /admin protegido
+      {
+        path: "/admin",
+        element: (
+          <AdminProtected>
+            <AdminLayout />
+          </AdminProtected>
+        ),
+        children: [
+          { index: true, element: <Navigate to="/admin/productos" replace /> },
+
+          { path: "productos", element: <AdminProductos /> },
+          { path: "productos/nuevo", element: <AdminProductoForm /> },
+          { path: "productos/:id/editar", element: <AdminProductoForm /> },
+
+          { path: "contenido", element: <AdminContenido /> },
+          { path: "pedidos", element: <AdminPedidos /> },
+        ],
+      },
 
       { path: "*", element: <Home /> },
     ],
@@ -55,6 +74,8 @@ const router =
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AdminAuthProvider>
+      <RouterProvider router={router} />
+    </AdminAuthProvider>
   </React.StrictMode>
 );

@@ -1,8 +1,12 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 
+/* ==============================
+Utils
+============================== */
+
 const joinUrl = (base, path) => {
-    const b = String(base).replace(/\/+$/, "");
-    const p = String(path).replace(/^\/+/, "");
+    const b = String(base || "").replace(/\/+$/, "");
+    const p = String(path || "").replace(/^\/+/, "");
     return `${b}/${p}`;
 };
 
@@ -15,19 +19,19 @@ const readJson = async (res) => {
     }
 };
 
+/* ==============================
+Request Base
+============================== */
+
 export const request = async (
     path,
-    { method = "GET", body, token, headers } = {}
+    { method = "GET", body, headers } = {}
     ) => {
-    const h = {
-        ...(headers || {}),
-        ...(body ? { "Content-Type": "application/json" } : {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-
     const res = await fetch(joinUrl(API_BASE, path), {
         method,
-        headers: Object.keys(h).length ? h : undefined,
+        headers: body
+        ? { "Content-Type": "application/json", ...headers }
+        : headers,
         body: body ? JSON.stringify(body) : undefined,
     });
 

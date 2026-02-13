@@ -9,32 +9,23 @@ import SEO from "../components/seo/SEO";
 import { getHomeHeroContent } from "../services/apiContent";
 
 export default function Home() {
-    const heroSlides = useMemo(
-        () => [
-        {
-            img: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
-            title: "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
-            subtitle: "Propuesta cálida y respetuosa, pensada para acompañar cada etapa.",
-            cta1: { to: "/el-jardin", label: "Conocer el jardín" },
-            cta2: { to: "/uniformes", label: "Ir a la tienda" },
-        },
-        {
-            img: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
-            title: "Acompañamos los primeros pasos con cuidado, juego y aprendizaje",
-            subtitle: "Rutinas que dan tranquilidad y espacios seguros para explorar.",
-            cta1: { to: "/el-jardin", label: "Ver propuesta" },
-            cta2: { to: "/uniformes", label: "Ver uniformes" },
-        },
-        ],
-        []
-    );
-
     const homeRef = useRef(null);
 
     const [heroTick, setHeroTick] = useState(0);
     const [heroIndex, setHeroIndex] = useState(0);
 
-    // ✅ Content desde backend (Firestore)
+    // ==============================
+    // Hero (fallback solo imágenes)
+    // ==============================
+    const fallbackHeroImages = useMemo(
+        () => [
+        "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
+        "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
+        ],
+        []
+    );
+
+    // Content desde backend (Firestore)
     const [heroContent, setHeroContent] = useState({
         title: "",
         subtitle: "",
@@ -56,7 +47,7 @@ export default function Home() {
             });
         })
         .catch(() => {
-            // fallback silencioso: se usan los hardcode
+            // fallback silencioso: queda el fallbackHeroImages y textos genéricos
         });
 
         return () => {
@@ -64,14 +55,21 @@ export default function Home() {
         };
     }, []);
 
-    // Si hay config en backend → usamos esas imágenes, si no → hardcode
     const heroImages =
         heroContent.items?.length > 0
         ? heroContent.items.map((it) => it.url).filter(Boolean)
-        : heroSlides.map((s) => s.img);
+        : fallbackHeroImages;
 
-    // CTAs siguen siendo los del slide (no hace falta llevarlo al back todavía)
-    const currentHero = heroSlides[heroIndex] ?? heroSlides[0];
+    // title/subtitle SOLO backend (si no hay, genéricos)
+    const heroTitle =
+        heroContent.title?.trim() || "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.";
+    const heroSubtitle =
+        heroContent.subtitle?.trim() ||
+        "Una propuesta cálida y respetuosa para acompañar cada etapa.";
+
+    // CTAs fijos (no dependen del slide)
+    const cta1 = { to: "/el-jardin", label: "Conocer el jardín" };
+    const cta2 = { to: "/uniformes", label: "Ir a la tienda" };
 
     const focusOnlyIfBackground = (e) => {
         if (e.target === e.currentTarget) e.currentTarget.focus();
@@ -163,10 +161,6 @@ export default function Home() {
         []
     );
 
-    // ✅ Título/subtítulo desde backend (global), con fallback a hardcode del slide actual
-    const heroTitle = heroContent.title?.trim() || currentHero.title;
-    const heroSubtitle = heroContent.subtitle?.trim() || currentHero.subtitle;
-
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <SEO
@@ -200,18 +194,18 @@ export default function Home() {
                 </p>
 
                 <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
-                <Link to={currentHero.cta1.to} className="w-full sm:w-auto">
+                <Link to={cta1.to} className="w-full sm:w-auto">
                     <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
-                    {currentHero.cta1.label} <span className={styles.heroArrow}>→</span>
+                    {cta1.label} <span className={styles.heroArrow}>→</span>
                     </Button>
                 </Link>
 
-                <Link to={currentHero.cta2.to} className="w-full sm:w-auto">
+                <Link to={cta2.to} className="w-full sm:w-auto">
                     <Button
                     variant="primary"
                     className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}
                     >
-                    {currentHero.cta2.label} <span className={styles.heroArrow}>→</span>
+                    {cta2.label} <span className={styles.heroArrow}>→</span>
                     </Button>
                 </Link>
                 </div>
@@ -227,7 +221,9 @@ export default function Home() {
             >
             <div className={styles.faqHead}>
                 <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
-                <p className={styles.faqSub}>Resolvemos dudas rápidas antes de coordinar una visita.</p>
+                <p className={styles.faqSub}>
+                Resolvemos dudas rápidas antes de coordinar una visita.
+                </p>
             </div>
 
             <div className={styles.faqTopics}>
@@ -247,7 +243,9 @@ export default function Home() {
                         onClick={() => toggleTopic(tIdx)}
                     >
                         <span className={styles.faqTopicTitle}>{group.topic}</span>
-                        <span className={styles.faqPlus} aria-hidden="true">+</span>
+                        <span className={styles.faqPlus} aria-hidden="true">
+                        +
+                        </span>
                     </button>
 
                     <div className={styles.faqTopicPanel} hidden={!topicOpen}>
@@ -264,7 +262,9 @@ export default function Home() {
                                 onClick={() => toggleQuestion(tIdx, qIdx)}
                                 >
                                 <span className={styles.faqQText}>{item.q}</span>
-                                <span className={styles.faqChevron} aria-hidden="true">+</span>
+                                <span className={styles.faqChevron} aria-hidden="true">
+                                    +
+                                </span>
                                 </button>
 
                                 <div className={styles.faqA} hidden={!qOpen}>
@@ -293,7 +293,9 @@ export default function Home() {
                 ¿Ya formás parte del jardín?
             </h3>
 
-            <p className="text-sm text-[var(--ui-muted)]">Accesos rápidos para resolver en segundos.</p>
+            <p className="text-sm text-[var(--ui-muted)]">
+                Accesos rápidos para resolver en segundos.
+            </p>
 
             <div className="flex flex-wrap gap-3">
                 <Link to="/uniformes">
