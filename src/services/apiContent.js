@@ -1,7 +1,6 @@
 import { request } from "./http";
 
-const getAdminToken = () =>
-    localStorage.getItem("adminToken") || localStorage.getItem("token") || "";
+const getAdminToken = () => localStorage.getItem("token") || "";
 
 const authHeaders = () => {
     const token = getAdminToken();
@@ -37,4 +36,3 @@ export const saveElJardinGalleryContent = async (payload) => {
     });
     return r?.saved ?? r;
 };
-
