@@ -18,6 +18,8 @@ export default function AdminProductoForm() {
     const editing = Boolean(id);
     const navigate = useNavigate();
 
+    const [originalStock, setOriginalStock] = useState(() => ({}));
+
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -52,19 +54,27 @@ export default function AdminProductoForm() {
                 : []
             );
 
+            const stockMap = {};
+                (Array.isArray(found.variants) ? found.variants : []).forEach((v) => {
+                const size = String(v?.size ?? "").trim();
+                if (size) stockMap[size] = Number(v?.stock ?? 0);
+                });
+            setOriginalStock(stockMap);
+
             setForm({
             name: found.name ?? "",
             description: found.description ?? "",
             active: found.active !== false,
             avatar: avatarArr.slice(0, MAX_IMAGES),
             variants: TALLES.map((size) => {
-                const v = bySize.get(size);
-                return {
+            const row = form.variants.find((v) => v.size === size) || {};
+            return {
                 size,
-                price: v?.price ?? "",
-                stock: v?.stock ?? "",
-                };
+                price: Number(row.price),
+                stock: editing ? Number(originalStock[size] ?? 0) : Number(row.stock),
+            };
             }),
+
             });
         })
         .finally(() => {
@@ -279,7 +289,7 @@ export default function AdminProductoForm() {
                         />
                         <Button
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         className="text-black border-black"
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
                         onClick={() =>
@@ -399,7 +409,9 @@ export default function AdminProductoForm() {
                     Activo
                     </label>
 
-                    <Button variant="primary" disabled={saving}>
+                    <Button type="submit"
+                            variant="ghost"
+                            className="text-black border-black" disabled={saving}>
                     {saving ? "Guardando…" : "Guardar"}
                     </Button>
                 </div>
