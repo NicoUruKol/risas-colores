@@ -10,27 +10,68 @@ import { adminCreate, adminUpdate, getById } from "../../services/productsApi";
 import { mediaUploadOne } from "../../services/apiMedia";
 
 const TALLES = ["1", "2", "3", "4", "5"];
+const UNICO = "Único";
 const MAX_IMAGES = 5;
 const PRODUCTS_FOLDER = "risas-colores/web/products";
+
+const cleanUrls = (arr) =>
+    (Array.isArray(arr) ? arr : [])
+        .map((x) => String(x || "").trim())
+        .filter(Boolean)
+        .slice(0, MAX_IMAGES);
+
+const buildVariantsForSizes = (sizes, fromVariants = []) => {
+    const map = new Map(
+        (Array.isArray(fromVariants) ? fromVariants : [])
+        .map((v) => {
+            const size = String(v?.size ?? "").trim();
+            if (!size) return null;
+            return [
+            size,
+            {
+                size,
+                price: v?.price ?? "",
+                stock: v?.stock ?? "",
+            },
+            ];
+        })
+        .filter(Boolean)
+    );
+
+    return sizes.map((size) => {
+        const v = map.get(size) || {};
+        return {
+        size,
+        price: v.price === "" ? "" : String(v.price),
+        stock: v.stock === "" ? "" : String(v.stock),
+        };
+    });
+};
 
 export default function AdminProductoForm() {
     const { id } = useParams();
     const editing = Boolean(id);
     const navigate = useNavigate();
 
-    const [originalStock, setOriginalStock] = useState(() => ({}));
-
     const [loading, setLoading] = useState(editing);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [errors, setErrors] = useState({});
+
+    // modo talles: "numeric" (1-5) o "unico"
+    const [sizeMode, setSizeMode] = useState("numeric");
+
+    const sizes = useMemo(
+        () => (sizeMode === "unico" ? [UNICO] : TALLES),
+        [sizeMode]
+    );
 
     const [form, setForm] = useState({
         name: "",
         description: "",
         active: true,
         avatar: [],
-        variants: TALLES.map((size) => ({ size, price: "", stock: "" })),
+        variants: buildVariantsForSizes(TALLES),
     });
 
     useEffect(() => {
@@ -44,37 +85,28 @@ export default function AdminProductoForm() {
             if (!alive) return;
             if (!found) return;
 
-            const avatarArr = Array.isArray(found.avatar)
-            ? found.avatar.map((x) => String(x || "").trim()).filter(Boolean)
-            : [];
+            const avatarArr = cleanUrls(found.avatar);
 
-            const bySize = new Map(
-            Array.isArray(found.variants)
-                ? found.variants.map((v) => [String(v.size), v])
-                : []
+            const foundSizes = Array.from(
+            new Set(
+                (Array.isArray(found.variants) ? found.variants : [])
+                .map((v) => String(v?.size ?? "").trim())
+                .filter(Boolean)
+            )
             );
 
-            const stockMap = {};
-                (Array.isArray(found.variants) ? found.variants : []).forEach((v) => {
-                const size = String(v?.size ?? "").trim();
-                if (size) stockMap[size] = Number(v?.stock ?? 0);
-                });
-            setOriginalStock(stockMap);
+            const isUnico = foundSizes.includes(UNICO);
+            const nextMode = isUnico ? "unico" : "numeric";
+            const nextSizes = isUnico ? [UNICO] : TALLES;
+
+            setSizeMode(nextMode);
 
             setForm({
             name: found.name ?? "",
             description: found.description ?? "",
             active: found.active !== false,
-            avatar: avatarArr.slice(0, MAX_IMAGES),
-            variants: TALLES.map((size) => {
-            const row = form.variants.find((v) => v.size === size) || {};
-            return {
-                size,
-                price: Number(row.price),
-                stock: editing ? Number(originalStock[size] ?? 0) : Number(row.stock),
-            };
-            }),
-
+            avatar: avatarArr,
+            variants: buildVariantsForSizes(nextSizes, found.variants),
             });
         })
         .finally(() => {
@@ -86,6 +118,15 @@ export default function AdminProductoForm() {
         alive = false;
         };
     }, [editing, id]);
+
+    // si cambia el modo (solo relevante al crear), re-armo variants preservando lo que se pueda
+    useEffect(() => {
+        if (editing) return;
+        setForm((prev) => ({
+        ...prev,
+        variants: buildVariantsForSizes(sizes, prev.variants),
+        }));
+    }, [sizes, editing]);
 
     const cover = useMemo(() => {
         const a = Array.isArray(form.avatar) ? form.avatar : [];
@@ -106,14 +147,12 @@ export default function AdminProductoForm() {
 
         if (!String(form.name).trim()) e.name = "Obligatorio";
 
-        const avatars = Array.isArray(form.avatar)
-        ? form.avatar.map((x) => String(x || "").trim()).filter(Boolean)
-        : [];
+        const avatars = cleanUrls(form.avatar);
         if (avatars.length === 0) e.avatar = "Subí al menos 1 imagen";
         if (avatars.length > MAX_IMAGES) e.avatar = `Máximo ${MAX_IMAGES} imágenes`;
 
         const vErrors = [];
-        TALLES.forEach((size) => {
+        sizes.forEach((size) => {
         const row = form.variants.find((v) => v.size === size);
         const price = row?.price;
         const stock = row?.stock;
@@ -136,16 +175,13 @@ export default function AdminProductoForm() {
         return e;
     };
 
-    const onPickTell = async (ev) => {
+    const onPickFile = async (ev) => {
         const file = ev.target.files?.[0];
         ev.target.value = "";
         if (!file) return;
 
         if ((form.avatar?.length || 0) >= MAX_IMAGES) {
-        setErrors((p) => ({
-            ...p,
-            avatar: `Máximo ${MAX_IMAGES} imágenes`,
-        }));
+        setErrors((p) => ({ ...p, avatar: `Máximo ${MAX_IMAGES} imágenes` }));
         return;
         }
 
@@ -153,12 +189,11 @@ export default function AdminProductoForm() {
         setUploading(true);
         const uploaded = await mediaUploadOne(PRODUCTS_FOLDER, file);
         const url = uploaded?.url ? String(uploaded.url).trim() : "";
-
         if (!url) throw new Error("No llegó url desde Cloudinary");
 
         setForm((prev) => ({
             ...prev,
-            avatar: [...(prev.avatar || []), url].slice(0, MAX_IMAGES),
+            avatar: [...cleanUrls(prev.avatar), url].slice(0, MAX_IMAGES),
         }));
 
         setErrors((p) => ({ ...p, avatar: undefined }));
@@ -193,8 +228,8 @@ export default function AdminProductoForm() {
         name: String(form.name).trim(),
         description: String(form.description || "").trim(),
         active: Boolean(form.active),
-        avatar: (form.avatar || []).map((x) => String(x || "").trim()).filter(Boolean).slice(0, MAX_IMAGES),
-        variants: TALLES.map((size) => {
+        avatar: cleanUrls(form.avatar),
+        variants: sizes.map((size) => {
             const row = form.variants.find((v) => v.size === size) || {};
             return {
             size,
@@ -207,7 +242,6 @@ export default function AdminProductoForm() {
         try {
         if (editing) await adminUpdate(id, payload);
         else await adminCreate(payload);
-
         navigate("/admin/productos");
         } finally {
         setSaving(false);
@@ -217,6 +251,7 @@ export default function AdminProductoForm() {
     return (
         <main className="py-10">
         <Container className="grid gap-6 max-w-[980px]">
+            {/* Header */}
             <div className="flex items-center justify-between gap-4">
             <div>
                 <Badge variant="lavender">Admin</Badge>
@@ -245,13 +280,9 @@ export default function AdminProductoForm() {
                     <input
                     className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
                     value={form.name}
-                    onChange={(e) =>
-                        setForm((p) => ({ ...p, name: e.target.value }))
-                    }
+                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     />
-                    {errors.name && (
-                    <div className="text-xs text-red-500">{errors.name}</div>
-                    )}
+                    {errors.name && <div className="text-xs text-red-500">{errors.name}</div>}
                 </div>
 
                 {/* Descripción */}
@@ -266,13 +297,25 @@ export default function AdminProductoForm() {
                     />
                 </div>
 
+                {/* Modo talles (solo al crear) */}
+                {!editing && (
+                    <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm text-ui-text">
+                        <input
+                        type="checkbox"
+                        checked={sizeMode === "unico"}
+                        onChange={(e) => setSizeMode(e.target.checked ? "unico" : "numeric")}
+                        />
+                        Único (Mochila)
+                    </label>
+                    </div>
+                )}
+
                 {/* Imágenes */}
                 <div className="grid gap-3">
                     <div className="flex items-center justify-between gap-3">
                     <div>
-                        <div className="text-sm text-ui-muted">
-                        Imágenes (máx {MAX_IMAGES})
-                        </div>
+                        <div className="text-sm text-ui-muted">Imágenes (máx {MAX_IMAGES})</div>
                         <div className="text-xs text-ui-muted">
                         Se guardan como URLs en <b>avatar[]</b>.
                         </div>
@@ -282,7 +325,7 @@ export default function AdminProductoForm() {
                         <input
                         type="file"
                         accept="image/*"
-                        onChange={onPickTell}
+                        onChange={onPickFile}
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
                         style={{ display: "none" }}
                         id="admin-product-upload"
@@ -292,32 +335,29 @@ export default function AdminProductoForm() {
                         variant="ghost"
                         className="text-black border-black"
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
-                        onClick={() =>
-                            document.getElementById("admin-product-upload")?.click()
-                        }
+                        onClick={() => document.getElementById("admin-product-upload")?.click()}
                         >
                         {uploading ? "Subiendo…" : "Subir imagen"}
                         </Button>
                     </label>
                     </div>
 
-                    {errors.avatar && (
-                    <div className="text-xs text-red-500">{errors.avatar}</div>
-                    )}
+                    {errors.avatar && <div className="text-xs text-red-500">{errors.avatar}</div>}
 
                     {cover ? (
                     <div className="grid gap-3 md:grid-cols-[240px_1fr]">
                         <div>
                         <ImageBox src={cover} alt={form.name || "Producto"} />
-                        <div className="text-xs text-ui-muted mt-2">
-                            Portada = primera imagen
-                        </div>
+                        <div className="text-xs text-ui-muted mt-2">Portada = primera imagen</div>
                         </div>
 
                         <div className="grid gap-3">
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {(form.avatar || []).map((url, idx) => (
-                            <div key={url + idx} className="rounded-md border border-ui-border p-2 bg-ui-surface">
+                            <div
+                                key={url + idx}
+                                className="rounded-md border border-ui-border p-2 bg-ui-surface"
+                            >
                                 <div className="rounded-md overflow-hidden">
                                 <img
                                     src={url}
@@ -327,9 +367,7 @@ export default function AdminProductoForm() {
                                 </div>
 
                                 <div className="mt-2 flex items-center justify-between gap-2">
-                                <div className="text-xs text-ui-muted truncate">
-                                    #{idx + 1}
-                                </div>
+                                <div className="text-xs text-ui-muted truncate">#{idx + 1}</div>
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -344,23 +382,22 @@ export default function AdminProductoForm() {
                         </div>
 
                         <div className="text-xs text-ui-muted">
-                            Tip: si querés “reordenar”, lo hacemos después con flechitas ↑↓.
+                            Tip: si el cliente se equivoca, quita la imagen y vuelve a subirla.
                         </div>
                         </div>
                     </div>
                     ) : (
-                    <div className="text-sm text-ui-muted">
-                        Todavía no hay imágenes cargadas.
-                    </div>
+                    <div className="text-sm text-ui-muted">Todavía no hay imágenes cargadas.</div>
                     )}
                 </div>
 
-                {/* Variants: precio/stock por talle */}
+                {/* Variants */}
                 <div className="grid gap-2">
-                    <div className="text-sm text-ui-muted">Precio y stock por talle</div>
-                    {errors.variants && (
-                    <div className="text-xs text-red-500">{errors.variants}</div>
-                    )}
+                    <div className="text-sm text-ui-muted">
+                    Precio y stock por talle {sizeMode === "unico" ? "(Único)" : "(1–5)"}
+                    </div>
+
+                    {errors.variants && <div className="text-xs text-red-500">{errors.variants}</div>}
 
                     <div className="rounded-md border border-ui-border overflow-hidden">
                     <div className="grid grid-cols-[90px_1fr_1fr] bg-ui-surface p-3 text-xs text-ui-muted">
@@ -370,10 +407,18 @@ export default function AdminProductoForm() {
                     </div>
 
                     <div className="divide-y divide-ui-border">
-                        {TALLES.map((size) => {
-                        const row = form.variants.find((v) => v.size === size) || { price: "", stock: "" };
+                        {sizes.map((size) => {
+                        const row =
+                            form.variants.find((v) => v.size === size) || {
+                            price: "",
+                            stock: "",
+                            };
+
                         return (
-                            <div key={size} className="grid grid-cols-[90px_1fr_1fr] p-3 gap-3 items-center bg-white/50">
+                            <div
+                            key={size}
+                            className="grid grid-cols-[90px_1fr_1fr] p-3 gap-3 items-center bg-white/50"
+                            >
                             <div className="font-bold text-ui-text">{size}</div>
 
                             <input
@@ -402,16 +447,17 @@ export default function AdminProductoForm() {
                     <input
                         type="checkbox"
                         checked={form.active}
-                        onChange={(e) =>
-                        setForm((p) => ({ ...p, active: e.target.checked }))
-                        }
+                        onChange={(e) => setForm((p) => ({ ...p, active: e.target.checked }))}
                     />
                     Activo
                     </label>
 
-                    <Button type="submit"
-                            variant="ghost"
-                            className="text-black border-black" disabled={saving}>
+                    <Button
+                    type="submit"
+                    variant="ghost"
+                    className="text-black border-black"
+                    disabled={saving}
+                    >
                     {saving ? "Guardando…" : "Guardar"}
                     </Button>
                 </div>
