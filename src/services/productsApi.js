@@ -57,3 +57,8 @@ export const adminDelete = async (id) => {
   });
   return r?.data ?? r;
 };
+
+export const adminGetById = async (id) => {
+  const r = await request(`/api/products/${id}/admin`, { headers: authHeaders() });
+  return r?.data ?? r;
+};

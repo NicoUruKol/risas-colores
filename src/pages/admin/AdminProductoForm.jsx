@@ -6,7 +6,7 @@ import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import ImageBox from "../../components/ui/ImageBox";
 
-import { adminCreate, adminUpdate, getById } from "../../services/productsApi";
+import { adminCreate, adminUpdate, adminGetById } from "../../services/productsApi";
 import { mediaUploadOne } from "../../services/apiMedia";
 
 const TALLES = ["1", "2", "3", "4", "5"];
@@ -80,10 +80,10 @@ export default function AdminProductoForm() {
         let alive = true;
         setLoading(true);
 
-        getById(id)
+        adminGetById(id)
         .then((found) => {
-            if (!alive) return;
-            if (!found) return;
+        if (!alive) return;
+        if (!found) return;
 
             const avatarArr = cleanUrls(found.avatar);
 
