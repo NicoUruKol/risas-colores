@@ -10,7 +10,7 @@ import { adminCreate, adminUpdate, getById } from "../../services/productsApi";
 import { mediaUploadOne } from "../../services/apiMedia";
 
 const TALLES = ["1", "2", "3", "4", "5"];
-const UNICO = "Único";
+const UNICO = "U";
 const MAX_IMAGES = 5;
 const PRODUCTS_FOLDER = "risas-colores/web/products";
 
@@ -382,7 +382,7 @@ export default function AdminProductoForm() {
                         </div>
 
                         <div className="text-xs text-ui-muted">
-                            Tip: si el cliente se equivoca, quita la imagen y vuelve a subirla.
+                            Podes quitar la imagen y volver a subirla.
                         </div>
                         </div>
                     </div>
@@ -405,6 +405,7 @@ export default function AdminProductoForm() {
                         <div>Precio</div>
                         <div>Stock</div>
                     </div>
+                    
 
                     <div className="divide-y divide-ui-border">
                         {sizes.map((size) => {
@@ -435,9 +436,14 @@ export default function AdminProductoForm() {
                                 placeholder="10"
                             />
                             </div>
+                            
                         );
+                        
                         })}
                     </div>
+                    <div className="text-xs text-ui-muted">
+                            Para que el talle no sea público poné el stock en "0"
+                        </div>
                     </div>
                 </div>
 
