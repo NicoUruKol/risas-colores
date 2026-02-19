@@ -39,9 +39,9 @@ export default function AdminLogin() {
         <main className="py-10">
         <Container className="max-w-[520px] grid gap-6">
             <div>
-            <Badge variant="lavender">Admin</Badge>
-            <h1 className="text-2xl font-extrabold text-ui-text mt-2">Ingresar</h1>
-            <p className="text-sm text-ui-muted mt-2">Acceso restringido.</p>
+                <Badge variant="lavender">Admin</Badge>
+                <h1 className="text-2xl font-extrabold text-ui-text mt-2">Ingresar</h1>
+                <p className="text-sm text-ui-muted mt-2">Acceso restringido.</p>
             </div>
 
             <Card className="p-5">
