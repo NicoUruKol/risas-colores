@@ -2,11 +2,22 @@ import { request } from "./http";
 
 const TOKEN_KEY = "token";
 
-const getAdminToken = () => localStorage.getItem(TOKEN_KEY) || "";
+// ✅ ahora el token vive en sessionStorage (se borra al cerrar pestaña/ventana)
+const getAdminToken = () => sessionStorage.getItem(TOKEN_KEY) || "";
 
 const authHeaders = () => {
   const token = getAdminToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const withQuery = (path, params = {}) => {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v === undefined || v === null || v === "") return;
+    qs.set(k, String(v));
+  });
+  const s = qs.toString();
+  return s ? `${path}?${s}` : path;
 };
 
 /* ==============================
@@ -27,8 +38,9 @@ export const getById = async (id) => {
 ADMIN CRUD
 ============================== */
 
-export const adminList = async () => {
-  const r = await request("/api/products", { headers: authHeaders() });
+export const adminList = async ({ active } = {}) => {
+  const url = withQuery("/api/products", { active });
+  const r = await request(url, { headers: authHeaders() });
   return r?.data ?? r;
 };
 

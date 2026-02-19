@@ -48,6 +48,8 @@ const buildVariantsForSizes = (sizes, fromVariants = []) => {
     });
 };
 
+const labelSize = (size) => (size === UNICO ? "Único" : size);
+
 export default function AdminProductoForm() {
     const { id } = useParams();
     const editing = Boolean(id);
@@ -82,8 +84,8 @@ export default function AdminProductoForm() {
 
         adminGetById(id)
         .then((found) => {
-        if (!alive) return;
-        if (!found) return;
+            if (!alive) return;
+            if (!found) return;
 
             const avatarArr = cleanUrls(found.avatar);
 
@@ -158,15 +160,15 @@ export default function AdminProductoForm() {
         const stock = row?.stock;
 
         if (price === "" || price === null || price === undefined) {
-            vErrors.push(`Precio obligatorio en talle ${size}`);
+            vErrors.push(`Precio obligatorio en talle ${labelSize(size)}`);
         } else if (Number.isNaN(Number(price))) {
-            vErrors.push(`Precio inválido en talle ${size}`);
+            vErrors.push(`Precio inválido en talle ${labelSize(size)}`);
         }
 
         if (stock === "" || stock === null || stock === undefined) {
-            vErrors.push(`Stock obligatorio en talle ${size}`);
+            vErrors.push(`Stock obligatorio en talle ${labelSize(size)}`);
         } else if (Number.isNaN(Number(stock))) {
-            vErrors.push(`Stock inválido en talle ${size}`);
+            vErrors.push(`Stock inválido en talle ${labelSize(size)}`);
         }
         });
 
@@ -261,7 +263,7 @@ export default function AdminProductoForm() {
             </div>
 
             <Link to="/admin/productos">
-                <Button variant="ghost" size="sm" className="text-black border-black">
+                <Button variant="ghost" size="sm" className="!text-black !border-black">
                 ← Volver
                 </Button>
             </Link>
@@ -291,9 +293,7 @@ export default function AdminProductoForm() {
                     <textarea
                     className="min-h-[96px] p-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
                     value={form.description}
-                    onChange={(e) =>
-                        setForm((p) => ({ ...p, description: e.target.value }))
-                    }
+                    onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                     />
                 </div>
 
@@ -313,7 +313,7 @@ export default function AdminProductoForm() {
 
                 {/* Imágenes */}
                 <div className="grid gap-3">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">
                     <div>
                         <div className="text-sm text-ui-muted">Imágenes (máx {MAX_IMAGES})</div>
                         <div className="text-xs text-ui-muted">
@@ -333,7 +333,7 @@ export default function AdminProductoForm() {
                         <Button
                         type="button"
                         variant="ghost"
-                        className="text-black border-black"
+                        className="!text-black !border-black"
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
                         onClick={() => document.getElementById("admin-product-upload")?.click()}
                         >
@@ -348,7 +348,9 @@ export default function AdminProductoForm() {
                     <div className="grid gap-3 md:grid-cols-[240px_1fr]">
                         <div>
                         <ImageBox src={cover} alt={form.name || "Producto"} />
-                        <div className="text-xs text-ui-muted mt-2">Portada = primera imagen</div>
+                        <div className="text-xs text-ui-muted mt-2">
+                            Portada = primera imagen
+                        </div>
                         </div>
 
                         <div className="grid gap-3">
@@ -371,7 +373,7 @@ export default function AdminProductoForm() {
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    className="text-black border-black"
+                                    className="!text-black !border-black"
                                     onClick={() => removeAvatarAt(idx)}
                                 >
                                     Quitar
@@ -382,7 +384,7 @@ export default function AdminProductoForm() {
                         </div>
 
                         <div className="text-xs text-ui-muted">
-                            Podes quitar la imagen y volver a subirla.
+                            Podés quitar la imagen y volver a subirla.
                         </div>
                         </div>
                     </div>
@@ -399,34 +401,74 @@ export default function AdminProductoForm() {
 
                     {errors.variants && <div className="text-xs text-red-500">{errors.variants}</div>}
 
-                    <div className="rounded-md border border-ui-border overflow-hidden">
+                    {/* MOBILE: cards */}
+                    <div className="grid gap-3 sm:hidden">
+                    {sizes.map((size) => {
+                        const row =
+                        form.variants.find((v) => v.size === size) || { price: "", stock: "" };
+
+                        return (
+                        <div
+                            key={size}
+                            className="rounded-md border border-ui-border bg-ui-surface p-3 grid gap-3"
+                        >
+                            <div className="flex items-center justify-between">
+                            <div className="font-extrabold text-ui-text">{labelSize(size)}</div>
+                            <div className="text-xs text-ui-muted">Talle</div>
+                            </div>
+
+                            <div className="grid gap-2">
+                            <label className="text-xs text-ui-muted">Precio</label>
+                            <input
+                                className="h-11 px-3 rounded-md border border-ui-border bg-white/70 text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                value={row.price}
+                                onChange={(e) => setVariantField(size, "price", e.target.value)}
+                                placeholder="8500"
+                                inputMode="numeric"
+                            />
+                            </div>
+
+                            <div className="grid gap-2">
+                            <label className="text-xs text-ui-muted">Stock</label>
+                            <input
+                                className="h-11 px-3 rounded-md border border-ui-border bg-white/70 text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                value={row.stock}
+                                onChange={(e) => setVariantField(size, "stock", e.target.value)}
+                                placeholder="10"
+                                inputMode="numeric"
+                            />
+                            </div>
+                        </div>
+                        );
+                    })}
+                    </div>
+
+                    {/* DESKTOP: tabla */}
+                    <div className="hidden sm:block rounded-md border border-ui-border overflow-hidden">
                     <div className="grid grid-cols-[90px_1fr_1fr] bg-ui-surface p-3 text-xs text-ui-muted">
                         <div>Talle</div>
                         <div>Precio</div>
                         <div>Stock</div>
                     </div>
-                    
 
                     <div className="divide-y divide-ui-border">
                         {sizes.map((size) => {
                         const row =
-                            form.variants.find((v) => v.size === size) || {
-                            price: "",
-                            stock: "",
-                            };
+                            form.variants.find((v) => v.size === size) || { price: "", stock: "" };
 
                         return (
                             <div
                             key={size}
                             className="grid grid-cols-[90px_1fr_1fr] p-3 gap-3 items-center bg-white/50"
                             >
-                            <div className="font-bold text-ui-text">{size}</div>
+                            <div className="font-bold text-ui-text">{labelSize(size)}</div>
 
                             <input
                                 className="h-11 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
                                 value={row.price}
                                 onChange={(e) => setVariantField(size, "price", e.target.value)}
                                 placeholder="8500"
+                                inputMode="numeric"
                             />
 
                             <input
@@ -434,16 +476,16 @@ export default function AdminProductoForm() {
                                 value={row.stock}
                                 onChange={(e) => setVariantField(size, "stock", e.target.value)}
                                 placeholder="10"
+                                inputMode="numeric"
                             />
                             </div>
-                            
                         );
-                        
                         })}
                     </div>
+                    </div>
+
                     <div className="text-xs text-ui-muted">
-                            Para que el talle no sea público poné el stock en "0"
-                        </div>
+                    Para que el talle no sea público poné el stock en "0".
                     </div>
                 </div>
 
@@ -461,7 +503,7 @@ export default function AdminProductoForm() {
                     <Button
                     type="submit"
                     variant="ghost"
-                    className="text-black border-black"
+                    className="!text-black !border-black"
                     disabled={saving}
                     >
                     {saving ? "Guardando…" : "Guardar"}
@@ -474,3 +516,4 @@ export default function AdminProductoForm() {
         </main>
     );
 }
+

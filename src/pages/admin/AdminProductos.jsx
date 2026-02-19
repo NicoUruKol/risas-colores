@@ -21,12 +21,10 @@ const toImages = (p) => {
 
 const getSizesFromVariants = (variants) => {
     if (!Array.isArray(variants)) return [];
-    return variants
-        .map((v) => String(v?.size || "").trim())
-        .filter(Boolean);
-};
+    return variants.map((v) => String(v?.size || "").trim()).filter(Boolean);
+    };
 
-const formatSizes = (sizes = []) => {
+    const formatSizes = (sizes = []) => {
     const uniq = Array.from(new Set(sizes));
     if (!uniq.length) return "-";
     return uniq.join(" · ");
@@ -50,43 +48,86 @@ const totalStockFromVariants = (variants) => {
     return stocks.reduce((acc, n) => acc + n, 0);
 };
 
+const FILTERS = [
+    { value: "all", label: "Todos" },
+    { value: "true", label: "Activos" },
+    { value: "false", label: "Inactivos" },
+];
+
 export default function AdminProductos() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const load = async () => {
+    // ✅ por defecto: admin ve TODO (activos + inactivos)
+    const [activeFilter, setActiveFilter] = useState("all");
+
+    const load = async (active = activeFilter) => {
         setLoading(true);
-        const res = await adminList();
+        const res = await adminList({ active });
         setItems(Array.isArray(res) ? res : []);
         setLoading(false);
     };
 
     useEffect(() => {
-        load();
+        load("all");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        load(activeFilter);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeFilter]);
 
     const handleDelete = async (id) => {
         await adminDelete(id);
-        load();
+        load(activeFilter);
     };
+
+    const filterLabel = useMemo(
+        () => FILTERS.find((f) => f.value === activeFilter)?.label || "Todos",
+        [activeFilter]
+    );
 
     return (
         <main className="py-10">
         <Container className="grid gap-6">
-            <div className="flex items-start justify-between gap-4">
+            {/* Header */}
+            <div className="grid gap-4 sm:flex sm:items-start sm:justify-between">
             <div>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className="text-2xl font-extrabold text-ui-text mt-2">
-                Productos
-                </h1>
+                <h1 className="text-2xl font-extrabold text-ui-text mt-2">Productos</h1>
                 <p className="text-sm text-ui-muted mt-2">
                 Gestioná Remera, Pantalón, Buzo y Mochila.
                 </p>
             </div>
 
-            <Link to="/admin/productos/nuevo">
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                {/* Filtro (mobile-first) */}
+                <div className="flex items-center gap-2">
+                <span className="text-xs text-ui-muted">Mostrar:</span>
+                <select
+                    className="h-10 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                    value={activeFilter}
+                    onChange={(e) => setActiveFilter(e.target.value)}
+                    aria-label="Filtro de productos"
+                >
+                    {FILTERS.map((f) => (
+                    <option key={f.value} value={f.value}>
+                        {f.label}
+                    </option>
+                    ))}
+                </select>
+                </div>
+
+                <Link to="/admin/productos/nuevo">
                 <Button variant="primary">Nuevo producto</Button>
-            </Link>
+                </Link>
+            </div>
+            </div>
+
+            {/* Estado filtro */}
+            <div className="text-xs text-ui-muted">
+            Filtro actual: <b>{filterLabel}</b>
             </div>
 
             {loading ? (
@@ -95,7 +136,7 @@ export default function AdminProductos() {
             </Card>
             ) : items.length === 0 ? (
             <Card className="p-5">
-                <p className="text-ui-muted">No hay productos cargados.</p>
+                <p className="text-ui-muted">No hay productos para este filtro.</p>
             </Card>
             ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -120,8 +161,7 @@ export default function AdminProductos() {
                         </div>
 
                         <div className="text-xs text-ui-muted mt-1">
-                            Stock:{" "}
-                            {stockTotal === null ? "-" : String(stockTotal)}
+                            Stock: {stockTotal === null ? "-" : String(stockTotal)}
                             {" · "}
                             Estado: {p.active === false ? "Inactivo" : "Activo"}
                         </div>
@@ -132,9 +172,7 @@ export default function AdminProductos() {
                         </div>
 
                         <div className="font-extrabold text-brand-orange">
-                        {priceFrom === null
-                            ? "-"
-                            : `Desde $${priceFrom.toLocaleString("es-AR")}`}
+                        {priceFrom === null ? "-" : `Desde $${priceFrom.toLocaleString("es-AR")}`}
                         </div>
                     </div>
 
@@ -142,7 +180,7 @@ export default function AdminProductos() {
                         <Link to={`/admin/productos/${p.id}/editar`}>
                         <Button
                             variant="ghost"
-                            className="w-full text-black border-black"
+                            className="w-full !text-black !border-black"
                         >
                             Editar
                         </Button>
@@ -150,7 +188,7 @@ export default function AdminProductos() {
 
                         <Button
                         variant="ghost"
-                        className="w-full text-black border-black"
+                        className="w-full !text-black !border-black"
                         onClick={() => handleDelete(p.id)}
                         >
                         Eliminar

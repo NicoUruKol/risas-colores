@@ -69,7 +69,7 @@ export default function AdminLogin() {
 
                 {err ? <p className="text-sm text-red-500">{err}</p> : null}
 
-                <Button variant="gosht" disabled={sending}>
+                <Button variant="ghost" disabled={sending}>
                 {sending ? "Ingresando…" : "Entrar"}
                 </Button>
             </form>
