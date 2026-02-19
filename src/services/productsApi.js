@@ -2,7 +2,7 @@ import { request } from "./http";
 
 const TOKEN_KEY = "token";
 
-// ✅ ahora el token vive en sessionStorage (se borra al cerrar pestaña/ventana)
+// ✅ token en sessionStorage
 const getAdminToken = () => sessionStorage.getItem(TOKEN_KEY) || "";
 
 const authHeaders = () => {
@@ -72,5 +72,27 @@ export const adminDelete = async (id) => {
 
 export const adminGetById = async (id) => {
   const r = await request(`/api/products/${id}/admin`, { headers: authHeaders() });
+  return r?.data ?? r;
+};
+
+/* ==============================
+ADMIN STOCK (movimientos)
+PATCH /api/products/:id/stock
+body: { size, delta, reason? }
+============================== */
+
+export const adminAdjustStock = async (id, { size, delta, reason } = {}) => {
+  const payload = {
+    size: String(size ?? "").trim(),
+    delta: Number(delta),
+    reason: reason === undefined || reason === null ? undefined : String(reason).trim(),
+  };
+
+  const r = await request(`/api/products/${id}/stock`, {
+    method: "PATCH",
+    body: payload,
+    headers: authHeaders(),
+  });
+
   return r?.data ?? r;
 };

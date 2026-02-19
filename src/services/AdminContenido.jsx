@@ -5,10 +5,10 @@ import Badge from "../../components/ui/Badge";
 
 import { mediaList, mediaUploadOne, mediaDelete } from "../../services/apiMedia";
 import {
-  getHomeHeroContent,
-  getElJardinGalleryContent,
-  saveHomeHeroContent,
-  saveElJardinGalleryContent,
+    getHomeHeroContent,
+    getElJardinGalleryContent,
+    saveHomeHeroContent,
+    saveElJardinGalleryContent,
 } from "../../services/apiContent";
 
 const FOLDER_HERO = "risas-colores/web/Hero";

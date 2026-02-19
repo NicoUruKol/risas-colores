@@ -120,7 +120,7 @@ export default function AdminProductos() {
                 </div>
 
                 <Link to="/admin/productos/nuevo">
-                <Button variant="primary">Nuevo producto</Button>
+                <Button variant="ghost" size="sm" className="text-black border-black">Nuevo producto</Button>
                 </Link>
             </div>
             </div>

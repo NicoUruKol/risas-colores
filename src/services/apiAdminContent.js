@@ -1,12 +1,4 @@
-import { request } from "./http";
-
-const getAdminToken = () =>
-    localStorage.getItem("token") || localStorage.getItem("adminToken") || "";
-
-const authHeaders = () => {
-    const token = getAdminToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import { request, authHeaders } from "./http";
 
 export const adminSaveHomeHero = async (payload) => {
     const r = await request("/api/content/home-hero", {
@@ -25,3 +17,4 @@ export const adminSaveElJardinGallery = async (payload) => {
     });
     return r?.saved ?? r;
 };
+

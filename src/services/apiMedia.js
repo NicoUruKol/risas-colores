@@ -1,4 +1,4 @@
-import { request } from "./http";
+import { request, authHeaders } from "./http";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -8,11 +8,19 @@ const joinUrl = (base, path) => {
     return `${b}/${p}`;
 };
 
-const getAdminToken = () => localStorage.getItem("token") || "";
+const redirectToAdminLogin = () => {
+    const routerType = import.meta.env.VITE_ROUTER;
+    const target = routerType === "hash" ? "/#/admin/login" : "/admin/login";
+    window.location.assign(target);
+};
 
-const authHeaders = () => {
-    const token = getAdminToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+const clearAdminSession = () => {
+    try {
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("admin_last_activity");
+    } catch {
+        // noop
+    }
 };
 
 export const mediaList = async (folder) => {
@@ -44,6 +52,11 @@ export const mediaUploadOne = async (folder, file) => {
     }
 
     if (!res.ok) {
+        if ((res.status === 401 || res.status === 403) && authHeaders().Authorization) {
+        clearAdminSession();
+        redirectToAdminLogin();
+        }
+
         const err = new Error(data?.message || `Error HTTP ${res.status}`);
         err.status = res.status;
         err.data = data;

@@ -6,13 +6,26 @@ import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import ImageBox from "../../components/ui/ImageBox";
 
-import { adminCreate, adminUpdate, adminGetById } from "../../services/productsApi";
+import {
+    adminCreate,
+    adminUpdate,
+    adminGetById,
+    adminAdjustStock,
+} from "../../services/productsApi";
 import { mediaUploadOne } from "../../services/apiMedia";
 
 const TALLES = ["1", "2", "3", "4", "5"];
 const UNICO = "U";
 const MAX_IMAGES = 5;
 const PRODUCTS_FOLDER = "risas-colores/web/products";
+
+const normalizeSize = (s) => {
+    const raw = String(s ?? "").trim();
+    if (!raw) return "";
+    const low = raw.toLowerCase();
+    if (low === "único" || low === "unico" || raw === "U") return "U";
+    return raw;
+};
 
 const cleanUrls = (arr) =>
     (Array.isArray(arr) ? arr : [])
@@ -24,7 +37,7 @@ const buildVariantsForSizes = (sizes, fromVariants = []) => {
     const map = new Map(
         (Array.isArray(fromVariants) ? fromVariants : [])
         .map((v) => {
-            const size = String(v?.size ?? "").trim();
+            const size = normalizeSize(v?.size);
             if (!size) return null;
             return [
             size,
@@ -40,15 +53,16 @@ const buildVariantsForSizes = (sizes, fromVariants = []) => {
 
     return sizes.map((size) => {
         const v = map.get(size) || {};
+        const price = v.price;
+        const stock = v.stock;
+
         return {
         size,
-        price: v.price === "" ? "" : String(v.price),
-        stock: v.stock === "" ? "" : String(v.stock),
+        price: price === "" || price === null || price === undefined ? "" : String(price),
+        stock: stock === "" || stock === null || stock === undefined ? "" : String(stock),
         };
     });
 };
-
-const labelSize = (size) => (size === UNICO ? "Único" : size);
 
 export default function AdminProductoForm() {
     const { id } = useParams();
@@ -60,13 +74,15 @@ export default function AdminProductoForm() {
     const [uploading, setUploading] = useState(false);
     const [errors, setErrors] = useState({});
 
+    // ajustes de stock por talle (solo edición)
+    const [stockDelta, setStockDelta] = useState({}); // { [size]: string }
+    const [stockReason, setStockReason] = useState("");
+    const [stockApplying, setStockApplying] = useState(false);
+    const [stockErr, setStockErr] = useState("");
+
     // modo talles: "numeric" (1-5) o "unico"
     const [sizeMode, setSizeMode] = useState("numeric");
-
-    const sizes = useMemo(
-        () => (sizeMode === "unico" ? [UNICO] : TALLES),
-        [sizeMode]
-    );
+    const sizes = useMemo(() => (sizeMode === "unico" ? [UNICO] : TALLES), [sizeMode]);
 
     const [form, setForm] = useState({
         name: "",
@@ -76,41 +92,46 @@ export default function AdminProductoForm() {
         variants: buildVariantsForSizes(TALLES),
     });
 
+    const loadProduct = async () => {
+        if (!editing) return null;
+        const found = await adminGetById(id);
+        if (!found) return null;
+
+        const avatarArr = cleanUrls(found.avatar);
+
+        const foundSizes = Array.from(
+        new Set(
+            (Array.isArray(found.variants) ? found.variants : [])
+            .map((v) => normalizeSize(v?.size))
+            .filter(Boolean)
+        )
+        );
+
+        const isUnico = foundSizes.includes(UNICO);
+        const nextMode = isUnico ? "unico" : "numeric";
+        const nextSizes = isUnico ? [UNICO] : TALLES;
+
+        setSizeMode(nextMode);
+
+        setForm({
+        name: found.name ?? "",
+        description: found.description ?? "",
+        active: found.active !== false,
+        avatar: avatarArr,
+        variants: buildVariantsForSizes(nextSizes, found.variants),
+        });
+
+        return found;
+    };
+
     useEffect(() => {
         if (!editing) return;
 
         let alive = true;
         setLoading(true);
 
-        adminGetById(id)
-        .then((found) => {
-            if (!alive) return;
-            if (!found) return;
-
-            const avatarArr = cleanUrls(found.avatar);
-
-            const foundSizes = Array.from(
-            new Set(
-                (Array.isArray(found.variants) ? found.variants : [])
-                .map((v) => String(v?.size ?? "").trim())
-                .filter(Boolean)
-            )
-            );
-
-            const isUnico = foundSizes.includes(UNICO);
-            const nextMode = isUnico ? "unico" : "numeric";
-            const nextSizes = isUnico ? [UNICO] : TALLES;
-
-            setSizeMode(nextMode);
-
-            setForm({
-            name: found.name ?? "",
-            description: found.description ?? "",
-            active: found.active !== false,
-            avatar: avatarArr,
-            variants: buildVariantsForSizes(nextSizes, found.variants),
-            });
-        })
+        loadProduct()
+        .catch(() => {})
         .finally(() => {
             if (!alive) return;
             setLoading(false);
@@ -119,6 +140,7 @@ export default function AdminProductoForm() {
         return () => {
         alive = false;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editing, id]);
 
     // si cambia el modo (solo relevante al crear), re-armo variants preservando lo que se pueda
@@ -138,15 +160,12 @@ export default function AdminProductoForm() {
     const setVariantField = (size, field, value) => {
         setForm((prev) => ({
         ...prev,
-        variants: prev.variants.map((v) =>
-            v.size === size ? { ...v, [field]: value } : v
-        ),
+        variants: prev.variants.map((v) => (v.size === size ? { ...v, [field]: value } : v)),
         }));
     };
 
     const validate = () => {
         const e = {};
-
         if (!String(form.name).trim()) e.name = "Obligatorio";
 
         const avatars = cleanUrls(form.avatar);
@@ -160,20 +179,21 @@ export default function AdminProductoForm() {
         const stock = row?.stock;
 
         if (price === "" || price === null || price === undefined) {
-            vErrors.push(`Precio obligatorio en talle ${labelSize(size)}`);
+            vErrors.push(`Precio obligatorio en talle ${size === "U" ? "Único" : size}`);
         } else if (Number.isNaN(Number(price))) {
-            vErrors.push(`Precio inválido en talle ${labelSize(size)}`);
+            vErrors.push(`Precio inválido en talle ${size === "U" ? "Único" : size}`);
         }
 
+        // ✅ Crear: pedimos stock inicial válido
+        // ✅ Editar: stock se mantiene (solo lectura), pero igual validamos por seguridad.
         if (stock === "" || stock === null || stock === undefined) {
-            vErrors.push(`Stock obligatorio en talle ${labelSize(size)}`);
+            vErrors.push(`Stock obligatorio en talle ${size === "U" ? "Único" : size}`);
         } else if (Number.isNaN(Number(stock))) {
-            vErrors.push(`Stock inválido en talle ${labelSize(size)}`);
+            vErrors.push(`Stock inválido en talle ${size === "U" ? "Único" : size}`);
         }
         });
 
         if (vErrors.length) e.variants = vErrors[0];
-
         return e;
     };
 
@@ -234,9 +254,9 @@ export default function AdminProductoForm() {
         variants: sizes.map((size) => {
             const row = form.variants.find((v) => v.size === size) || {};
             return {
-            size,
+            size, // U o 1..5
             price: Number(row.price),
-            stock: Number(row.stock),
+            stock: Number(row.stock), // ✅ en edición va “igual” (solo lectura), no se pisa
             };
         }),
         };
@@ -247,6 +267,44 @@ export default function AdminProductoForm() {
         navigate("/admin/productos");
         } finally {
         setSaving(false);
+        }
+    };
+
+    const applyStockDelta = async (size) => {
+        if (!editing) return;
+
+        setStockErr("");
+        const raw = String(stockDelta[size] ?? "").trim();
+
+        // permitir "+5", "-2", "5"
+        const n = Number(raw);
+        if (!Number.isFinite(n) || !Number.isInteger(n) || n === 0) {
+        setStockErr("El ajuste debe ser un entero distinto de 0 (ej: +5 o -2).");
+        return;
+        }
+
+        try {
+        setStockApplying(true);
+        await adminAdjustStock(id, {
+            size,
+            delta: n,
+            reason: stockReason,
+        });
+
+        // ✅ refrescar el producto para traer stock actualizado y evitar “pisadas” luego
+        await loadProduct();
+
+        setStockDelta((p) => ({ ...p, [size]: "" }));
+        setStockReason("");
+        } catch (err) {
+        // si te llega token vencido y tu http no lo maneja todavía:
+        if (err?.status === 401 || err?.status === 403) {
+            navigate("/admin/login", { replace: true, state: { from: `/admin/productos/${id}/editar` } });
+            return;
+        }
+        setStockErr(err?.message || "Error aplicando ajuste de stock");
+        } finally {
+        setStockApplying(false);
         }
     };
 
@@ -263,7 +321,7 @@ export default function AdminProductoForm() {
             </div>
 
             <Link to="/admin/productos">
-                <Button variant="ghost" size="sm" className="!text-black !border-black">
+                <Button variant="ghost" size="sm" className="text-black border-black">
                 ← Volver
                 </Button>
             </Link>
@@ -313,7 +371,7 @@ export default function AdminProductoForm() {
 
                 {/* Imágenes */}
                 <div className="grid gap-3">
-                    <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">
+                    <div className="flex items-center justify-between gap-3">
                     <div>
                         <div className="text-sm text-ui-muted">Imágenes (máx {MAX_IMAGES})</div>
                         <div className="text-xs text-ui-muted">
@@ -333,7 +391,7 @@ export default function AdminProductoForm() {
                         <Button
                         type="button"
                         variant="ghost"
-                        className="!text-black !border-black"
+                        className="text-black border-black"
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
                         onClick={() => document.getElementById("admin-product-upload")?.click()}
                         >
@@ -348,24 +406,15 @@ export default function AdminProductoForm() {
                     <div className="grid gap-3 md:grid-cols-[240px_1fr]">
                         <div>
                         <ImageBox src={cover} alt={form.name || "Producto"} />
-                        <div className="text-xs text-ui-muted mt-2">
-                            Portada = primera imagen
-                        </div>
+                        <div className="text-xs text-ui-muted mt-2">Portada = primera imagen</div>
                         </div>
 
                         <div className="grid gap-3">
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {(form.avatar || []).map((url, idx) => (
-                            <div
-                                key={url + idx}
-                                className="rounded-md border border-ui-border p-2 bg-ui-surface"
-                            >
+                            <div key={url + idx} className="rounded-md border border-ui-border p-2 bg-ui-surface">
                                 <div className="rounded-md overflow-hidden">
-                                <img
-                                    src={url}
-                                    alt={`img-${idx + 1}`}
-                                    className="w-full h-32 object-cover"
-                                />
+                                <img src={url} alt={`img-${idx + 1}`} className="w-full h-32 object-cover" />
                                 </div>
 
                                 <div className="mt-2 flex items-center justify-between gap-2">
@@ -373,7 +422,7 @@ export default function AdminProductoForm() {
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    className="!text-black !border-black"
+                                    className="text-black border-black"
                                     onClick={() => removeAvatarAt(idx)}
                                 >
                                     Quitar
@@ -383,9 +432,7 @@ export default function AdminProductoForm() {
                             ))}
                         </div>
 
-                        <div className="text-xs text-ui-muted">
-                            Podés quitar la imagen y volver a subirla.
-                        </div>
+                        <div className="text-xs text-ui-muted">Podés quitar la imagen y volver a subirla.</div>
                         </div>
                     </div>
                     ) : (
@@ -401,92 +448,130 @@ export default function AdminProductoForm() {
 
                     {errors.variants && <div className="text-xs text-red-500">{errors.variants}</div>}
 
-                    {/* MOBILE: cards */}
-                    <div className="grid gap-3 sm:hidden">
-                    {sizes.map((size) => {
-                        const row =
-                        form.variants.find((v) => v.size === size) || { price: "", stock: "" };
-
-                        return (
-                        <div
-                            key={size}
-                            className="rounded-md border border-ui-border bg-ui-surface p-3 grid gap-3"
-                        >
-                            <div className="flex items-center justify-between">
-                            <div className="font-extrabold text-ui-text">{labelSize(size)}</div>
-                            <div className="text-xs text-ui-muted">Talle</div>
-                            </div>
-
-                            <div className="grid gap-2">
-                            <label className="text-xs text-ui-muted">Precio</label>
-                            <input
-                                className="h-11 px-3 rounded-md border border-ui-border bg-white/70 text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                                value={row.price}
-                                onChange={(e) => setVariantField(size, "price", e.target.value)}
-                                placeholder="8500"
-                                inputMode="numeric"
-                            />
-                            </div>
-
-                            <div className="grid gap-2">
-                            <label className="text-xs text-ui-muted">Stock</label>
-                            <input
-                                className="h-11 px-3 rounded-md border border-ui-border bg-white/70 text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                                value={row.stock}
-                                onChange={(e) => setVariantField(size, "stock", e.target.value)}
-                                placeholder="10"
-                                inputMode="numeric"
-                            />
-                            </div>
-                        </div>
-                        );
-                    })}
-                    </div>
-
-                    {/* DESKTOP: tabla */}
-                    <div className="hidden sm:block rounded-md border border-ui-border overflow-hidden">
-                    <div className="grid grid-cols-[90px_1fr_1fr] bg-ui-surface p-3 text-xs text-ui-muted">
+                    <div className="rounded-md border border-ui-border overflow-hidden">
+                    {/* header (solo desktop) */}
+                    <div className="hidden md:grid md:grid-cols-[90px_1fr_1fr_1fr_auto] bg-ui-surface p-3 text-xs text-ui-muted">
                         <div>Talle</div>
                         <div>Precio</div>
                         <div>Stock</div>
+                        <div>Ajuste (+/-)</div>
+                        <div></div>
                     </div>
 
                     <div className="divide-y divide-ui-border">
                         {sizes.map((size) => {
-                        const row =
-                            form.variants.find((v) => v.size === size) || { price: "", stock: "" };
+                        const row = form.variants.find((v) => v.size === size) || { price: "", stock: "" };
+                        const labelSize = size === "U" ? "Único" : size;
 
                         return (
                             <div
                             key={size}
-                            className="grid grid-cols-[90px_1fr_1fr] p-3 gap-3 items-center bg-white/50"
+                            className="p-3 bg-white/50 md:grid md:grid-cols-[90px_1fr_1fr_1fr_auto] md:gap-3 md:items-center"
                             >
-                            <div className="font-bold text-ui-text">{labelSize(size)}</div>
+                            {/* talle */}
+                            <div className="font-bold text-ui-text">{labelSize}</div>
 
-                            <input
-                                className="h-11 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                            {/* precio */}
+                            <div className="mt-2 md:mt-0">
+                                <div className="text-xs text-ui-muted md:hidden mb-1">Precio</div>
+                                <input
+                                className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
                                 value={row.price}
                                 onChange={(e) => setVariantField(size, "price", e.target.value)}
                                 placeholder="8500"
-                                inputMode="numeric"
-                            />
+                                />
+                            </div>
 
-                            <input
-                                className="h-11 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                                value={row.stock}
-                                onChange={(e) => setVariantField(size, "stock", e.target.value)}
-                                placeholder="10"
-                                inputMode="numeric"
-                            />
+                            {/* stock */}
+                            <div className="mt-3 md:mt-0">
+                                <div className="text-xs text-ui-muted md:hidden mb-1">Stock</div>
+
+                                {/* Crear: editable (stock inicial) */}
+                                {!editing ? (
+                                <input
+                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    value={row.stock}
+                                    onChange={(e) => setVariantField(size, "stock", e.target.value)}
+                                    placeholder="10"
+                                />
+                                ) : (
+                                <input
+                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text opacity-80"
+                                    value={row.stock}
+                                    readOnly
+                                    tabIndex={-1}
+                                />
+                                )}
+                            </div>
+
+                            {/* ajuste */}
+                            <div className="mt-3 md:mt-0">
+                                <div className="text-xs text-ui-muted md:hidden mb-1">Ajuste (+/-)</div>
+
+                                {editing ? (
+                                <input
+                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    value={stockDelta[size] ?? ""}
+                                    onChange={(e) =>
+                                    setStockDelta((p) => ({ ...p, [size]: e.target.value }))
+                                    }
+                                    placeholder="+5 o -2"
+                                />
+                                ) : (
+                                <div className="text-xs text-ui-muted md:text-sm">
+                                    (Disponible al editar)
+                                </div>
+                                )}
+                            </div>
+
+                            {/* aplicar */}
+                            <div className="mt-3 md:mt-0">
+                                {editing ? (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="text-black border-black w-full md:w-auto"
+                                    disabled={stockApplying}
+                                    onClick={() => applyStockDelta(size)}
+                                >
+                                    {stockApplying ? "Aplicando…" : "Aplicar"}
+                                </Button>
+                                ) : (
+                                <div />
+                                )}
+                            </div>
+
+                            {/* motivo (solo una vez abajo, en mobile queda mejor acá) */}
+                            {editing ? (
+                                <div className="mt-3 md:col-span-5">
+                                <div className="text-xs text-ui-muted mb-1">
+                                    Motivo (opcional)
+                                </div>
+                                <input
+                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    value={stockReason}
+                                    onChange={(e) => setStockReason(e.target.value)}
+                                    placeholder="Ej: reposición, ajuste inventario, etc."
+                                />
+                                </div>
+                            ) : null}
                             </div>
                         );
                         })}
                     </div>
+
+                    {editing ? (
+                        <div className="text-xs text-ui-muted p-3">
+                        <b>Ajuste</b> de <b>STOCK</b> queda registrado en el historial.
+                        </div>
+                    ) : (
+                        <div className="text-xs text-ui-muted p-3">
+                        En la creación cargás el <b>stock inicial</b>. Luego se ajusta por movimientos.
+                        </div>
+                    )}
                     </div>
 
-                    <div className="text-xs text-ui-muted">
-                    Para que el talle no sea público poné el stock en "0".
-                    </div>
+                    {stockErr ? <div className="text-xs text-red-500">{stockErr}</div> : null}
                 </div>
 
                 {/* Activo + Guardar */}
@@ -500,12 +585,7 @@ export default function AdminProductoForm() {
                     Activo
                     </label>
 
-                    <Button
-                    type="submit"
-                    variant="ghost"
-                    className="!text-black !border-black"
-                    disabled={saving}
-                    >
+                    <Button type="submit" variant="ghost" className="text-black border-black" disabled={saving}>
                     {saving ? "Guardando…" : "Guardar"}
                     </Button>
                 </div>
@@ -516,4 +596,3 @@ export default function AdminProductoForm() {
         </main>
     );
 }
-
