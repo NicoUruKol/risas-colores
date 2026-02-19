@@ -18,6 +18,7 @@ import AdminProductoForm from "../pages/admin/AdminProductoForm";
 import AdminContenido from "../pages/admin/AdminContenido";
 import AdminPedidos from "../pages/admin/AdminPedidos";
 import AdminLogin from "../pages/admin/AdminLogin";
+import AdminStockMovements from "../pages/admin/AdminStockMovements";
 
 import AdminProtected from "./components/auth/AdminProtected";
 import { AdminAuthProvider } from "../context/AdminAuthContext";
@@ -54,6 +55,7 @@ const routes = [
           { path: "productos", element: <AdminProductos /> },
           { path: "productos/nuevo", element: <AdminProductoForm /> },
           { path: "productos/:id/editar", element: <AdminProductoForm /> },
+          { path: "stock", element: <AdminStockMovements /> },
 
           { path: "contenido", element: <AdminContenido /> },
           { path: "pedidos", element: <AdminPedidos /> },

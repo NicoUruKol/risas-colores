@@ -45,6 +45,7 @@ export default function AdminLayout() {
             <aside className={styles.sidebar}>
                 <nav className={styles.nav}>
                 <NavItem to="/admin/productos">Productos</NavItem>
+                <NavItem to="/admin/stock">Stock</NavItem>
                 <NavItem to="/admin/contenido">Contenido</NavItem>
                 <NavItem to="/admin/pedidos">Pedidos</NavItem>
                 </nav>

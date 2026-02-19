@@ -1,0 +1,193 @@
+/* ==============================
+AdminStockMovements
+============================== */
+
+.page {
+  display: grid;
+  gap: 24px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin-top: 8px;
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.sub {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ui-muted, rgba(0,0,0,0.6));
+}
+
+/* ==============================
+Filters
+============================== */
+
+.filtersCard {
+  padding: 20px;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  color: var(--ui-muted, rgba(0,0,0,0.6));
+}
+
+.input {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-border, rgba(0,0,0,0.12));
+  background: var(--ui-surface, rgba(255,255,255,0.7));
+  color: var(--ui-text, rgba(0,0,0,0.9));
+  outline: none;
+}
+
+.input:focus {
+  box-shadow: 0 0 0 4px rgba(74,144,194,0.25);
+}
+
+/* widths (desktop nice) */
+.wCode {
+  flex: 1;
+  min-width: 180px;
+  max-width: 220px;
+}
+
+.wSize {
+  flex: 1;
+  min-width: 160px;
+  max-width: 220px;
+}
+
+.wType {
+  flex: 2;
+  min-width: 260px;
+}
+
+.wOrder {
+  flex: 1;
+  min-width: 200px;
+}
+
+.wLimit {
+  width: 140px;
+  min-width: 140px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* mobile-first: buttons full width */
+.actionBtn {
+  width: 100%;
+}
+
+.error {
+  font-size: 14px;
+  color: #ef4444;
+}
+
+/* ==============================
+Results
+============================== */
+
+.tableWrap {
+  overflow: hidden;
+  padding: 0;
+}
+
+.tableHead {
+  display: grid;
+  grid-template-columns: 180px 110px 90px 120px 140px 1fr;
+  gap: 0;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--ui-muted, rgba(0,0,0,0.6));
+  background: var(--ui-surface, rgba(255,255,255,0.7));
+  border-bottom: 1px solid var(--ui-border, rgba(0,0,0,0.12));
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 180px 110px 90px 120px 140px 1fr;
+  gap: 0;
+  padding: 12px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.5);
+  border-top: 1px solid var(--ui-border, rgba(0,0,0,0.12));
+}
+
+.muted {
+  color: var(--ui-muted, rgba(0,0,0,0.6));
+}
+
+.bold {
+  font-weight: 800;
+}
+
+/* mobile cards */
+.cards {
+  display: grid;
+  gap: 12px;
+}
+
+.cardRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.delta {
+  font-weight: 800;
+}
+
+/* ==============================
+Responsive
+============================== */
+
+@media (min-width: 640px) {
+  .actionBtn {
+    width: auto;
+  }
+}
+
+@media (max-width: 1023px) {
+  .tableWrap {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .cards {
+    display: none;
+  }
+}
