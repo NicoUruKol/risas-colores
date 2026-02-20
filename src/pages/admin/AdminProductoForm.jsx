@@ -443,7 +443,7 @@ export default function AdminProductoForm() {
                 {/* Variants */}
                 <div className="grid gap-2">
                     <div className="text-sm text-ui-muted">
-                    Precio y stock por talle {sizeMode === "unico" ? "(Único)" : "(1–5)"}
+                    Editá precio y stock por talle {sizeMode === "unico" ? "(Único)" : "(1–5)"}
                     </div>
 
                     {errors.variants && <div className="text-xs text-red-500">{errors.variants}</div>}

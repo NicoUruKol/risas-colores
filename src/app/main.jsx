@@ -20,6 +20,8 @@ import AdminPedidos from "../pages/admin/AdminPedidos";
 import AdminLogin from "../pages/admin/AdminLogin";
 import AdminStockMovements from "../pages/admin/AdminStockMovements";
 import AdminGallery from "../pages/admin/AdminGallery";
+import AdminHero from "../pages/admin/AdminHero";
+
 
 import AdminProtected from "./components/auth/AdminProtected";
 import { AdminAuthProvider } from "../context/AdminAuthContext";
@@ -57,6 +59,7 @@ const routes = [
           { path: "productos/nuevo", element: <AdminProductoForm /> },
           { path: "productos/:id/editar", element: <AdminProductoForm /> },
           { path: "stock", element: <AdminStockMovements /> },
+          { path: "contenido/hero", element: <AdminHero /> },
           { path: "contenido/galeria", element: <AdminGallery /> },
           { path: "contenido", element: <AdminContenido /> },
           { path: "pedidos", element: <AdminPedidos /> },

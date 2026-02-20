@@ -1,5 +1,5 @@
 /* ==============================
-AdminGallery (mobile-first)
+AdminHero (mobile-first)
 ============================== */
 
 .page {
@@ -13,10 +13,6 @@ AdminGallery (mobile-first)
   display: grid;
   gap: 16px;
 }
-
-/* ==============================
-Header
-============================== */
 
 .header {
   display: flex;
@@ -33,54 +29,33 @@ Header
 
 .headerRight {
   display: flex;
-  justify-content: flex-end;
-  flex-wrap: wrap;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .title {
   font-size: 26px;
   line-height: 1.1;
   font-weight: 800;
-  margin: 0;
 }
 
 .sub {
   font-size: 14px;
   opacity: 0.75;
-  margin: 0;
 }
 
-/* ==============================
-Status cards
-============================== */
-
 .errorCard {
-  padding: 14px;
+  padding: 12px;
 }
 
 .errorText {
   font-size: 14px;
   color: #ef4444;
-  margin: 0;
 }
-
-.loadingCard {
-  padding: 16px;
-}
-
-.muted {
-  font-size: 14px;
-  opacity: 0.75;
-  margin: 0;
-}
-
-/* ==============================
-Actions
-============================== */
 
 .actionsCard {
-  padding: 14px;
+  padding: 16px;
   display: grid;
   gap: 10px;
 }
@@ -93,13 +68,9 @@ Actions
 
 .meta {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   font-size: 13px;
   opacity: 0.85;
-}
-
-.metaRow {
-  line-height: 1.2;
 }
 
 .metaStrong {
@@ -112,21 +83,19 @@ Actions
   gap: 10px;
 }
 
-/* Botones bajos + aire (sin que se peguen) */
-.actionsBtns :global(button) {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
-}
-
 .tip {
   font-size: 12px;
   opacity: 0.75;
 }
 
-/* ==============================
-Main split
-============================== */
+.loadingCard {
+  padding: 16px;
+}
+
+.muted {
+  font-size: 14px;
+  opacity: 0.75;
+}
 
 .twoCol {
   display: grid;
@@ -134,7 +103,7 @@ Main split
 }
 
 .panel {
-  padding: 14px;
+  padding: 16px;
   display: grid;
   gap: 12px;
 }
@@ -151,10 +120,6 @@ Main split
   font-size: 14px;
 }
 
-/* ==============================
-Library (Cloudinary)
-============================== */
-
 .gridLibrary {
   display: grid;
   gap: 12px;
@@ -162,17 +127,17 @@ Library (Cloudinary)
 }
 
 .itemCard {
-  border: 1px solid rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   padding: 10px;
-  background: rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.7);
   display: grid;
   gap: 10px;
 }
 
 .itemCardSelected {
   border-color: rgba(246, 166, 90, 0.95);
-  box-shadow: 0 0 0 4px rgba(246, 166, 90, 0.14);
+  box-shadow: 0 0 0 4px rgba(246, 166, 90, 0.16);
 }
 
 .thumb {
@@ -188,57 +153,43 @@ Library (Cloudinary)
   display: block;
 }
 
-.itemMeta{
-  display: grid;
-  gap: 4px;
-  align-items: start;
+.itemMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.itemName{
+.itemName {
   font-size: 12px;
-  opacity: 0.80;
-  min-width: 0;
+  opacity: 0.78;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 1.2;
+  min-width: 0;
 }
 
-.itemMark{
+.itemMark {
   font-size: 12px;
-  opacity: 0.70;
-  line-height: 1.2;
+  opacity: 0.75;
   white-space: nowrap;
 }
 
-/* botones con aire y sin “aplastar” */
-.itemActions{
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* en desktop, 2 columnas */
+.itemActions {
+  display: flex;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-.itemActions :global(button){
-  height: 32px;         /* un toque más bajos */
-  padding: 0 10px;
+.itemActions :global(button) {
+  height: 34px;
+  padding: 0 12px;
   font-size: 13px;
-}
-
-/* En mobile, vuelven a 1 columna para que no se peguen */
-@media (max-width: 639px){
-  .itemActions{
-    grid-template-columns: 1fr;
-  }
 }
 
 .moreWrap {
   padding-top: 6px;
 }
-
-/* ==============================
-Selected (orden público)
-============================== */
 
 .selectedList {
   display: grid;
@@ -246,10 +197,10 @@ Selected (orden público)
 }
 
 .selectedCard {
-  border: 1px solid rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 16px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.7);
   display: grid;
   gap: 12px;
 }
@@ -266,13 +217,12 @@ Selected (orden público)
   opacity: 0.75;
 }
 
-/* Botonera compacta (no alta) */
 .selectedBtns {
   display: flex;
-  align-items: center;
   gap: 8px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .selectedBtns :global(button) {
@@ -281,15 +231,10 @@ Selected (orden público)
   font-size: 13px;
 }
 
-/* Flechas compactas */
 .selectedBtns :global(button:nth-child(1)),
 .selectedBtns :global(button:nth-child(2)) {
   width: 38px;
-  min-width: 38px;
-  padding-left: 0;
-  padding-right: 0;
-  display: inline-flex;
-  justify-content: center;
+  padding: 0;
 }
 
 .selectedThumb {
@@ -300,23 +245,28 @@ Selected (orden público)
 
 .selectedImg {
   width: 100%;
-  height: 180px;
+  height: 190px;
   object-fit: cover;
   display: block;
 }
 
-.altField {
+.fieldsGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.field {
   display: grid;
   gap: 6px;
 }
 
-.altLabel {
+.label {
   font-size: 12px;
   opacity: 0.75;
 }
 
-.altInput {
-  height: 40px;
+.input {
+  height: 44px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -324,7 +274,7 @@ Selected (orden público)
   outline: none;
 }
 
-.altInput:focus {
+.input:focus {
   box-shadow: 0 0 0 4px rgba(74, 144, 194, 0.25);
 }
 
@@ -333,15 +283,11 @@ Selected (orden público)
   opacity: 0.75;
 }
 
-/* ==============================
->= 640px
-============================== */
 @media (min-width: 640px) {
   .actionsTop {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
   }
 
   .actionsBtns {
@@ -350,27 +296,25 @@ Selected (orden público)
   }
 
   .gridLibrary {
-  display: grid;
-  gap: 16px;
-
-}
-
-  /* En desktop: botones en 2 columnas (no se pisan y quedan “como antes”) */
-  .itemActions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .thumbImg {
     height: 160px;
   }
+
+  .fieldsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-/* ==============================
->= 1024px (2 columnas: biblioteca + seleccionadas)
-============================== */
 @media (min-width: 1024px) {
   .twoCol {
     grid-template-columns: minmax(0, 1fr) 420px;
     align-items: start;
+  }
+
+  .gridLibrary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

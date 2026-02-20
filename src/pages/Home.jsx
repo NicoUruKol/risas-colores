@@ -26,46 +26,62 @@ export default function Home() {
     );
 
     // Content desde backend (Firestore)
-    const [heroContent, setHeroContent] = useState({
-        title: "",
-        subtitle: "",
+        const [heroContent, setHeroContent] = useState({
         items: [],
-    });
+        });
 
-    useEffect(() => {
+        useEffect(() => {
         let alive = true;
 
         getHomeHeroContent()
-        .then((data) => {
+            .then((data) => {
             if (!alive) return;
             const items = Array.isArray(data?.items) ? data.items : [];
-
-            setHeroContent({
-            title: data?.title || "",
-            subtitle: data?.subtitle || "",
-            items,
+            setHeroContent({ items });
+            })
+            .catch(() => {
+            // fallback silencioso
             });
-        })
-        .catch(() => {
-            // fallback silencioso: queda el fallbackHeroImages y textos genéricos
-        });
 
         return () => {
-        alive = false;
+            alive = false;
         };
-    }, []);
+        }, []);
 
-    const heroImages =
-        heroContent.items?.length > 0
-        ? heroContent.items.map((it) => it.url).filter(Boolean)
-        : fallbackHeroImages;
+        // Fallback (por si Firestore está vacío)
+        const fallbackHeroSlides = useMemo(
+        () => [
+            {
+            url: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
+            title:
+                "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
+            subtitle: "Una propuesta cálida y respetuosa para acompañar cada etapa.",
+            active: true,
+            order: 1,
+            public_id: "fallback-1",
+            },
+            {
+            url: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
+            title: "Un espacio seguro para crecer con confianza.",
+            subtitle: "Acompañamiento cercano y actividades pensadas para cada edad.",
+            active: true,
+            order: 2,
+            public_id: "fallback-2",
+            },
+        ],
+        []
+        );
 
-    // title/subtitle SOLO backend (si no hay, genéricos)
-    const heroTitle =
-        heroContent.title?.trim() || "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.";
-    const heroSubtitle =
-        heroContent.subtitle?.trim() ||
-        "Una propuesta cálida y respetuosa para acompañar cada etapa.";
+        const heroSlides =
+        heroContent.items?.length > 0 ? heroContent.items : fallbackHeroSlides;
+
+        // imágenes para el carrusel
+        const heroImages = heroSlides.map((it) => it.url).filter(Boolean);
+
+        // texto por slide (seguro ante index fuera de rango)
+        const safeIndex = Math.min(heroIndex, Math.max(0, heroSlides.length - 1));
+        const heroTitle = heroSlides[safeIndex]?.title || "";
+        const heroSubtitle = heroSlides[safeIndex]?.subtitle || "";
 
     // CTAs fijos (no dependen del slide)
     const cta1 = { to: "/el-jardin", label: "Conocer el jardín" };

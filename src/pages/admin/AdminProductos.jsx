@@ -97,7 +97,7 @@ export default function AdminProductos() {
                 <Badge variant="lavender">Admin</Badge>
                 <h1 className="text-2xl font-extrabold text-ui-text mt-2">Productos</h1>
                 <p className="text-sm text-ui-muted mt-2">
-                Gestioná Remera, Pantalón, Buzo y Mochila.
+                Gestioná tus productos.
                 </p>
             </div>
 

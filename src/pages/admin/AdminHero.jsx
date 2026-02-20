@@ -4,16 +4,14 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 
-import {
-    getElJardinGalleryContent,
-    saveElJardinGalleryContent,
-} from "../../services/apiContent";
+import { getHomeHeroContent, saveHomeHeroContent } from "../../services/apiContent";
 
-import styles from "./AdminGallery.module.css";
+import styles from "./AdminHero.module.css";
 
 const API_BASE = import.meta.env.VITE_API_URL;
-const FOLDER = "risas-colores/web/gallery";
-const MAX_SELECT = 30;
+
+const FOLDER = "risas-colores/web/Hero";
+const MAX_SELECT = 5;
 
 const joinUrl = (base, path) => {
     const b = String(base || "").replace(/\/+$/, "");
@@ -30,9 +28,9 @@ const getAdminToken = () =>
 const authHeaders = () => {
     const token = getAdminToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
-};
+    };
 
-const readJson = async (res) => {
+    const readJson = async (res) => {
     const text = await res.text();
     try {
         return text ? JSON.parse(text) : null;
@@ -41,19 +39,23 @@ const readJson = async (res) => {
     }
 };
 
-const normalizeSavedItems = (data) => {
-    const raw = data?.items ?? data?.gallery ?? data?.images ?? data;
-    const arr = Array.isArray(raw) ? raw : [];
-    return arr
-        .map((x) => ({
+const normalizeSavedHero = (data) => {
+    const items = Array.isArray(data?.items) ? data.items : [];
+    return items
+        .map((x, idx) => ({
         public_id: String(x?.public_id || "").trim(),
         url: String(x?.url || "").trim(),
-        alt: String(x?.alt || "").trim(),
+        title: String(x?.title || "").trim(),
+        subtitle: String(x?.subtitle || "").trim(),
+        active: x?.active !== false,
+        order: Number.isFinite(Number(x?.order)) ? Number(x.order) : idx + 1,
         }))
-        .filter((x) => x.public_id && x.url);
+        .filter((x) => x.public_id && x.url)
+        .sort((a, b) => a.order - b.order)
+        .slice(0, MAX_SELECT);
 };
 
-export default function AdminGallery() {
+export default function AdminHero() {
     const nav = useNavigate();
     const loc = useLocation();
     const fileRef = useRef(null);
@@ -102,9 +104,8 @@ export default function AdminGallery() {
     };
 
     const fetchSaved = async () => {
-        const data = await getElJardinGalleryContent();
-        const savedItems = normalizeSavedItems(data);
-        setSelected(savedItems.slice(0, MAX_SELECT));
+        const data = await getHomeHeroContent();
+        setSelected(normalizeSavedHero(data));
     };
 
     const loadAll = async () => {
@@ -114,7 +115,7 @@ export default function AdminGallery() {
         await Promise.all([fetchLibrary({ append: false }), fetchSaved()]);
         } catch (e) {
         if (e?.status === 401 || e?.status === 403) return goLogin();
-        setErr(e?.message || "Error cargando galería");
+        setErr(e?.message || "Error cargando Hero");
         } finally {
         setLoading(false);
         }
@@ -134,7 +135,12 @@ export default function AdminGallery() {
         const exists = prev.some((x) => x.public_id === pid);
         if (exists) return prev.filter((x) => x.public_id !== pid);
         if (prev.length >= MAX_SELECT) return prev;
-        return [...prev, { public_id: pid, url, alt: "" }];
+
+        const order = prev.length + 1;
+        return [
+            ...prev,
+            { public_id: pid, url, title: "", subtitle: "", active: true, order },
+        ];
         });
     };
 
@@ -144,21 +150,35 @@ export default function AdminGallery() {
         if (idx < 0) return prev;
         const to = idx + dir;
         if (to < 0 || to >= prev.length) return prev;
+
         const next = [...prev];
         const [it] = next.splice(idx, 1);
         next.splice(to, 0, it);
-        return next;
+
+        return next.map((x, i) => ({ ...x, order: i + 1 }));
         });
     };
 
     const removeSelected = (pid) => {
-        setSelected((prev) => prev.filter((x) => x.public_id !== pid));
+        setSelected((prev) =>
+        prev
+            .filter((x) => x.public_id !== pid)
+            .map((x, i) => ({ ...x, order: i + 1 }))
+        );
     };
 
-    const setAlt = (pid, value) => {
+    const setField = (pid, field, value) => {
         setSelected((prev) =>
         prev.map((x) =>
-            x.public_id === pid ? { ...x, alt: String(value || "") } : x
+            x.public_id === pid ? { ...x, [field]: String(value || "") } : x
+        )
+        );
+    };
+
+    const toggleActive = (pid) => {
+        setSelected((prev) =>
+        prev.map((x) =>
+            x.public_id === pid ? { ...x, active: !x.active } : x
         )
         );
     };
@@ -232,28 +252,47 @@ export default function AdminGallery() {
         }
     };
 
+    const validate = () => {
+        if (selected.length === 0) return "Seleccioná al menos 1 slide.";
+        if (selected.length > MAX_SELECT) return `Máximo ${MAX_SELECT} slides.`;
+
+        const active = selected.filter((x) => x.active);
+        if (active.length === 0) return "Dejá al menos 1 slide activo.";
+
+        for (const it of active) {
+        if (!String(it.title || "").trim()) return "Falta título en un slide activo.";
+        if (!String(it.subtitle || "").trim()) return "Falta subtítulo en un slide activo.";
+        }
+
+        return "";
+    };
+
     const onSave = async () => {
         setErr("");
 
-        if (selected.length === 0) {
-        setErr("Seleccioná al menos 1 imagen para la galería.");
+        const v = validate();
+        if (v) {
+        setErr(v);
         return;
         }
 
         setSaving(true);
         try {
         const payload = {
-            items: selected.slice(0, MAX_SELECT).map((x) => ({
+            items: selected.slice(0, MAX_SELECT).map((x, idx) => ({
             public_id: x.public_id,
             url: x.url,
-            alt: String(x.alt || "").trim() || "Galería del jardín",
+            title: String(x.title || "").trim(),
+            subtitle: String(x.subtitle || "").trim(),
+            active: x.active !== false,
+            order: idx + 1,
             })),
         };
 
-        await saveElJardinGalleryContent(payload);
+        await saveHomeHeroContent(payload);
         } catch (e) {
         if (e?.status === 401 || e?.status === 403) return goLogin();
-        setErr(e?.message || "Error guardando galería");
+        setErr(e?.message || "Error guardando Hero");
         } finally {
         setSaving(false);
         }
@@ -276,13 +315,12 @@ export default function AdminGallery() {
     return (
         <main className={styles.page}>
         <div className={styles.wrap}>
-            {/* Header */}
             <div className={styles.header}>
             <div className={styles.headerLeft}>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className={styles.title}>Galería “El Jardín”</h1>
+                <h1 className={styles.title}>Hero</h1>
                 <p className={styles.sub}>
-                Elegí imágenes desde Cloudinary, ordenalas y guardá la selección en Firestore.
+                Máximo {MAX_SELECT} slides. Cada slide tiene su título y subtítulo. CTAs quedan fijos.
                 </p>
             </div>
 
@@ -301,7 +339,6 @@ export default function AdminGallery() {
             </Card>
             ) : null}
 
-            {/* Actions */}
             <Card className={styles.actionsCard}>
             <div className={styles.actionsTop}>
                 <div className={styles.meta}>
@@ -341,13 +378,13 @@ export default function AdminGallery() {
                     disabled={saving || selected.length === 0}
                     onClick={onSave}
                 >
-                    {saving ? "Guardando…" : "Guardar galería"}
+                    {saving ? "Guardando…" : "Guardar Hero"}
                 </Button>
                 </div>
             </div>
 
             <div className={styles.tip}>
-                Tip: la galería pública usa el <b>orden</b> de la lista “Seleccionadas”.
+                Tip: se muestra en Home el orden de “Seleccionadas” y solo las activas.
             </div>
             </Card>
 
@@ -357,7 +394,6 @@ export default function AdminGallery() {
             </Card>
             ) : (
             <div className={styles.twoCol}>
-                {/* Biblioteca */}
                 <Card className={styles.panel}>
                 <div className={styles.panelHead}>
                     <div className={styles.panelTitle}>Biblioteca (Cloudinary)</div>
@@ -398,7 +434,7 @@ export default function AdminGallery() {
                             <div className={styles.itemName} title={it.filename || pid}>
                                 {it.filename || pid}
                             </div>
-                            <div className={styles.itemMark}>{isSel ? "✓ Seleccionada" : " "}</div>
+                            <div className={styles.itemMark}>{isSel ? "✓ Seleccionada" : ""}</div>
                             </div>
 
                             <div className={styles.itemActions}>
@@ -441,12 +477,11 @@ export default function AdminGallery() {
                 ) : null}
                 </Card>
 
-                {/* Seleccionadas */}
                 <Card className={styles.panel}>
                 <div className={styles.panelTitle}>Seleccionadas (orden público)</div>
 
                 {selected.length === 0 ? (
-                    <p className={styles.muted}>Todavía no seleccionaste imágenes.</p>
+                    <p className={styles.muted}>Todavía no seleccionaste slides.</p>
                 ) : (
                     <div className={styles.selectedList}>
                     {selected.map((it, idx) => (
@@ -464,6 +499,7 @@ export default function AdminGallery() {
                             >
                                 ↑
                             </Button>
+
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -473,6 +509,16 @@ export default function AdminGallery() {
                             >
                                 ↓
                             </Button>
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="text-black border-black"
+                                onClick={() => toggleActive(it.public_id)}
+                            >
+                                {it.active ? "Activa" : "Inactiva"}
+                            </Button>
+
                             <Button
                                 type="button"
                                 variant="ghost"
@@ -487,21 +533,33 @@ export default function AdminGallery() {
                         <div className={styles.selectedThumb}>
                             <img
                             src={it.url}
-                            alt={it.alt || "Galería del jardín"}
+                            alt="slide"
                             className={styles.selectedImg}
                             loading="lazy"
                             decoding="async"
                             />
                         </div>
 
-                        <div className={styles.altField}>
-                            <label className={styles.altLabel}>Alt (opcional)</label>
+                        <div className={styles.fieldsGrid}>
+                            <div className={styles.field}>
+                            <label className={styles.label}>Título (obligatorio si está activa)</label>
                             <input
-                            className={styles.altInput}
-                            value={it.alt || ""}
-                            onChange={(e) => setAlt(it.public_id, e.target.value)}
-                            placeholder="Galería del jardín"
+                                className={styles.input}
+                                value={it.title || ""}
+                                onChange={(e) => setField(it.public_id, "title", e.target.value)}
+                                placeholder="Aprender jugando..."
                             />
+                            </div>
+
+                            <div className={styles.field}>
+                            <label className={styles.label}>Subtítulo (obligatorio si está activa)</label>
+                            <input
+                                className={styles.input}
+                                value={it.subtitle || ""}
+                                onChange={(e) => setField(it.public_id, "subtitle", e.target.value)}
+                                placeholder="Una propuesta cálida..."
+                            />
+                            </div>
                         </div>
                         </article>
                     ))}
@@ -509,7 +567,7 @@ export default function AdminGallery() {
                 )}
 
                 <div className={styles.tipSmall}>
-                    Presione guardar para verlo en la pagina de jardin
+                    Guardar escribe en Firestore lo que ves acá (selección + orden + textos + activo).
                 </div>
                 </Card>
             </div>
