@@ -5,6 +5,7 @@ import Button from "../components/ui/Button";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
+import ReviewsSection from "../components/sections/ReviewsSection";
 
 import { getHomeHeroContent } from "../services/apiContent";
 
@@ -15,16 +16,9 @@ export default function Home() {
     const [heroIndex, setHeroIndex] = useState(0);
 
     // ==============================
-    // Hero (fallback solo imágenes)
+    // Hero
     // ==============================
-    const fallbackHeroImages = useMemo(
-        () => [
-        "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
-        "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
-        ],
-        []
-    );
-
+    
     // Content desde backend (Firestore)
         const [heroContent, setHeroContent] = useState({
         items: [],
@@ -111,7 +105,11 @@ export default function Home() {
         }));
     };
 
-    const faqs = useMemo(
+    // ==============================
+    // Preguntas Frecuentes
+    // ==============================
+
+        const faqs = useMemo(
         () => [
         {
             topic: "Ingreso y contacto",
@@ -176,6 +174,17 @@ export default function Home() {
         ],
         []
     );
+
+    // ==============================
+    // Comentarios (salen cuando tengamos el link real)
+    // ==============================
+
+    const REVIEWS = [
+        { id: "r1", name: "Mariana G.", when: "hace 2 meses", rating: 5, text: "Hermoso jardín, el equipo es súper cálido y mi hijo va feliz todos los días." },
+        { id: "r2", name: "Lucas P.", when: "hace 3 meses", rating: 5, text: "Muy buena contención y comunicación con las familias. Recomendable." },
+        { id: "r3", name: "Flor S.", when: "hace 5 meses", rating: 5, text: "Espacios cuidados, propuestas lindas y mucha dedicación. ¡Gracias!" },
+        { id: "r4", name: "Carla R.", when: "hace 1 mes", rating: 5, text: "Se nota el amor con el que trabajan. Súper organizados y atentos." },
+        ];
 
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
@@ -296,6 +305,15 @@ export default function Home() {
                 })}
             </div>
             </section>
+            {/* ==============================
+                Reviews Google
+                ============================== */}
+            <ReviewsSection
+                reviews={REVIEWS}
+                googleReviewsUrl="https://YOUR_GOOGLE_REVIEWS_LINK"
+                buttonText="Ver todas las reseñas"
+                />
+
 
             {/* ==============================
                 Familias actuales
