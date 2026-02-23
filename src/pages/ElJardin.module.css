@@ -389,8 +389,112 @@ Intro
   box-shadow: 0 12px 26px rgba(0,0,0,0.06);
 }
 
+.mediaImg{
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
 @media (min-width: 768px) {
   .mediaMock { aspect-ratio: 1 / 1; }
+}
+
+/* ==============================
+Intro stats (CountUp)
+============================== */
+
+.stats{
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.stat{
+  min-width: 0;
+}
+
+.statNumber{
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.6px;
+
+  font-size: clamp(2.2rem, 4.2vw, 3.1rem);
+  color: #4a90c2;
+
+  text-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* Subrayado marca */
+.statNumber::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 8px;
+
+  border-radius: 20px;
+
+  background: linear-gradient(
+    90deg,
+    var(--brand-primary),
+    var(--brand-secondary),
+    var(--brand-accent)
+  );
+
+  opacity: 0.25;
+  filter: blur(2px);
+
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.stat{
+  opacity: 0;
+  transform: translateY(12px);
+  animation: statFadeIn 600ms ease forwards;
+}
+
+.stat:nth-child(2){
+  animation-delay: 120ms;
+}
+
+@keyframes statFadeIn{
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.statSuffix{
+  font-weight: 900;
+  color: #4a90c2;
+}
+
+.statLabel{
+  margin-top: 0.45rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ui-muted);
+  max-width: 22ch;
+}
+
+@media (max-width: 520px){
+  .stats{
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .statLabel{
+    max-width: none;
+  }
 }
 
 /* ==============================

@@ -495,7 +495,7 @@ export default function AdminGallery() {
                         </div>
 
                         <div className={styles.altField}>
-                            <label className={styles.altLabel}>Alt (opcional)</label>
+                            <label className={styles.altLabel}>Alt (opcional) para que Google sepa que es</label>
                             <input
                             className={styles.altInput}
                             value={it.alt || ""}

@@ -11,6 +11,8 @@ import { useAdminAuth } from "../../context/AdminAuthContext";
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPass, setShowPass] = useState(false);
+
     const [sending, setSending] = useState(false);
     const [err, setErr] = useState("");
 
@@ -37,46 +39,66 @@ export default function AdminLogin() {
 
     return (
         <main className="py-10">
-        <Container className="max-w-[520px] grid gap-6">
-            <div>
+            <Container className="max-w-[520px] grid gap-6">
+                <div>
                 <Badge variant="lavender">Admin</Badge>
                 <h1 className="text-2xl font-extrabold text-ui-text mt-2">Ingresar</h1>
                 <p className="text-sm text-ui-muted mt-2">Acceso restringido.</p>
-            </div>
-
-            <Card className="p-5">
-            <form className="grid gap-4" onSubmit={onSubmit}>
-                <div className="grid gap-2">
-                <label className="text-sm text-ui-muted">Email</label>
-                <input
-                    className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="username"
-                />
                 </div>
 
-                <div className="grid gap-2">
-                <label className="text-sm text-ui-muted">Password</label>
-                <input
-                    type="password"
-                    className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                />
-                </div>
+                <Card className="p-5">
+                    <form className="grid gap-4" onSubmit={onSubmit}>
+                        <div className="grid gap-2">
+                            <label className="text-sm text-ui-muted">Email</label>
+                            <input
+                                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                autoComplete="username"
+                            />
+                        </div>
 
-                {err ? <p className="text-sm text-red-500">{err}</p> : null}
+                        <div className="grid gap-2">
+                            <label className="text-sm text-ui-muted">Password</label>
+                                <input
+                                    type={showPass ? "text" : "password"}
+                                    className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    autoComplete="current-password"
+                                />
 
-                <Button variant="ghost" disabled={sending}>
-                {sending ? "Ingresando…" : "Entrar"}
-                </Button>
-            </form>
-            </Card>
+                            {/* ✅ Ver contraseña */}
+                            <label className="inline-flex items-center gap-2 text-sm text-ui-text select-none">
+                                <input
+                                type="checkbox"
+                                checked={showPass}
+                                onChange={(e) => setShowPass(e.target.checked)}
+                                />
+                                Ver contraseña
+                            </label>
+                        </div>
 
-            <Link to="/" className="text-sm text-ui-muted underline w-fit">← Volver al sitio</Link>
-        </Container>
+                        {err ? <p className="text-sm text-red-500">{err}</p> : null}
+
+                        {/* ✅ Botón NO del mismo tamaño que inputs */}
+                        <div className="flex justify-end">
+                            <Button
+                                variant="ghost"
+                                className="h-10 px-6 rounded-md"
+                                disabled={sending}
+                                type="submit"
+                            >
+                                {sending ? "Ingresando…" : "Entrar"}
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
+
+                <Link to="/" className="text-sm text-ui-muted underline w-fit">
+                    ← Volver al sitio
+                </Link>
+            </Container>
         </main>
     );
 }
