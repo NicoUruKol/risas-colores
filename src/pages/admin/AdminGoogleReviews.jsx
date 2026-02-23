@@ -32,7 +32,7 @@ function isValidHttpUrl(value) {
         return u.protocol === "http:" || u.protocol === "https:";
     } catch {
         return false;
-  }
+    }
 }
 
 function initialForm() {

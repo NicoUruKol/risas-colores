@@ -21,6 +21,7 @@ import AdminLogin from "../pages/admin/AdminLogin";
 import AdminStockMovements from "../pages/admin/AdminStockMovements";
 import AdminGallery from "../pages/admin/AdminGallery";
 import AdminHero from "../pages/admin/AdminHero";
+import AdminGoogleReviews from "../pages/admin/AdminGoogleReviews";
 
 
 import AdminProtected from "./components/auth/AdminProtected";
@@ -62,6 +63,8 @@ const routes = [
           { path: "contenido/hero", element: <AdminHero /> },
           { path: "contenido/galeria", element: <AdminGallery /> },
           { path: "contenido", element: <AdminContenido /> },
+          { path: "contenido/reseñas", element: <AdminGoogleReviews /> },
+
           { path: "pedidos", element: <AdminPedidos /> },
         ],
       },
