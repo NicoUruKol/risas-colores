@@ -5,6 +5,7 @@ import Button from "../components/ui/Button";
 import styles from "./Home.module.css";
 import HeroCarousel from "../components/ui/HeroCarousel";
 import SEO from "../components/seo/SEO";
+import { getGoogleReviewsContent } from "../services/apiGoogleReviews";
 import ReviewsSection from "../components/sections/ReviewsSection";
 
 import { getHomeHeroContent } from "../services/apiContent";
@@ -178,14 +179,16 @@ export default function Home() {
     // ==============================
     // Comentarios (salen cuando tengamos el link real)
     // ==============================
+    const [reviewsData, setReviewsData] = useState({ googleReviewsUrl: "", items: [] });
 
-    const REVIEWS = [
-        { id: "r1", name: "Mariana G.", when: "hace 2 meses", rating: 5, text: "Hermoso jardín, el equipo es súper cálido y mi hijo va feliz todos los días." },
-        { id: "r2", name: "Lucas P.", when: "hace 3 meses", rating: 5, text: "Muy buena contención y comunicación con las familias. Recomendable." },
-        { id: "r3", name: "Flor S.", when: "hace 5 meses", rating: 5, text: "Espacios cuidados, propuestas lindas y mucha dedicación. ¡Gracias!" },
-        { id: "r4", name: "Carla R.", when: "hace 1 mes", rating: 5, text: "Se nota el amor con el que trabajan. Súper organizados y atentos." },
-        ];
+    useEffect(() => {
+        getGoogleReviewsContent().then(setReviewsData).catch(() => {});
+        }, []);
 
+    // ==============================
+    // empieza el componente
+    // ==============================    
+    
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
         <SEO
@@ -309,8 +312,8 @@ export default function Home() {
                 Reviews Google
                 ============================== */}
             <ReviewsSection
-                reviews={REVIEWS}
-                googleReviewsUrl="https://YOUR_GOOGLE_REVIEWS_LINK"
+                reviews={reviewsData.items}
+                googleReviewsUrl={reviewsData.googleReviewsUrl}
                 buttonText="Ver todas las reseñas"
                 />
 

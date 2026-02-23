@@ -24,7 +24,7 @@ export default function ReviewsSection({
     title = "Lo que dicen las familias",
     subtitle = "Reseñas reales en Google",
     badge = "Google Maps",
-    googleReviewsUrl = "",
+    googleReviewsUrl = "https://maps.app.goo.gl/BtGnwQnfJ2pBCWco8?g_st=iw",
     buttonText = "Ver más reseñas",
     limit = 4,
     reviews = [],
