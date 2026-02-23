@@ -105,6 +105,9 @@
 }
 
 .personMeta{
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   min-width: 0;
 }
 
@@ -117,24 +120,21 @@
 
 .name{
   font-weight: 900;
+  font-size: 0.98rem;
   color: var(--ui-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 22ch;
+  letter-spacing: 0.2px;
 }
-
 .when{
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
   color: var(--ui-muted);
-  font-size: 0.85rem;
-  white-space: nowrap;
 }
 
 .stars{
-  margin-top: 0.2rem;
-  font-size: 0.9rem;
-  letter-spacing: 0.6px;
-  color: #f6a65a; /* brand primary */
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.8px;
+  color: #f6a65a;
   line-height: 1;
 }
 
