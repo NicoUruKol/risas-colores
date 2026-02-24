@@ -229,7 +229,7 @@ export default function AdminGoogleReviews() {
                     value={form.authorName}
                     onChange={onChange}
                     className={styles.input}
-                    placeholder="Ej: Paula Panizo"
+                    placeholder="Ej: Lalo Landa"
                     />
                     {errors.authorName && <span className={styles.err}>{errors.authorName}</span>}
                 </label>
