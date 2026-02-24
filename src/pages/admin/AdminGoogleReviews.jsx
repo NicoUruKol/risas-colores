@@ -196,191 +196,191 @@ export default function AdminGoogleReviews() {
 
     return (
         <main className={styles.page}>
-        {toast && (
-            <div className={toast.type === "success" ? styles.toastSuccess : styles.toastError} role="status">
-            {toast.message}
-            </div>
-        )}
-
-        <header className={styles.header}>
-            <div>
-            <h1 className={styles.title}>Reseñas (estilo Google)</h1>
-            <p className={styles.subtitle}>CRUD completo + activar/desactivar desde el panel.</p>
-            </div>
-            <Badge variant="blue">Contenido</Badge>
-        </header>
-
-        {status === "error" && (
-            <div className={styles.noticeErr} role="alert">
-            Error al cargar/guardar. Revisá el backend y el token admin.
-            </div>
-        )}
-
-        <section className={styles.grid}>
-            <Card className={styles.card}>
-            <h2 className={styles.h2}>{editingId ? "Editar reseña" : "Nueva reseña"}</h2>
-
-            <form className={styles.form} onSubmit={onSubmit}>
-                <div className={styles.row2}>
-                <label className={styles.field}>
-                    <span className={styles.label}>Nombre *</span>
-                    <input
-                    name="authorName"
-                    value={form.authorName}
-                    onChange={onChange}
-                    className={styles.input}
-                    placeholder="Ej: Lalo Landa"
-                    />
-                    {errors.authorName && <span className={styles.err}>{errors.authorName}</span>}
-                </label>
-
-                <label className={styles.field}>
-                    <span className={styles.label}>Rating *</span>
-                    <select name="rating" value={form.rating} onChange={onChange} className={styles.input}>
-                    <option value={5}>★★★★★ (5)</option>
-                    <option value={4}>★★★★☆ (4)</option>
-                    <option value={3}>★★★☆☆ (3)</option>
-                    <option value={2}>★★☆☆☆ (2)</option>
-                    <option value={1}>★☆☆☆☆ (1)</option>
-                    </select>
-                    {errors.rating && <span className={styles.err}>{errors.rating}</span>}
-                </label>
-                </div>
-
-                <div className={styles.row2}>
-                <label className={styles.field}>
-                    <span className={styles.label}>Tiempo *</span>
-                    <select name="relativePreset" value={form.relativePreset} onChange={onChange} className={styles.input}>
-                    {PRESETS.map((x) => (
-                        <option key={x} value={x}>
-                        {x}
-                        </option>
-                    ))}
-                    </select>
-                    {errors.relativeTime && <span className={styles.err}>{errors.relativeTime}</span>}
-                </label>
-
-                {form.relativePreset === "Otro" ? (
-                    <label className={styles.field}>
-                    <span className={styles.label}>Especificar *</span>
-                    <input
-                        name="relativeCustom"
-                        value={form.relativeCustom}
-                        onChange={onChange}
-                        className={styles.input}
-                        placeholder="Ej: Hace 10 días"
-                    />
-                    </label>
-                ) : (
-                    <div className={styles.fieldGhost} />
-                )}
-                </div>
-
-                <label className={styles.field}>
-                <span className={styles.label}>Foto (URL) (opcional)</span>
-                <input
-                    name="authorPhotoUrl"
-                    value={form.authorPhotoUrl}
-                    onChange={onChange}
-                    className={styles.input}
-                    placeholder="https://..."
-                />
-                {errors.authorPhotoUrl && <span className={styles.err}>{errors.authorPhotoUrl}</span>}
-                </label>
-
-                <label className={styles.field}>
-                <span className={styles.label}>Comentario *</span>
-                <textarea
-                    name="text"
-                    value={form.text}
-                    onChange={onChange}
-                    className={styles.textarea}
-                    rows={6}
-                    placeholder="Pegá el comentario…"
-                />
-                {errors.text && <span className={styles.err}>{errors.text}</span>}
-                </label>
-
-                <label className={styles.toggle}>
-                <input type="checkbox" name="active" checked={form.active} onChange={onChange} />
-                <span>Activa</span>
-                </label>
-
-                <div className={styles.actions}>
-                <button className={styles.btn} type="submit" disabled={status === "saving"}>
-                    {editingId ? "Guardar cambios" : "Crear reseña"}
-                    <span className={styles.arrow} aria-hidden>
-                    →
-                    </span>
-                </button>
-
-                {editingId ? (
-                    <button className={styles.btnGhost} type="button" onClick={resetForm}>
-                    Cancelar
-                    </button>
-                ) : null}
-                </div>
-            </form>
-            </Card>
-
-            <Card className={styles.cardWide}>
-            <h2 className={styles.h2}>Reseñas cargadas</h2>
-
-            {loading ? (
-                <div className={styles.empty}>Cargando…</div>
-            ) : sorted.length === 0 ? (
-                <div className={styles.empty}>Todavía no hay reseñas.</div>
-            ) : (
-                <div className={styles.list}>
-                {sorted.map((it) => (
-                    <article key={it.id} className={styles.item}>
-                    <div className={styles.itemTop}>
-                        <div className={styles.person}>
-                        <div className={styles.avatar}>
-                            {it.authorPhotoUrl ? (
-                            <img
-                                src={it.authorPhotoUrl}
-                                alt=""
-                                className={styles.avatarImg}
-                                loading="lazy"
-                                onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                                }}
-                            />
-                            ) : (
-                            <span className={styles.avatarFallback}>
-                                {String(it.authorName || "?").trim().slice(0, 1).toUpperCase()}
-                            </span>
-                            )}
-                        </div>
-                        <div className={styles.personMeta}>
-                            <div className={styles.personName}>{it.authorName}</div>
-                            <div className={styles.personSub}>
-                            {it.rating}⭐ · {it.relativeTime} · {it.active !== false ? "Activa" : "Inactiva"}
-                            </div>
-                        </div>
-                        </div>
-
-                        <div className={styles.itemBtns}>
-                        <button className={styles.smallBtn} type="button" onClick={() => onToggleActive(it)}>
-                            {it.active !== false ? "Desactivar" : "Activar"}
-                        </button>
-                        <button className={styles.smallBtn} type="button" onClick={() => startEdit(it)}>
-                            Editar
-                        </button>
-                        <button className={styles.smallBtnDanger} type="button" onClick={() => onDelete(it)}>
-                            Eliminar
-                        </button>
-                        </div>
-                    </div>
-
-                    <p className={styles.itemText}>{it.text}</p>
-                    </article>
-                ))}
+            {toast && (
+                <div className={toast.type === "success" ? styles.toastSuccess : styles.toastError} role="status">
+                {toast.message}
                 </div>
             )}
-            </Card>
-        </section>
+
+            <header className={styles.header}>
+                <div>
+                <h1 className={styles.title}>Reseñas (estilo Google)</h1>
+                <p className={styles.subtitle}>CRUD completo + activar/desactivar desde el panel.</p>
+                </div>
+                <Badge variant="blue">Contenido</Badge>
+            </header>
+
+            {status === "error" && (
+                <div className={styles.noticeErr} role="alert">
+                Error al cargar/guardar. Revisá el backend y el token admin.
+                </div>
+            )}
+
+            <section className={styles.grid}>
+                <Card className={styles.card}>
+                <h2 className={styles.h2}>{editingId ? "Editar reseña" : "Nueva reseña"}</h2>
+
+                <form className={styles.form} onSubmit={onSubmit}>
+                    <div className={styles.row2}>
+                    <label className={styles.field}>
+                        <span className={styles.label}>Nombre *</span>
+                        <input
+                        name="authorName"
+                        value={form.authorName}
+                        onChange={onChange}
+                        className={styles.input}
+                        placeholder="Ej: Lalo Landa"
+                        />
+                        {errors.authorName && <span className={styles.err}>{errors.authorName}</span>}
+                    </label>
+
+                    <label className={styles.field}>
+                        <span className={styles.label}>Rating *</span>
+                        <select name="rating" value={form.rating} onChange={onChange} className={styles.input}>
+                        <option value={5}>★★★★★ (5)</option>
+                        <option value={4}>★★★★☆ (4)</option>
+                        <option value={3}>★★★☆☆ (3)</option>
+                        <option value={2}>★★☆☆☆ (2)</option>
+                        <option value={1}>★☆☆☆☆ (1)</option>
+                        </select>
+                        {errors.rating && <span className={styles.err}>{errors.rating}</span>}
+                    </label>
+                    </div>
+
+                    <div className={styles.row2}>
+                    <label className={styles.field}>
+                        <span className={styles.label}>Tiempo *</span>
+                        <select name="relativePreset" value={form.relativePreset} onChange={onChange} className={styles.input}>
+                        {PRESETS.map((x) => (
+                            <option key={x} value={x}>
+                            {x}
+                            </option>
+                        ))}
+                        </select>
+                        {errors.relativeTime && <span className={styles.err}>{errors.relativeTime}</span>}
+                    </label>
+
+                    {form.relativePreset === "Otro" ? (
+                        <label className={styles.field}>
+                        <span className={styles.label}>Especificar *</span>
+                        <input
+                            name="relativeCustom"
+                            value={form.relativeCustom}
+                            onChange={onChange}
+                            className={styles.input}
+                            placeholder="Ej: Hace 10 días"
+                        />
+                        </label>
+                    ) : (
+                        <div className={styles.fieldGhost} />
+                    )}
+                    </div>
+
+                    <label className={styles.field}>
+                    <span className={styles.label}>Foto (URL) (opcional)</span>
+                    <input
+                        name="authorPhotoUrl"
+                        value={form.authorPhotoUrl}
+                        onChange={onChange}
+                        className={styles.input}
+                        placeholder="https://..."
+                    />
+                    {errors.authorPhotoUrl && <span className={styles.err}>{errors.authorPhotoUrl}</span>}
+                    </label>
+
+                    <label className={styles.field}>
+                    <span className={styles.label}>Comentario *</span>
+                    <textarea
+                        name="text"
+                        value={form.text}
+                        onChange={onChange}
+                        className={styles.textarea}
+                        rows={6}
+                        placeholder="Pegá el comentario…"
+                    />
+                    {errors.text && <span className={styles.err}>{errors.text}</span>}
+                    </label>
+
+                    <label className={styles.toggle}>
+                    <input type="checkbox" name="active" checked={form.active} onChange={onChange} />
+                    <span>Activa</span>
+                    </label>
+
+                    <div className={styles.actions}>
+                    <button className={styles.btn} type="submit" disabled={status === "saving"}>
+                        {editingId ? "Guardar cambios" : "Crear reseña"}
+                        <span className={styles.arrow} aria-hidden>
+                        →
+                        </span>
+                    </button>
+
+                    {editingId ? (
+                        <button className={styles.btnGhost} type="button" onClick={resetForm}>
+                        Cancelar
+                        </button>
+                    ) : null}
+                    </div>
+                </form>
+                </Card>
+
+                <Card className={styles.cardWide}>
+                <h2 className={styles.h2}>Reseñas cargadas</h2>
+
+                {loading ? (
+                    <div className={styles.empty}>Cargando…</div>
+                ) : sorted.length === 0 ? (
+                    <div className={styles.empty}>Todavía no hay reseñas.</div>
+                ) : (
+                    <div className={styles.list}>
+                    {sorted.map((it) => (
+                        <article key={it.id} className={styles.item}>
+                        <div className={styles.itemTop}>
+                            <div className={styles.person}>
+                            <div className={styles.avatar}>
+                                {it.authorPhotoUrl ? (
+                                <img
+                                    src={it.authorPhotoUrl}
+                                    alt=""
+                                    className={styles.avatarImg}
+                                    loading="lazy"
+                                    onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    }}
+                                />
+                                ) : (
+                                <span className={styles.avatarFallback}>
+                                    {String(it.authorName || "?").trim().slice(0, 1).toUpperCase()}
+                                </span>
+                                )}
+                            </div>
+                            <div className={styles.personMeta}>
+                                <div className={styles.personName}>{it.authorName}</div>
+                                <div className={styles.personSub}>
+                                {it.rating}⭐ · {it.relativeTime} · {it.active !== false ? "Activa" : "Inactiva"}
+                                </div>
+                            </div>
+                            </div>
+
+                            <div className={styles.itemBtns}>
+                            <button className={styles.smallBtn} type="button" onClick={() => onToggleActive(it)}>
+                                {it.active !== false ? "Desactivar" : "Activar"}
+                            </button>
+                            <button className={styles.smallBtn} type="button" onClick={() => startEdit(it)}>
+                                Editar
+                            </button>
+                            <button className={styles.smallBtnDanger} type="button" onClick={() => onDelete(it)}>
+                                Eliminar
+                            </button>
+                            </div>
+                        </div>
+
+                        <p className={styles.itemText}>{it.text}</p>
+                        </article>
+                    ))}
+                    </div>
+                )}
+                </Card>
+            </section>
         </main>
     );
 }

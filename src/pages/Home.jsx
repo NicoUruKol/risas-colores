@@ -191,159 +191,159 @@ export default function Home() {
     
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
-        <SEO
-            title="Educación, juego y cuidado"
-            description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
-            path="/"
-        />
+            <SEO
+                title="Educación, juego y cuidado"
+                description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
+                path="/"
+            />
 
-        <div className={styles.bg} />
+            <div className={styles.bg} />
 
-        <Container className="relative z-10 grid gap-10">
-            {/* ==============================
-                Hero
-                ============================== */}
-            <section
-            tabIndex={0}
-            onPointerDown={focusOnlyIfBackground}
-            className={`${styles.heroCard} p-6 md:p-8 grid gap-4`}
-            >
-            <HeroCarousel images={heroImages} onChange={handleHeroChange} />
-
-            <div key={heroTick} className={styles.heroTextAnim}>
-                <h1
-                className={`text-[1.6rem] sm:text-2xl md:text-4xl font-extrabold leading-tight text-[var(--ui-text)] ${styles.heroTitle}`}
-                >
-                {heroTitle}
-                </h1>
-
-                <p className="text-sm sm:text-base text-[var(--ui-muted)]">
-                {heroSubtitle}
-                </p>
-
-                <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
-                <Link to={cta1.to} className="w-full sm:w-auto">
-                    <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
-                    {cta1.label} <span className={styles.heroArrow}>→</span>
-                    </Button>
-                </Link>
-
-                <Link to={cta2.to} className="w-full sm:w-auto">
-                    <Button
-                    variant="primary"
-                    className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}
+            <Container className="relative z-10 grid gap-10">
+                {/* ==============================
+                    Hero
+                    ============================== */}
+                <section
+                    tabIndex={0}
+                    onPointerDown={focusOnlyIfBackground}
+                    className={`${styles.heroCard} p-6 md:p-8 grid gap-4`}
                     >
-                    {cta2.label} <span className={styles.heroArrow}>→</span>
-                    </Button>
-                </Link>
-                </div>
-            </div>
-            </section>
+                    <HeroCarousel images={heroImages} onChange={handleHeroChange} />
 
-            {/* ==============================
-                FAQ (4 temas)
-                ============================== */}
-            <section
-            className={`${styles.faqShell} p-6 md:p-7 grid gap-4`}
-            aria-label="Preguntas frecuentes"
-            >
-            <div className={styles.faqHead}>
-                <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
-                <p className={styles.faqSub}>
-                Resolvemos dudas rápidas antes de coordinar una visita.
-                </p>
-            </div>
+                    <div key={heroTick} className={styles.heroTextAnim}>
+                        <h1
+                        className={`text-[1.6rem] sm:text-2xl md:text-4xl font-extrabold leading-tight text-[var(--ui-text)] ${styles.heroTitle}`}
+                        >
+                        {heroTitle}
+                        </h1>
 
-            <div className={styles.faqTopics}>
-                {faqs.map((group, tIdx) => {
-                const topicOpen = activeTopic === tIdx;
+                        <p className="text-sm sm:text-base text-[var(--ui-muted)]">
+                        {heroSubtitle}
+                        </p>
 
-                return (
-                    <div
-                    key={group.topic}
-                    data-tone={tIdx % 3}
-                    className={`${styles.faqTopic} ${topicOpen ? styles.faqTopicActive : ""}`}
-                    >
-                    <button
-                        type="button"
-                        className={styles.faqTopicBtn}
-                        aria-expanded={topicOpen}
-                        onClick={() => toggleTopic(tIdx)}
-                    >
-                        <span className={styles.faqTopicTitle}>{group.topic}</span>
-                        <span className={styles.faqPlus} aria-hidden="true">
-                        +
-                        </span>
-                    </button>
+                        <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
+                        <Link to={cta1.to} className="w-full sm:w-auto">
+                            <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
+                            {cta1.label} <span className={styles.heroArrow}>→</span>
+                            </Button>
+                        </Link>
 
-                    <div className={styles.faqTopicPanel} hidden={!topicOpen}>
-                        <div className={styles.faqInner}>
-                        {group.items.map((item, qIdx) => {
-                            const qOpen = (openQ[tIdx] ?? -1) === qIdx;
-
-                            return (
-                            <div key={item.q} className={styles.faqQItem}>
-                                <button
-                                type="button"
-                                className={styles.faqQBtn}
-                                aria-expanded={qOpen}
-                                onClick={() => toggleQuestion(tIdx, qIdx)}
-                                >
-                                <span className={styles.faqQText}>{item.q}</span>
-                                <span className={styles.faqChevron} aria-hidden="true">
-                                    +
-                                </span>
-                                </button>
-
-                                <div className={styles.faqA} hidden={!qOpen}>
-                                <p className={styles.cardText}>{item.a}</p>
-                                </div>
-                            </div>
-                            );
-                        })}
+                        <Link to={cta2.to} className="w-full sm:w-auto">
+                            <Button
+                            variant="primary"
+                            className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}
+                            >
+                            {cta2.label} <span className={styles.heroArrow}>→</span>
+                            </Button>
+                        </Link>
                         </div>
                     </div>
+                </section>
+
+                {/* ==============================
+                FAQ (4 temas)
+                ============================== */}
+                <section
+                    className={`${styles.faqShell} p-6 md:p-7 grid gap-4`}
+                    aria-label="Preguntas frecuentes"
+                    >
+                    <div className={styles.faqHead}>
+                        <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
+                        <p className={styles.faqSub}>
+                        Resolvemos dudas rápidas antes de coordinar una visita.
+                        </p>
                     </div>
-                );
-                })}
-            </div>
-            </section>
-            {/* ==============================
-                Reviews Google
-                ============================== */}
-            <ReviewsSection
-                reviews={reviewsData.items}
-                googleReviewsUrl={reviewsData.googleReviewsUrl}
-                buttonText="Ver todas las reseñas"
-                />
+
+                    <div className={styles.faqTopics}>
+                        {faqs.map((group, tIdx) => {
+                        const topicOpen = activeTopic === tIdx;
+
+                        return (
+                            <div
+                            key={group.topic}
+                            data-tone={tIdx % 3}
+                            className={`${styles.faqTopic} ${topicOpen ? styles.faqTopicActive : ""}`}
+                            >
+                            <button
+                                type="button"
+                                className={styles.faqTopicBtn}
+                                aria-expanded={topicOpen}
+                                onClick={() => toggleTopic(tIdx)}
+                            >
+                                <span className={styles.faqTopicTitle}>{group.topic}</span>
+                                <span className={styles.faqPlus} aria-hidden="true">
+                                +
+                                </span>
+                            </button>
+
+                            <div className={styles.faqTopicPanel} hidden={!topicOpen}>
+                                <div className={styles.faqInner}>
+                                {group.items.map((item, qIdx) => {
+                                    const qOpen = (openQ[tIdx] ?? -1) === qIdx;
+
+                                    return (
+                                    <div key={item.q} className={styles.faqQItem}>
+                                        <button
+                                        type="button"
+                                        className={styles.faqQBtn}
+                                        aria-expanded={qOpen}
+                                        onClick={() => toggleQuestion(tIdx, qIdx)}
+                                        >
+                                        <span className={styles.faqQText}>{item.q}</span>
+                                        <span className={styles.faqChevron} aria-hidden="true">
+                                            +
+                                        </span>
+                                        </button>
+
+                                        <div className={styles.faqA} hidden={!qOpen}>
+                                        <p className={styles.cardText}>{item.a}</p>
+                                        </div>
+                                    </div>
+                                    );
+                                })}
+                                </div>
+                            </div>
+                        </div>
+                        );
+                        })}
+                    </div>
+                </section>
+                {/* ==============================
+                    Reviews Google
+                    ============================== */}
+                <ReviewsSection
+                    reviews={reviewsData.items}
+                    googleReviewsUrl={reviewsData.googleReviewsUrl}
+                    buttonText="Ver todas las reseñas"
+                    />
 
 
-            {/* ==============================
-                Familias actuales
-                ============================== */}
-            <section
-            tabIndex={0}
-            onPointerDown={focusOnlyIfBackground}
-            className={`${styles.familiasShell} p-6 grid gap-3`}
-            >
-            <h3 className="text-lg md:text-xl font-extrabold text-[var(--ui-text)]">
-                ¿Ya formás parte del jardín?
-            </h3>
+                {/* ==============================
+                    Familias actuales
+                    ============================== */}
+                <section
+                    tabIndex={0}
+                    onPointerDown={focusOnlyIfBackground}
+                    className={`${styles.familiasShell} p-6 grid gap-3`}
+                    >
+                    <h3 className="text-lg md:text-xl font-extrabold text-[var(--ui-text)]">
+                        ¿Ya formás parte del jardín?
+                    </h3>
 
-            <p className="text-sm text-[var(--ui-muted)]">
-                Accesos rápidos para resolver en segundos.
-            </p>
+                    <p className="text-sm text-[var(--ui-muted)]">
+                        Accesos rápidos para resolver en segundos.
+                    </p>
 
-            <div className="flex flex-wrap gap-3">
-                <Link to="/uniformes">
-                <Button variant="primary" className={styles.btnTextDark}>
-                    Ver uniformes
-                </Button>
-                </Link>
-                <Button variant="ghost">Información importante</Button>
-            </div>
-            </section>
-        </Container>
+                    <div className="flex flex-wrap gap-3">
+                        <Link to="/uniformes">
+                            <Button variant="ghost" className={styles.btnTextDark}>
+                                Ver uniformes
+                            </Button>
+                        </Link>
+                        <Button variant="ghost">Información importante</Button>
+                    </div>
+                </section>
+            </Container>
         </main>
     );
 }

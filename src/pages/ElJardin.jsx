@@ -248,7 +248,7 @@ export default function ElJardin() {
                                             />
                                             <span className={styles.statSuffix}>+</span>
                                         </div>
-                                        <div className={styles.statLabel}>familias nos eligieron desde 1991</div>
+                                        <div className={styles.statLabel}>familias nos eligieron desde 1995</div>
                                     </div>
 
                                     <div className={styles.stat}>
