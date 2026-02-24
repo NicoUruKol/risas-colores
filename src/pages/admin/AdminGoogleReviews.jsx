@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import styles from "./AdminGoogleReviews.module.css";
 
 import {
-    getGoogleReviewsAdmin,
-    saveGoogleReviewsUrl,
-    createGoogleReview,
-    updateGoogleReview,
-    setGoogleReviewActive,
-    deleteGoogleReview,
+  getGoogleReviewsAdmin,
+  createGoogleReview,
+  updateGoogleReview,
+  setGoogleReviewActive,
+  deleteGoogleReview,
 } from "../../services/apiGoogleReviews";
 
 const PRESETS = [
@@ -33,9 +31,9 @@ function isValidHttpUrl(value) {
     } catch {
         return false;
     }
-}
+    }
 
-function initialForm() {
+    function initialForm() {
     return {
         authorName: "",
         authorPhotoUrl: "",
@@ -56,12 +54,18 @@ export default function AdminGoogleReviews() {
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState("idle"); // idle | saving | error
     const [errors, setErrors] = useState({});
-
-    const [googleReviewsUrl, setGoogleReviewsUrlState] = useState("");
     const [items, setItems] = useState([]);
 
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState(() => initialForm());
+
+    const [toast, setToast] = useState(null); // null | { type: "success" | "error", message: string }
+
+    const showToast = (type, message) => {
+        setToast({ type, message });
+        window.clearTimeout(showToast._t);
+        showToast._t = window.setTimeout(() => setToast(null), 2000);
+    };
 
     const sorted = useMemo(() => {
         const arr = Array.isArray(items) ? items : [];
@@ -73,10 +77,10 @@ export default function AdminGoogleReviews() {
         setStatus("idle");
         try {
         const data = await getGoogleReviewsAdmin();
-        setGoogleReviewsUrlState(data?.googleReviewsUrl || "");
         setItems(data?.items || []);
         } catch {
         setStatus("error");
+        showToast("error", "Error al cargar reseñas");
         } finally {
         setLoading(false);
         }
@@ -120,7 +124,7 @@ export default function AdminGoogleReviews() {
         authorPhotoUrl: it.authorPhotoUrl || "",
         rating: Number(it.rating) || 5,
         relativePreset: preset,
-        relativeCustom: preset === "Otro" ? (it.relativeTime || "") : "",
+        relativeCustom: preset === "Otro" ? it.relativeTime || "" : "",
         text: it.text || "",
         active: it.active !== false,
         });
@@ -146,25 +150,19 @@ export default function AdminGoogleReviews() {
             active: !!form.active,
         };
 
-        if (editingId) await updateGoogleReview(editingId, payload);
-        else await createGoogleReview(payload);
+        if (editingId) {
+            await updateGoogleReview(editingId, payload);
+            showToast("success", "Reseña actualizada");
+        } else {
+            await createGoogleReview(payload);
+            showToast("success", "Reseña creada");
+        }
 
         await load();
         resetForm();
         } catch {
         setStatus("error");
-        } finally {
-        setStatus("idle");
-        }
-    };
-
-    const onSaveUrl = async () => {
-        setStatus("saving");
-        try {
-        await saveGoogleReviewsUrl(googleReviewsUrl);
-        await load();
-        } catch {
-        setStatus("error");
+        showToast("error", "Error al guardar");
         } finally {
         setStatus("idle");
         }
@@ -174,8 +172,10 @@ export default function AdminGoogleReviews() {
         try {
         await setGoogleReviewActive(it.id, !(it.active !== false));
         await load();
+        showToast("success", it.active !== false ? "Reseña desactivada" : "Reseña activada");
         } catch {
         setStatus("error");
+        showToast("error", "Error al cambiar estado");
         }
     };
 
@@ -187,13 +187,21 @@ export default function AdminGoogleReviews() {
         await deleteGoogleReview(it.id);
         await load();
         if (editingId === it.id) resetForm();
+        showToast("success", "Reseña eliminada");
         } catch {
         setStatus("error");
+        showToast("error", "Error al eliminar");
         }
     };
 
     return (
         <main className={styles.page}>
+        {toast && (
+            <div className={toast.type === "success" ? styles.toastSuccess : styles.toastError} role="status">
+            {toast.message}
+            </div>
+        )}
+
         <header className={styles.header}>
             <div>
             <h1 className={styles.title}>Reseñas (estilo Google)</h1>
@@ -242,12 +250,7 @@ export default function AdminGoogleReviews() {
                 <div className={styles.row2}>
                 <label className={styles.field}>
                     <span className={styles.label}>Tiempo *</span>
-                    <select
-                    name="relativePreset"
-                    value={form.relativePreset}
-                    onChange={onChange}
-                    className={styles.input}
-                    >
+                    <select name="relativePreset" value={form.relativePreset} onChange={onChange} className={styles.input}>
                     {PRESETS.map((x) => (
                         <option key={x} value={x}>
                         {x}
@@ -306,7 +309,9 @@ export default function AdminGoogleReviews() {
                 <div className={styles.actions}>
                 <button className={styles.btn} type="submit" disabled={status === "saving"}>
                     {editingId ? "Guardar cambios" : "Crear reseña"}
-                    <span className={styles.arrow} aria-hidden>→</span>
+                    <span className={styles.arrow} aria-hidden>
+                    →
+                    </span>
                 </button>
 
                 {editingId ? (
@@ -333,7 +338,15 @@ export default function AdminGoogleReviews() {
                         <div className={styles.person}>
                         <div className={styles.avatar}>
                             {it.authorPhotoUrl ? (
-                            <img src={it.authorPhotoUrl} alt="" className={styles.avatarImg} />
+                            <img
+                                src={it.authorPhotoUrl}
+                                alt=""
+                                className={styles.avatarImg}
+                                loading="lazy"
+                                onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                }}
+                            />
                             ) : (
                             <span className={styles.avatarFallback}>
                                 {String(it.authorName || "?").trim().slice(0, 1).toUpperCase()}

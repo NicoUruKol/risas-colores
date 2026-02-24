@@ -14,9 +14,9 @@ export default function Button({
 
     const variants = {
         primary:
-        "bg-brand-orange text-white hover:bg-brand-orangeHover shadow-card",
+        "bg-brand-orange text-black hover:bg-brand-orangeHover shadow-card",
         secondary:
-        "bg-brand-blue text-white hover:brightness-95 shadow-card",
+        "bg-brand-blue text-black hover:brightness-95 shadow-card",
         ghost:
         "bg-transparent border border-ui-border text-ui-text hover:shadow-card",
     };
