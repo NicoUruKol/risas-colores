@@ -2,20 +2,20 @@ import { request, authHeaders } from "./http";
 
 /* Público */
 export const getGoogleReviewsContent = async () => {
-    const r = await request("/api/content/google-reviews");
+    const r = await request("/api/reviews/google-reviews");
     return r?.data ?? r;
 };
 
 /* Admin */
 export const getGoogleReviewsAdmin = async () => {
-    const r = await request("/api/content/google-reviews/admin", {
+    const r = await request("/api/reviews/google-reviews/admin", {
         headers: authHeaders(),
     });
     return r?.data ?? r;
 };
 
 export const saveGoogleReviewsUrl = async (googleReviewsUrl) => {
-    const r = await request("/api/content/google-reviews/url", {
+    const r = await request("/api/reviews/google-reviews/url", {
         method: "PUT",
         body: { googleReviewsUrl },
         headers: authHeaders(),
@@ -24,7 +24,7 @@ export const saveGoogleReviewsUrl = async (googleReviewsUrl) => {
 };
 
 export const createGoogleReview = async (payload) => {
-    const r = await request("/api/content/google-reviews", {
+    const r = await request("/api/reviews/google-reviews", {
         method: "POST",
         body: payload,
         headers: authHeaders(),
@@ -33,7 +33,7 @@ export const createGoogleReview = async (payload) => {
     };
 
     export const updateGoogleReview = async (id, payload) => {
-    const r = await request(`/api/content/google-reviews/${id}`, {
+    const r = await request(`/api/reviews/google-reviews/${id}`, {
         method: "PUT",
         body: payload,
         headers: authHeaders(),
@@ -42,7 +42,7 @@ export const createGoogleReview = async (payload) => {
 };
 
 export const setGoogleReviewActive = async (id, active) => {
-    const r = await request(`/api/content/google-reviews/${id}/active`, {
+    const r = await request(`/api/reviews/google-reviews/${id}/active`, {
         method: "PATCH",
         body: { active },
         headers: authHeaders(),
@@ -51,7 +51,7 @@ export const setGoogleReviewActive = async (id, active) => {
 };
 
 export const deleteGoogleReview = async (id) => {
-    const r = await request(`/api/content/google-reviews/${id}`, {
+    const r = await request(`/api/reviews/google-reviews/${id}`, {
         method: "DELETE",
         headers: authHeaders(),
     });
