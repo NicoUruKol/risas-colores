@@ -34,6 +34,9 @@ export default function ReviewsSection({
         return arr.slice(0, limit);
     }, [reviews, limit]);
 
+    const DEFAULT_URL = "https://maps.app.goo.gl/BtGnwQnfJ2pBCWco8?g_st=iw";
+    const link = String(googleReviewsUrl || "").trim() || DEFAULT_URL;
+
     return (
         <section className={styles.section} aria-label="Reseñas de Google">
         <div className={styles.head}>
@@ -48,51 +51,54 @@ export default function ReviewsSection({
         </div>
 
         <div className={styles.grid}>
-            {items.map((r) => (
-            <Card key={r.id} className={`${styles.card} ${styles.softCard}`}>
+            {items.map((r) => {
+            const displayName = String(r.authorName ?? r.name ?? "").trim();
+            const when = String(r.relativeTime ?? r.when ?? "").trim();
+            const photo = String(r.authorPhotoUrl ?? r.photoUrl ?? "").trim();
+            const initial = (displayName || "?").slice(0, 1).toUpperCase();
+
+            return (
+                <Card key={r.id} className={`${styles.card} ${styles.softCard}`}>
                 <div className={styles.cardTop}>
                     <div className={styles.person}>
-                        <div className={styles.avatar} aria-hidden>
-                            {String(r.name || "?").trim().slice(0, 1).toUpperCase()}
-                        </div>
-                        <div className={styles.personMeta}>
-                            <div className={styles.name}>{r.name}</div>
-                            <Stars value={r.rating} />
-                            {r.when ? <div className={styles.when}>{r.when}</div> : null}
-                        </div>
+                    <div className={styles.avatar} aria-hidden>
+                        {photo ? (
+                        <img src={photo} alt="" className={styles.avatarImg} loading="lazy" />
+                        ) : (
+                        initial
+                        )}
+                    </div>
+
+                    <div className={styles.personMeta}>
+                        <div className={styles.name}>{displayName || "Sin nombre"}</div>
+                        <Stars value={r.rating} />
+                        {when ? <div className={styles.when}>{when}</div> : null}
+                    </div>
                     </div>
 
                     <div className={styles.source} aria-label="Fuente Google">
-                        <span className={styles.gDot} aria-hidden />
-                        <span className={styles.sourceText}>Google</span>
+                    <span className={styles.gDot} aria-hidden />
+                    <span className={styles.sourceText}>Google</span>
                     </div>
                 </div>
 
                 <p className={styles.text}>{clampText(r.text, 170)}</p>
-            </Card>
-            ))}
+                </Card>
+            );
+            })}
         </div>
 
-        {googleReviewsUrl ? (
-            <div className={styles.footer}>
-            <a
-                className={styles.linkReset}
-                href={googleReviewsUrl}
-                target="_blank"
-                rel="noreferrer"
-            >
-                <Button variant="ghost" className={styles.btnSmall}>
+        <div className={styles.footer}>
+            <a className={styles.linkReset} href={link} target="_blank" rel="noreferrer">
+            <Button variant="ghost" className={styles.btnSmall}>
                 {buttonText}
                 <span className={styles.arrow} aria-hidden>
-                    →
+                →
                 </span>
-                </Button>
+            </Button>
             </a>
-            <p className={styles.disclaimer}>
-                *Ir a Google Maps reseñas.
-            </p>
-            </div>
-        ) : null}
+            <p className={styles.disclaimer}>*Ir a Google Maps reseñas.</p>
+        </div>
         </section>
     );
 }

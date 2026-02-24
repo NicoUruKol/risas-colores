@@ -210,26 +210,6 @@ export default function AdminGoogleReviews() {
 
         <section className={styles.grid}>
             <Card className={styles.card}>
-            <h2 className={styles.h2}>Link de Google Reviews</h2>
-
-            <div className={styles.urlRow}>
-                <input
-                className={styles.input}
-                value={googleReviewsUrl}
-                onChange={(e) => setGoogleReviewsUrlState(e.target.value)}
-                placeholder="https://maps.app.goo.gl/..."
-                />
-                <Button variant="secondary" onClick={onSaveUrl} disabled={status === "saving"}>
-                Guardar link
-                </Button>
-            </div>
-
-            <p className={styles.hint}>
-                Este link es el botón “Ver más reseñas” del front (abre Google Maps).
-            </p>
-            </Card>
-
-            <Card className={styles.card}>
             <h2 className={styles.h2}>{editingId ? "Editar reseña" : "Nueva reseña"}</h2>
 
             <form className={styles.form} onSubmit={onSubmit}>
