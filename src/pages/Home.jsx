@@ -80,7 +80,7 @@ export default function Home() {
 
     // CTAs fijos (no dependen del slide)
     const cta1 = { to: "/el-jardin", label: "Conocer el jardín" };
-    const cta2 = { to: "/uniformes", label: "Ir a la tienda" };
+    const cta2 = { to: "/uniformes", label: "Ver uniformes" };
 
     const focusOnlyIfBackground = (e) => {
         if (e.target === e.currentTarget) e.currentTarget.focus();

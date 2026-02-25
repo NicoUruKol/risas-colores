@@ -11,9 +11,7 @@
   gap: 1rem;
 }
 
-.headLeft{
-  min-width: 0;
-}
+.headLeft{ min-width: 0; }
 
 .title{
   margin: 0;
@@ -29,32 +27,72 @@
   line-height: 1.45;
 }
 
-.headRight{
-  flex: 0 0 auto;
+.headRight{ flex: 0 0 auto; }
+
+/* ==============================
+Backdrop (desktop)
+============================== */
+.backdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  border: 0;
+  padding: 0;
+  background:
+    radial-gradient(420px 300px at 20% 20%, rgba(246,166,90,0.20), transparent 70%),
+    radial-gradient(460px 340px at 80% 30%, rgba(74,144,194,0.16), transparent 70%),
+    radial-gradient(520px 380px at 55% 75%, rgba(200,182,226,0.18), transparent 72%),
+    rgba(0,0,0,0.08);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
 }
 
+/* ==============================
+Grid
+============================== */
 .grid{
   display: grid;
   gap: 0.9rem;
 }
 
 @media (min-width: 640px){
-  .grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (min-width: 1024px){
-  .grid{
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* softCard (mismo lenguaje del Home) */
+/* Focus mode cuando hay una abierta */
+.gridDim .softCard{
+  transition: filter 180ms ease, opacity 180ms ease, transform 180ms ease, box-shadow 180ms ease, background 220ms ease;
+}
+
+.dimCard{
+  opacity: 0.55;
+  filter: grayscale(0.12) saturate(0.88);
+}
+
+/* ==============================
+Cards base
+============================== */
+.cardWrap{
+  position: relative;
+  min-width: 0;
+}
+
+.card{ min-width: 0; }
+
+/* Ocultamos la base cuando está abierto (desktop) */
+.baseHidden{
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* softCard (lenguaje Home) */
 .softCard{
   box-sizing: border-box;
   min-width: 0;
-
   padding: 1.05rem 1.1rem;
 
   border-radius: 28px 26px 30px 24px;
@@ -63,19 +101,29 @@
   backdrop-filter: blur(1px);
   box-shadow: 0 12px 26px rgba(0,0,0,0.06);
 
-  transition: background 260ms ease, box-shadow 260ms ease, transform 220ms ease;
   position: relative;
   overflow: hidden;
+
+  cursor: pointer;
+  user-select: none;
+
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+
+  /* ✅ no “expansión” en hover */
+  transform: none;
+  transition: background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
 }
 
 .softCard:hover{
-  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,166,90,0.14));
+  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(246,166,90,0.12));
+  box-shadow: 0 14px 30px rgba(0,0,0,0.08);
 }
 
-.card{
-  min-width: 0;
-}
-
+/* ==============================
+Top row
+============================== */
 .cardTop{
   display: flex;
   align-items: flex-start;
@@ -102,6 +150,15 @@
 
   border: 1px solid rgba(0,0,0,0.08);
   background: rgba(255,255,255,0.75);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.avatarImg{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .personMeta{
@@ -111,19 +168,16 @@
   min-width: 0;
 }
 
-.nameRow{
-  display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
 .name{
   font-weight: 900;
   font-size: 0.98rem;
   color: var(--ui-text);
   letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .when{
   margin-top: 0.25rem;
   font-size: 0.82rem;
@@ -138,9 +192,7 @@
   line-height: 1;
 }
 
-.starsOff{
-  color: rgba(0,0,0,0.18);
-}
+.starsOff{ color: rgba(0,0,0,0.18); }
 
 .source{
   display: inline-flex;
@@ -166,6 +218,9 @@
   font-weight: 800;
 }
 
+/* ==============================
+Text base (clamped)
+============================== */
 .text{
   margin: 0.8rem 0 0;
   color: var(--ui-muted);
@@ -176,8 +231,115 @@
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+
+  flex: 1 1 auto;
 }
 
+.tapHint{
+  margin-top: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--ui-muted);
+  opacity: 0.85;
+}
+
+/* ==============================
+Inline expand (<1024px)
+============================== */
+.inlineExpand{
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: grid;
+  gap: 0.6rem;
+}
+
+.inlineTop{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.inlineTitle{
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 0.95rem;
+}
+
+.fullText{
+  margin: 0;
+  color: var(--ui-muted);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+/* ==============================
+Side panel (>=1024px)
+Ocupa el lugar de la card y se expande al costado
+============================== */
+.sidePanel{ display: none; }
+
+@media (min-width: 1024px){
+  .inlineExpand{ display: none; }
+
+  .sidePanel{
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 130; /* arriba del backdrop */
+    pointer-events: auto;
+  }
+
+  .sideRight{
+    width: calc(100% + 420px + 14px);
+  }
+
+  .sideLeft{
+    width: calc(100% + 420px + 14px);
+    transform: translateX(calc(-420px - 14px));
+  }
+
+  .sideCard{
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* vibe Jardín (no blanco liso) */
+  .sideCardVibe{
+    background:
+      radial-gradient(340px 240px at 18% 18%, rgba(246,166,90,0.18), transparent 60%),
+      radial-gradient(360px 260px at 82% 26%, rgba(74,144,194,0.14), transparent 60%),
+      radial-gradient(420px 320px at 60% 85%, rgba(200,182,226,0.18), transparent 65%),
+      rgba(255,255,255,0.92);
+    border-color: rgba(229,231,235,0.92);
+    box-shadow: 0 22px 64px rgba(0,0,0,0.18);
+    backdrop-filter: blur(2px);
+  }
+
+  .sideTop{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .closeHint{
+    font-size: 0.82rem;
+    color: var(--ui-muted);
+    opacity: 0.8;
+    padding-top: 0.25rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+/* ==============================
+Footer
+============================== */
 .footer{
   display: flex;
   align-items: center;
@@ -210,4 +372,41 @@
   margin: 0;
   font-size: 0.86rem;
   color: var(--ui-muted);
+}
+
+/* ==============================
+Animaciones premium (sin mover layout)
+============================== */
+
+/* Desktop: panel lateral */
+@keyframes reviewSideInRight {
+  from { opacity: 0; transform: translateX(10px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateX(0);   filter: blur(0); }
+}
+
+@keyframes reviewSideInLeft {
+  from { opacity: 0; transform: translateX(calc(-420px - 14px - 10px)); filter: blur(2px); }
+  to   { opacity: 1; transform: translateX(calc(-420px - 14px));        filter: blur(0); }
+}
+
+/* Importante: la animación se aplica al panel (no a la grilla) */
+@media (min-width: 1024px){
+  .sideRight { animation: reviewSideInRight 220ms ease-out both; }
+  .sideLeft  { animation: reviewSideInLeft  220ms ease-out both; }
+
+  /* micro “pop” de sombra (muy leve) */
+  .sideCardVibe{
+    will-change: transform, opacity, filter;
+  }
+}
+
+/* Mobile/tablet: inline expand */
+@keyframes reviewInlineIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.inlineExpand{
+  animation: reviewInlineIn 180ms ease-out both;
+  will-change: transform, opacity;
 }
