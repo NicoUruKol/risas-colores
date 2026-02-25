@@ -1,0 +1,334 @@
+/* ==============================
+Stage + BG (mismo mood Home)
+============================== */
+.stage {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute;
+  inset: -80px;
+  z-index: -10;
+  pointer-events: none;
+}
+
+.bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+  filter: blur(0.2px);
+  background:
+    linear-gradient(to bottom, rgba(246,166,90,.0), rgba(246,166,90,.35), rgba(246,166,90,.0)) 12% 0 / 10px 220px repeat-y,
+    linear-gradient(to bottom, rgba(74,144,194,.0), rgba(74,144,194,.35), rgba(74,144,194,.0)) 48% 0 / 12px 260px repeat-y,
+    linear-gradient(to bottom, rgba(200,182,226,.0), rgba(177,132,240,.35), rgba(200,182,226,.0)) 78% 0 / 9px 240px repeat-y;
+  animation: driftY 12s linear infinite;
+  will-change: background-position;
+}
+
+.bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.7;
+  background:
+    radial-gradient(220px 160px at 15% 20%, rgba(246,166,90,.22), transparent 65%),
+    radial-gradient(260px 190px at 85% 25%, rgba(74,144,194,.20), transparent 65%),
+    radial-gradient(320px 240px at 55% 75%, rgba(177,132,240,.22), transparent 70%);
+  animation: floaty 8s ease-in-out infinite;
+}
+
+@keyframes driftY {
+  from { background-position-y: 0, 0, 0; }
+  to   { background-position-y: 220px, 260px, 240px; }
+}
+
+@keyframes floaty {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(18px); }
+}
+
+/* ==============================
+Layout
+============================== */
+.head {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.title {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: -0.2px;
+  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  color: var(--ui-text);
+}
+
+.sub {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+/* ==============================
+Shell
+============================== */
+.shell {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(229,231,235,0.90);
+  background-color: rgba(246,166,90,0.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.shell::before {
+  content: "";
+  position: absolute;
+  inset: -60px;
+  pointer-events: none;
+  opacity: 0.9;
+  background:
+    radial-gradient(280px 200px at 18% 25%, rgba(177,132,240,0.18), transparent 65%),
+    radial-gradient(320px 220px at 82% 30%, rgba(74,144,194,0.16), transparent 68%),
+    radial-gradient(360px 260px at 55% 82%, rgba(246,166,90,0.14), transparent 70%);
+  filter: blur(0.2px);
+}
+
+.shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==============================
+Section headers
+============================== */
+.sectionHead {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.sectionTitle {
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.sectionHint {
+  color: var(--ui-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* ==============================
+Errors
+============================== */
+.err {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: rgba(190, 24, 93, 0.9);
+  font-weight: 700;
+}
+
+/* ==============================
+Info box
+============================== */
+.infoBox {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 0.7rem;
+  align-items: start;
+  border-radius: 18px;
+  border: 1px solid rgba(229,231,235,0.90);
+  background: rgba(255,255,255,0.72);
+  padding: 0.85rem 0.9rem;
+}
+
+.infoIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(74,144,194,0.12);
+}
+
+.infoText {
+  color: var(--ui-text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ==============================
+Resumen
+============================== */
+.empty {
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(229,231,235,0.85);
+  border-radius: 18px;
+  padding: 0.9rem;
+}
+
+.lines {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  border-radius: 18px;
+  border: 1px solid rgba(229,231,235,0.85);
+  background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(74,144,194,0.06));
+  padding: 0.8rem 0.9rem;
+}
+
+.lineName {
+  font-weight: 900;
+  color: var(--ui-text);
+  line-height: 1.2;
+}
+
+.lineMeta {
+  margin-top: 0.2rem;
+  color: var(--ui-muted);
+  font-size: 0.9rem;
+}
+
+.linePrice {
+  font-weight: 900;
+  color: var(--ui-text);
+  white-space: nowrap;
+}
+
+.totalBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid rgba(229,231,235,0.9);
+  padding-top: 0.9rem;
+}
+
+.totalLabel {
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+}
+
+.totalValue {
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: var(--ui-text);
+}
+
+.miniNote {
+  color: var(--ui-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* ==============================
+Modal
+============================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(520px, 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(229,231,235,0.95);
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 22px 60px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+.modalTop {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 1rem 1rem 0.75rem;
+}
+
+.modalIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(246,166,90,0.16);
+  font-size: 1.2rem;
+}
+
+.modalTitle {
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 1.05rem;
+}
+
+.modalBody {
+  padding: 0 1rem 1rem;
+}
+
+.modalP {
+  margin: 0;
+  color: var(--ui-text);
+  line-height: 1.55;
+}
+
+.modalBullets {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--ui-muted);
+  font-size: 0.95rem;
+}
+
+.modalActions {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 1px solid rgba(229,231,235,0.9);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+@media (max-width: 768px) {
+  .bg { inset: 0; }
+  .bg::before {
+    background:
+      linear-gradient(to bottom, rgba(246,166,90,0), rgba(246,166,90,.30), rgba(246,166,90,0)) 20% 0 / 8px 180px repeat-y,
+      linear-gradient(to bottom, rgba(74,144,194,0), rgba(74,144,194,.30), rgba(74,144,194,0)) 50% 0 / 10px 220px repeat-y,
+      linear-gradient(to bottom, rgba(200,182,226,0), rgba(177,132,240,.30), rgba(200,182,226,0)) 80% 0 / 7px 200px repeat-y;
+  }
+}

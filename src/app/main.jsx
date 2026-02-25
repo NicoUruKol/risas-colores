@@ -1,6 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, createHashRouter, RouterProvider, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  createHashRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+
 import "../styles/globals.css";
 import AppShell from "./AppShell";
 
@@ -10,7 +16,6 @@ import UniformesEntry from "../pages/UnifomesEntry";
 import ProductoDetalle from "../pages/ProductosDetalle";
 import Carrito from "../pages/Carrito";
 import Checkout from "../pages/Checkout";
-import Confirmacion from "../pages/Confirmacion";
 
 import AdminLayout from "../pages/admin/AdminLayout";
 import AdminProductos from "../pages/admin/AdminProductos";
@@ -23,10 +28,12 @@ import AdminGallery from "../pages/admin/AdminGallery";
 import AdminHero from "../pages/admin/AdminHero";
 import AdminGoogleReviews from "../pages/admin/AdminGoogleReviews";
 
+import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentPending from "../pages/PaymentPending";
+import PaymentFailure from "../pages/PaymentFailure";
 
 import AdminProtected from "./components/auth/AdminProtected";
 import { AdminAuthProvider } from "../context/AdminAuthContext";
-
 
 const routes = [
   {
@@ -40,7 +47,11 @@ const routes = [
 
       { path: "/carrito", element: <Carrito /> },
       { path: "/checkout", element: <Checkout /> },
-      { path: "/confirmacion", element: <Confirmacion /> },
+
+      // ✅ Mercado Pago returns
+      { path: "/payment-success", element: <PaymentSuccess /> },
+      { path: "/payment-pending", element: <PaymentPending /> },
+      { path: "/payment-failure", element: <PaymentFailure /> },
 
       // ✅ Login admin (público)
       { path: "/admin/login", element: <AdminLogin /> },
@@ -59,22 +70,25 @@ const routes = [
           { path: "productos", element: <AdminProductos /> },
           { path: "productos/nuevo", element: <AdminProductoForm /> },
           { path: "productos/:id/editar", element: <AdminProductoForm /> },
+
           { path: "stock", element: <AdminStockMovements /> },
+
+          { path: "contenido", element: <AdminContenido /> },
           { path: "contenido/hero", element: <AdminHero /> },
           { path: "contenido/galeria", element: <AdminGallery /> },
-          { path: "contenido", element: <AdminContenido /> },
           { path: "contenido/reseñas", element: <AdminGoogleReviews /> },
 
           { path: "pedidos", element: <AdminPedidos /> },
         ],
       },
 
+      // fallback
       { path: "*", element: <Home /> },
     ],
   },
 ];
 
-const routerType = import.meta.env.VITE_ROUTER; // "hash" o "browser"
+const routerType = import.meta.env.VITE_ROUTER; // "hash" | "browser"
 
 const router =
   routerType === "hash"
