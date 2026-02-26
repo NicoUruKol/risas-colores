@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Card from "../ui/Card";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
@@ -11,7 +11,7 @@ Data
 const SALAS = [
     {
         key: "lactarios",
-        tone: 2, // violeta
+        tone: 2,
         chip: "Lactarios",
         title: "45 días a 1 año",
         bullets: ["Primer vínculo y cuidados personalizados", "Rutinas de sueño, higiene y alimentación"],
@@ -19,7 +19,7 @@ const SALAS = [
     },
     {
         key: "deambuladores",
-        tone: 1, // azul
+        tone: 1,
         chip: "Deambuladores",
         title: "1 a 2 años",
         bullets: ["Exploración guiada y juego libre", "Autonomía en un entorno preparado"],
@@ -27,7 +27,7 @@ const SALAS = [
     },
     {
         key: "sala2",
-        tone: 0, // naranja
+        tone: 0,
         chip: "Sala de 2",
         title: "2 a 3 años",
         bullets: ["Lenguaje, arte y música todos los días", "Curiosidad y socialización acompañadas"],
@@ -66,6 +66,7 @@ Component
 ============================== */
 export default function HorariosSalas() {
     const [active, setActive] = useState(0);
+
     const trackRef = useRef(null);
     const startX = useRef(null);
     const deltaX = useRef(0);
@@ -73,8 +74,8 @@ export default function HorariosSalas() {
 
     const sala = SALAS[active];
 
-    const goTo = useCallback((next) => {
-        setActive((prev) => clampIndex(next, SALAS.length));
+    const goTo = useCallback((nextIndex) => {
+        setActive(() => clampIndex(nextIndex, SALAS.length));
     }, []);
 
     const prev = useCallback(() => goTo(active - 1), [active, goTo]);
@@ -142,9 +143,6 @@ export default function HorariosSalas() {
             </header>
 
             <div className={styles.grid} data-tone={sala.tone}>
-            {/* ==============================
-            Slider Salas
-            ============================== */}
             <div className={styles.slider} data-tone={sala.tone}>
                 <div className={styles.sliderTop}>
                 <h3 className={styles.sliderTitle}>Nuestras salas</h3>
@@ -235,9 +233,6 @@ export default function HorariosSalas() {
                 <p className={styles.hint}>Deslizá para cambiar de sala</p>
             </div>
 
-            {/* ==============================
-            Jornadas + Info
-            ============================== */}
             <div className={styles.jornadas} data-tone={sala.tone}>
                 <div className={styles.jTop}>
                 <h3 className={styles.jTitle}>Jornadas</h3>
@@ -274,37 +269,29 @@ export default function HorariosSalas() {
                     </span>
                     <p className={styles.extraText}>Un equipo que está siempre cerca.</p>
                 </div>
-                    <div className={styles.extraItem}>
-                        <span className={styles.extraIcon} aria-hidden="true">
-                        ✨
-                        </span>
-                        <p className={styles.extraText}>Podés comenzar cuando lo necesites.</p>
-                    </div>
+
+                <div className={styles.extraItem}>
+                    <span className={styles.extraIcon} aria-hidden="true">
+                    ✨
+                    </span>
+                    <p className={styles.extraText}>Podés comenzar cuando lo necesites.</p>
+                </div>
                 </div>
 
                 <div className={styles.ctaRow}>
-                    <a
-                        href="https://wa.me/5491156971231?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0AEstamos%20interesados%20en%20conocer%20disponibilidad%20y%20horarios%20del%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias!"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.ctaLink}
-                    >
-                        <Button
-                        className={styles.ctaBtn}
-                        data-variant="primary"
-                        type="button"
-                        >
-                        <span className={styles.ctaContent}>
-                            <img
-                            src={whatsappIcon}
-                            alt=""
-                            aria-hidden="true"
-                            className={styles.ctaIcon}
-                            />
-                            Consultar disponibilidad por WhatsApp
-                        </span>
-                        </Button>
-                    </a>
+                <a
+                    href="https://wa.me/5491156971231?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0AEstamos%20interesados%20en%20conocer%20disponibilidad%20y%20horarios%20del%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias!"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.ctaLink}
+                >
+                    <Button className={styles.ctaBtn} data-variant="primary" type="button">
+                    <span className={styles.ctaContent}>
+                        <img src={whatsappIcon} alt="" aria-hidden="true" className={styles.ctaIcon} />
+                        Consultar disponibilidad por WhatsApp
+                    </span>
+                    </Button>
+                </a>
                 </div>
             </div>
             </div>
