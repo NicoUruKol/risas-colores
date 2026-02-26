@@ -10,6 +10,7 @@ import SEO from "../components/seo/SEO";
 import styles from "./ElJardin.module.css";
 import SceneInteractiva from "../components/scene/SceneInteractiva";
 import { getElJardinGalleryContent } from "../services/apiContent";
+import HorariosSalas from "../components/sections/HorariosSalas";
 
 import intro from "../assets/intro.webp";
 
@@ -269,6 +270,14 @@ export default function ElJardin() {
                             </div>
                         </div>
                     </section>
+
+
+                    {/* ==============================
+                    Horarios y Salas
+                    ============================== */}
+                    <Container>
+                        <HorariosSalas />
+                    </Container>
 
                     {/* ==============================
                     Propuesta
