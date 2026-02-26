@@ -1,23 +1,16 @@
 import { useEffect, useMemo, useRef } from "react";
 
+/* ==============================
+Helpers
+============================== */
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
+
 const smoothstep = (a, b, x) => {
     const t = clamp01((x - a) / (b - a));
     return t * t * (3 - 2 * t);
 };
 
-function setStaticStyle(pathEl, haloEl, colorVar, thickness) {
-    if (!pathEl || !haloEl) return;
-
-    // Solo 1 vez (NO por frame)
-    pathEl.setAttribute("stroke", `var(${colorVar})`);
-    pathEl.setAttribute("stroke-width", String(thickness));
-
-    haloEl.setAttribute("stroke", `var(${colorVar})`);
-    haloEl.setAttribute("stroke-width", String(thickness * 1.1));
-    }
-
-    function applyWormDynamic(pathEl, haloEl, L, frac, visibleFrac, haloOpacityMul) {
+function applyWormDynamic(pathEl, haloEl, L, frac, visibleFrac, haloOpacityMul) {
     if (!pathEl || !haloEl || !L || L <= 10) return;
 
     const maxLen = L * visibleFrac;
@@ -30,48 +23,41 @@ function setStaticStyle(pathEl, haloEl, colorVar, thickness) {
 
     const wormLen = Math.max(0, headOnPath - tailOnPath);
 
-    // ✅ Si todavía es casi 0, dejamos opacity 0 para que no "asome" desplegado
     const alpha = 0.95 * smoothstep(0.0, 0.02, frac);
 
-    // ✅ dasharray cambia todo el tiempo (porque wormLen crece)
-    // pero es inevitable si querés el crecimiento real
     const dasharray = `${wormLen} ${L}`;
     const dashoffset = String(-tailOnPath);
 
-    // main
     pathEl.setAttribute("stroke-dasharray", dasharray);
     pathEl.setAttribute("stroke-dashoffset", dashoffset);
     pathEl.setAttribute("opacity", String(alpha));
 
-    // halo (mismo dash)
     haloEl.setAttribute("stroke-dasharray", dasharray);
     haloEl.setAttribute("stroke-dashoffset", dashoffset);
     haloEl.setAttribute("opacity", String(alpha * haloOpacityMul));
-    }
+}
 
-    export default function BackgroundDecor2() {
+/* ==============================
+Component
+============================== */
+export default function BackgroundDecor2() {
     const viewW = 1200;
     const viewH = 2000;
 
-    // ✅ Mobile detect sólido
     const isMobile = useMemo(() => {
         if (typeof window === "undefined") return false;
         return window.matchMedia?.("(max-width: 768px)").matches ?? false;
     }, []);
 
-    // ✅ Performance knobs (mobile 30fps, desktop 60fps)
     const fps = isMobile ? 30 : 60;
     const minFrameMs = 1000 / fps;
 
-    // ✅ Blur liviano en mobile
     const glowBlur = isMobile ? 6 : 16;
     const haloBlur = isMobile ? 10 : 30;
 
-    // ✅ Gusanos un poco más finos en mobile
     const thicknessMul = isMobile ? 0.85 : 1.0;
     const visibleMul = isMobile ? 0.92 : 1.0;
 
-    // ✅ Halo casi apagado en mobile (reduce "suciedad" + costo)
     const haloOpacityMul = isMobile ? 0.03 : 0.10;
 
     const paths = useMemo(() => {
@@ -128,14 +114,12 @@ function setStaticStyle(pathEl, haloEl, colorVar, thickness) {
         return { ORANGE_A, ORANGE_B, VIOLET_A, VIOLET_B, BLUE_A, BLUE_B };
     }, []);
 
-    const refs = {
-        orangeHalo: useRef(null),
-        orangeMain: useRef(null),
-        violetHalo: useRef(null),
-        violetMain: useRef(null),
-        blueHalo: useRef(null),
-        blueMain: useRef(null),
-    };
+    const orangeHaloRef = useRef(null);
+    const orangeMainRef = useRef(null);
+    const violetHaloRef = useRef(null);
+    const violetMainRef = useRef(null);
+    const blueHaloRef = useRef(null);
+    const blueMainRef = useRef(null);
 
     const lensRef = useRef({
         orange: 0,
@@ -149,145 +133,143 @@ function setStaticStyle(pathEl, haloEl, colorVar, thickness) {
     useEffect(() => {
         let raf = 0;
         let lastNow = 0;
-
         const start = performance.now();
 
         const setPathAndLen = (mainEl, haloEl, d, colorVar, thickness) => {
-            if (!mainEl || !haloEl) return 0;
+        if (!mainEl || !haloEl) return 0;
 
-            mainEl.setAttribute("d", d);
-            haloEl.setAttribute("d", d);
+        mainEl.setAttribute("d", d);
+        haloEl.setAttribute("d", d);
 
-            // estilos fijos 1 vez
-            mainEl.setAttribute("stroke", `var(${colorVar})`);
-            mainEl.setAttribute("stroke-width", String(thickness));
-            haloEl.setAttribute("stroke", `var(${colorVar})`);
-            haloEl.setAttribute("stroke-width", String(thickness * 1.1));
+        mainEl.setAttribute("stroke", `var(${colorVar})`);
+        mainEl.setAttribute("stroke-width", String(thickness));
+        haloEl.setAttribute("stroke", `var(${colorVar})`);
+        haloEl.setAttribute("stroke-width", String(thickness * 1.1));
 
-            try {
+        try {
             const L = mainEl.getTotalLength();
             return Number.isFinite(L) ? L : 0;
-            } catch {
+        } catch {
             return 0;
-            }
+        }
         };
 
-        // init
         lensRef.current.orangeModeA = true;
         lensRef.current.violetModeA = true;
         lensRef.current.blueModeA = true;
 
         lensRef.current.orange = setPathAndLen(
-            refs.orangeMain.current,
-            refs.orangeHalo.current,
-            paths.ORANGE_A,
-            "--brand-primary",
-            54 * thicknessMul
+        orangeMainRef.current,
+        orangeHaloRef.current,
+        paths.ORANGE_A,
+        "--brand-primary",
+        54 * thicknessMul
         );
+
         lensRef.current.violet = setPathAndLen(
-            refs.violetMain.current,
-            refs.violetHalo.current,
-            paths.VIOLET_A,
-            "--brand-accent",
-            56 * thicknessMul
+        violetMainRef.current,
+        violetHaloRef.current,
+        paths.VIOLET_A,
+        "--brand-accent",
+        56 * thicknessMul
         );
+
         lensRef.current.blue = setPathAndLen(
-            refs.blueMain.current,
-            refs.blueHalo.current,
-            paths.BLUE_A,
-            "--brand-secondary",
-            50 * thicknessMul
+        blueMainRef.current,
+        blueHaloRef.current,
+        paths.BLUE_A,
+        "--brand-secondary",
+        50 * thicknessMul
         );
 
         const stepPair = (
-            tSec,
-            name,
-            durA,
-            durB,
-            dA,
-            dB,
-            haloEl,
-            mainEl,
-            colorVar,
-            thickness,
-            visibleFrac
+        tSec,
+        name,
+        durA,
+        durB,
+        dA,
+        dB,
+        haloEl,
+        mainEl,
+        colorVar,
+        thickness,
+        visibleFrac
         ) => {
-            const period = durA + durB;
-            const local = tSec % period;
+        const period = durA + durB;
+        const local = tSec % period;
 
-            const isA = local < durA;
-            const frac = isA ? local / durA : (local - durA) / durB;
+        const isA = local < durA;
+        const frac = isA ? local / durA : (local - durA) / durB;
 
-            const modeKey = `${name}ModeA`;
-            if (lensRef.current[modeKey] !== isA) {
+        const modeKey = `${name}ModeA`;
+        if (lensRef.current[modeKey] !== isA) {
             lensRef.current[modeKey] = isA;
             const d = isA ? dA : dB;
             lensRef.current[name] = setPathAndLen(mainEl, haloEl, d, colorVar, thickness);
-            }
+        }
 
-            applyWormDynamic(mainEl, haloEl, lensRef.current[name], frac, visibleFrac, haloOpacityMul);
+        applyWormDynamic(mainEl, haloEl, lensRef.current[name], frac, visibleFrac, haloOpacityMul);
         };
 
         const loop = (now) => {
-            if (!lastNow) lastNow = now;
+        if (!lastNow) lastNow = now;
 
-            // throttle fps
-            if (now - lastNow < minFrameMs) {
+        if (now - lastNow < minFrameMs) {
             raf = requestAnimationFrame(loop);
             return;
-            }
-            lastNow = now;
+        }
+        lastNow = now;
 
-            const tSec = (now - start) / 1000;
+        const tSec = (now - start) / 1000;
 
-            stepPair(
+        stepPair(
             tSec,
             "orange",
             16.0,
             15.0,
             paths.ORANGE_A,
             paths.ORANGE_B,
-            refs.orangeHalo.current,
-            refs.orangeMain.current,
+            orangeHaloRef.current,
+            orangeMainRef.current,
             "--brand-primary",
             54 * thicknessMul,
             0.60 * visibleMul
-            );
+        );
 
-            stepPair(
+        stepPair(
             tSec,
             "violet",
             15.0,
             16.0,
             paths.VIOLET_A,
             paths.VIOLET_B,
-            refs.violetHalo.current,
-            refs.violetMain.current,
+            violetHaloRef.current,
+            violetMainRef.current,
             "--brand-accent",
             56 * thicknessMul,
             0.58 * visibleMul
-            );
+        );
 
-            stepPair(
+        stepPair(
             tSec,
             "blue",
             16.0,
             15.0,
             paths.BLUE_A,
             paths.BLUE_B,
-            refs.blueHalo.current,
-            refs.blueMain.current,
+            blueHaloRef.current,
+            blueMainRef.current,
             "--brand-secondary",
             50 * thicknessMul,
             0.56 * visibleMul
-            );
+        );
 
-            raf = requestAnimationFrame(loop);
+        raf = requestAnimationFrame(loop);
         };
 
         raf = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(raf);
-        }, [paths, minFrameMs, thicknessMul, visibleMul, haloOpacityMul]);
+    }, [paths, minFrameMs, thicknessMul, visibleMul, haloOpacityMul]);
 
     return (
         <div className="pointer-events-none absolute inset-0 w-full h-full overflow-hidden" style={{ zIndex: 0 }}>
@@ -313,17 +295,56 @@ function setStaticStyle(pathEl, haloEl, colorVar, thickness) {
             </filter>
             </defs>
 
-            {/* ORANGE */}
-            <path ref={refs.orangeHalo} d={paths.ORANGE_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormHalo)" />
-            <path ref={refs.orangeMain} d={paths.ORANGE_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormGlow)" />
+            <path
+            ref={orangeHaloRef}
+            d={paths.ORANGE_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormHalo)"
+            />
+            <path
+            ref={orangeMainRef}
+            d={paths.ORANGE_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormGlow)"
+            />
 
-            {/* VIOLET */}
-            <path ref={refs.violetHalo} d={paths.VIOLET_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormHalo)" />
-            <path ref={refs.violetMain} d={paths.VIOLET_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormGlow)" />
+            <path
+            ref={violetHaloRef}
+            d={paths.VIOLET_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormHalo)"
+            />
+            <path
+            ref={violetMainRef}
+            d={paths.VIOLET_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormGlow)"
+            />
 
-            {/* BLUE */}
-            <path ref={refs.blueHalo} d={paths.BLUE_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormHalo)" />
-            <path ref={refs.blueMain} d={paths.BLUE_A} fill="none" strokeLinecap="round" strokeLinejoin="round" filter="url(#wormGlow)" />
+            <path
+            ref={blueHaloRef}
+            d={paths.BLUE_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormHalo)"
+            />
+            <path
+            ref={blueMainRef}
+            d={paths.BLUE_A}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="url(#wormGlow)"
+            />
         </svg>
         </div>
     );
