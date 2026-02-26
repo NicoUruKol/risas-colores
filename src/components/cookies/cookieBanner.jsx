@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "./CookieBanner.module.css";
 
 const CONSENT_KEY = "cookies-consent";
 
 export default function CookieBanner() {
-    const [visible, setVisible] = useState(false);
-
-    useEffect(() => {
-        const consent = localStorage.getItem(CONSENT_KEY);
-        if (!consent) setVisible(true);
-    }, []);
+    const [visible, setVisible] = useState(() => {
+        if (typeof window === "undefined") return false;
+        return !localStorage.getItem(CONSENT_KEY);
+    });
 
     const acceptCookies = () => {
-        localStorage.setItem(CONSENT_KEY, "accepted");
+        localStorage.setItem(CONSENT_KEY, "1");
         setVisible(false);
     };
 
@@ -26,8 +24,7 @@ export default function CookieBanner() {
     return (
         <div className={styles.banner} role="dialog" aria-live="polite">
         <p className={styles.text}>
-            Usamos cookies para mejorar la experiencia en nuestro sitio y acompañar
-            mejor a las familias que nos visitan.
+            Usamos cookies para mejorar la experiencia en nuestro sitio y acompañar mejor a las familias que nos visitan.
         </p>
 
         <div className={styles.actions}>
