@@ -284,7 +284,7 @@ export default function HorariosSalas() {
 
                 <div className={styles.ctaRow}>
                     <a
-                        href="https://wa.me/5491152499974?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0AEstamos%20interesados%20en%20conocer%20disponibilidad%20y%20horarios%20del%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias!"
+                        href="https://wa.me/5491156971231?text=Hola%20%F0%9F%91%A6%F0%9F%8F%BB%20%F0%9F%91%A7%F0%9F%8F%BB%20%F0%9F%8C%88%0AEstamos%20interesados%20en%20conocer%20disponibilidad%20y%20horarios%20del%20Jard%C3%ADn%20Maternal%20Risas%20y%20Colores.%0A%C2%A1Gracias!"
                         target="_blank"
                         rel="noopener noreferrer"
                         className={styles.ctaLink}
