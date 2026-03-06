@@ -35,6 +35,8 @@ import PaymentFailure from "../pages/PaymentFailure";
 import AdminProtected from "./components/auth/AdminProtected";
 import { AdminAuthProvider } from "../context/AdminAuthContext";
 
+import { SpeedInsights } from "@vercel/speed-insights/react";
+
 const routes = [
   {
     element: <AppShell />,
@@ -99,6 +101,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AdminAuthProvider>
       <RouterProvider router={router} />
+      <SpeedInsights />
     </AdminAuthProvider>
   </React.StrictMode>
 );
