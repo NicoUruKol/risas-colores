@@ -17,7 +17,7 @@ export default function Home() {
     const [heroIndex, setHeroIndex] = useState(0);
 
     // ==============================
-    // Hero
+    // Hero!
     // ==============================
     
     // Content desde backend (Firestore)
