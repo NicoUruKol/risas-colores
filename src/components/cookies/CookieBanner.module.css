@@ -16,6 +16,8 @@
     0 2px 6px rgba(0, 0, 0, 0.04);
 
   font-family: inherit;
+  
+  animation: cookieFadeIn 420ms ease-out;
 }
 
 /* Detalle superior tipo confeti */
@@ -82,6 +84,17 @@
   background: #ececec;
 }
 
+/* Botón solo necesarias */
+.necessary {
+  background: #ffffff;
+  color: #4a90c2;
+  border: 1px solid rgba(74, 144, 194, 0.4);
+}
+
+.necessary:hover {
+  background: rgba(74, 144, 194, 0.08);
+}
+
 /* Mobile */
 @media (max-width: 560px) {
   .banner {
@@ -89,5 +102,20 @@
     right: 0.75rem;
     bottom: 0.75rem;
     max-width: none;
+  }
+}
+/* ==============================
+    Animación de aparición
+============================== */
+
+@keyframes cookieFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
