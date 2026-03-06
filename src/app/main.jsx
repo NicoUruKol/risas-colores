@@ -36,6 +36,7 @@ import AdminProtected from "./components/auth/AdminProtected";
 import { AdminAuthProvider } from "../context/AdminAuthContext";
 
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react"
 
 const routes = [
   {
@@ -101,6 +102,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AdminAuthProvider>
       <RouterProvider router={router} />
+      <Analytics />
       <SpeedInsights />
     </AdminAuthProvider>
   </React.StrictMode>
