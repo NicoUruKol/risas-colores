@@ -9,7 +9,7 @@ import Header3 from "../components/layout/Header3";
 import CookieBanner, {
     CONSENT_KEY,
     CONSENT_ACCEPTED,
-    } from "../components/cookies/CookieBanner";
+    } from "../components/cookies/cookieBanner";
 import ConsentScripts from "../components/cookies/ConsentScripts";
 
 function isMobile() {
