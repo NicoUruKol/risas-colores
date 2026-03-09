@@ -197,6 +197,10 @@ export default function Home() {
                 path="/"
             />
 
+            <h1 className={styles.visuallyHidden}>
+                Jardín Maternal Risas y Colores
+            </h1>
+
             <div className={styles.bg} />
 
             <Container className="relative z-10 grid gap-10">

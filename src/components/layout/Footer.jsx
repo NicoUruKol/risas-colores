@@ -59,7 +59,7 @@ export default function Footer() {
                     
                     <a
                         className={styles.pill}
-                        href="https://instagram.com/risasycolores.jardinmaternal?igsh=dXFqeGdseGdseGoyM3F4"
+                        href="https://instagram.com/risasycolores.jardinmaternal/"
                         target="_blank"
                         rel="noreferrer"
                         aria-label="Abrir Instagram"
