@@ -201,6 +201,15 @@ export default function Home() {
                 Jardín Maternal Risas y Colores
             </h1>
 
+            <section className={styles.visuallyHidden} aria-label="Información del jardín">
+                <h2>Jardín maternal en Villa Pueyrredón</h2>
+                <p>
+                    El Jardín Maternal Risas y Colores acompaña a niños y niñas en sus primeros años
+                    de aprendizaje en Villa Pueyrredón, Ciudad de Buenos Aires, con una propuesta
+                    basada en el juego, el afecto y el desarrollo integral.
+                </p>
+            </section>
+
             <div className={styles.bg} />
 
             <Container className="relative z-10 grid gap-10">
