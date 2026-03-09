@@ -20,37 +20,6 @@ export default function SEO({
     const canonical = siteUrl ? absUrl(siteUrl, path) : "";
     const ogImg = siteUrl ? absUrl(siteUrl, ogImage) : ogImage;
 
-    const businessPhone = import.meta.env.VITE_BUSINESS_PHONE || "";
-    const businessStreet = import.meta.env.VITE_BUSINESS_STREET || "";
-    const businessLocality = import.meta.env.VITE_BUSINESS_LOCALITY || "";
-    const businessRegion = import.meta.env.VITE_BUSINESS_REGION || "";
-    const businessPostalCode = import.meta.env.VITE_BUSINESS_POSTAL_CODE || "";
-    const businessCountry = import.meta.env.VITE_BUSINESS_COUNTRY || "AR";
-    const businessInstagram = import.meta.env.VITE_BUSINESS_INSTAGRAM || "";
-    const businessFacebook = import.meta.env.VITE_BUSINESS_FACEBOOK || "";
-
-    const jsonLd = {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        name: SITE_NAME,
-        url: canonical || siteUrl || undefined,
-        image: ogImg || undefined,
-        description: description || undefined,
-        telephone: businessPhone || undefined,
-        address:
-            businessStreet || businessLocality || businessRegion || businessPostalCode
-                ? {
-                        "@type": "PostalAddress",
-                        streetAddress: businessStreet || undefined,
-                        addressLocality: businessLocality || undefined,
-                        addressRegion: businessRegion || undefined,
-                        postalCode: businessPostalCode || undefined,
-                        addressCountry: businessCountry || undefined,
-                    }
-                : undefined,
-        sameAs: [businessInstagram, businessFacebook].filter(Boolean),
-    };
-
     return (
         <>
             <title>{fullTitle}</title>
@@ -71,11 +40,6 @@ export default function SEO({
             <meta name="twitter:title" content={fullTitle} />
             {description ? <meta name="twitter:description" content={description} /> : null}
             <meta name="twitter:image" content={ogImg} />
-
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
         </>
     );
 }

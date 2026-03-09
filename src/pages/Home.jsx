@@ -192,8 +192,8 @@ export default function Home() {
     return (
         <main ref={homeRef} className={`relative py-10 ${styles.stage}`}>
             <SEO
-                title="Educación, juego y cuidado"
-                description="Jardín Maternal Risas y Colores. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
+                title="Jardín Maternal en Villa Pueyrredón"
+                description="Jardín Maternal Risas y Colores en Villa Pueyrredón. Acompañamos a niños y niñas en sus primeros pasos con una propuesta basada en el juego, el afecto y el aprendizaje."
                 path="/"
             />
 
