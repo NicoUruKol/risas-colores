@@ -72,9 +72,10 @@ export default function SEO({
             {description ? <meta name="twitter:description" content={description} /> : null}
             <meta name="twitter:image" content={ogImg} />
 
-            <script type="application/ld+json">
-                {JSON.stringify(jsonLd)}
-            </script>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
         </>
     );
 }
