@@ -14,8 +14,12 @@ import {
 /* ==============================
 Helpers
 ============================== */
+const getDisplayPaymentStatus = (status) => {
+    if (status === "created") return "pending_payment";
+    return status || "pending_payment";
+};
+
 const PAYMENT_STATUS_LABELS = {
-    created: "Creado",
     pending_payment: "Pago pendiente",
     paid: "Pagado",
     expired: "Expirado",
@@ -28,7 +32,6 @@ const DELIVERY_STATUS_LABELS = {
 };
 
 const PAYMENT_STATUS_BADGE = {
-    created: "lavender",
     pending_payment: "orange",
     paid: "blue",
     expired: "lavender",
@@ -60,6 +63,18 @@ const formatDate = (value) => {
     }
 };
 
+const getDateMs = (value) => {
+    if (!value) return 0;
+
+    try {
+        if (typeof value?.toDate === "function") return value.toDate().getTime();
+        if (value?._seconds) return value._seconds * 1000;
+        return new Date(value).getTime() || 0;
+    } catch {
+        return 0;
+    }
+};
+
 const getFamilyLabel = (order) => {
     const adult = order?.family?.adultName || order?.customer?.name || "Sin nombre";
     const kid = order?.family?.kidName || "Sin peque";
@@ -71,11 +86,11 @@ const canCancelOrder = (order) => {
 };
 
 const canMarkDelivered = (order) => {
-    return order?.status === "paid" && order?.deliveryStatus === "pending_delivery";
+    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "pending_delivery";
 };
 
 const canMarkPendingDelivery = (order) => {
-    return order?.status === "paid" && order?.deliveryStatus === "delivered";
+    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "delivered";
 };
 
 const canChangePaymentStatus = (order, nextStatus) => {
@@ -101,6 +116,42 @@ const canChangePaymentStatus = (order, nextStatus) => {
 
 const normalizeText = (value) => String(value || "").trim().toLowerCase();
 
+const matchesQuickFilter = (order, quickFilter) => {
+    const paymentStatus = getDisplayPaymentStatus(order?.status);
+    const deliveryStatus = order?.deliveryStatus;
+
+    if (quickFilter === "pending_payment") {
+        return paymentStatus === "pending_payment";
+    }
+
+    if (quickFilter === "pending_delivery") {
+        return paymentStatus === "paid" && deliveryStatus === "pending_delivery";
+    }
+
+    if (quickFilter === "delivered") {
+        return paymentStatus === "paid" && deliveryStatus === "delivered";
+    }
+
+    if (quickFilter === "cancelled") {
+        return paymentStatus === "cancelled";
+    }
+
+    return true;
+};
+
+const getOrderPriority = (order) => {
+    const paymentStatus = getDisplayPaymentStatus(order?.status);
+    const deliveryStatus = order?.deliveryStatus;
+
+    if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") return 1;
+    if (paymentStatus === "pending_payment") return 2;
+    if (paymentStatus === "paid" && deliveryStatus === "delivered") return 3;
+    if (paymentStatus === "expired") return 4;
+    if (paymentStatus === "cancelled") return 5;
+
+    return 6;
+};
+
 /* ==============================
 Component
 ============================== */
@@ -118,21 +169,40 @@ export default function AdminPedidos() {
     const [error, setError] = useState("");
 
     const [search, setSearch] = useState("");
-    const [paymentFilter, setPaymentFilter] = useState("active");
-    const [deliveryFilter, setDeliveryFilter] = useState("all");
+    const [quickFilter, setQuickFilter] = useState("pending_delivery");
 
     /* ==============================
     Derived
     ============================== */
-    const selectedSummary = useMemo(
-        () => orders.find((order) => order.id === selectedId) || null,
-        [orders, selectedId]
-    );
+    const counters = useMemo(() => {
+        let pendingPayment = 0;
+        let pendingDelivery = 0;
+        let delivered = 0;
+        let cancelled = 0;
+
+        for (const order of orders) {
+            const paymentStatus = getDisplayPaymentStatus(order?.status);
+            const deliveryStatus = order?.deliveryStatus;
+
+            if (paymentStatus === "pending_payment") pendingPayment += 1;
+            if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") pendingDelivery += 1;
+            if (paymentStatus === "paid" && deliveryStatus === "delivered") delivered += 1;
+            if (paymentStatus === "cancelled") cancelled += 1;
+        }
+
+        return {
+            pendingPayment,
+            pendingDelivery,
+            delivered,
+            cancelled,
+            total: orders.length,
+        };
+    }, [orders]);
 
     const filteredOrders = useMemo(() => {
         const q = normalizeText(search);
 
-        return orders.filter((order) => {
+        const result = orders.filter((order) => {
             const matchesSearch =
                 !q ||
                 normalizeText(order.id).includes(q) ||
@@ -144,25 +214,16 @@ export default function AdminPedidos() {
 
             if (!matchesSearch) return false;
 
-            let matchesPayment = true;
-
-            if (paymentFilter === "active") {
-                matchesPayment = order.status !== "cancelled";
-            } else if (paymentFilter !== "all") {
-                matchesPayment = order.status === paymentFilter;
-            }
-
-            if (!matchesPayment) return false;
-
-            let matchesDelivery = true;
-
-            if (deliveryFilter !== "all") {
-                matchesDelivery = order.deliveryStatus === deliveryFilter;
-            }
-
-            return matchesDelivery;
+            return matchesQuickFilter(order, quickFilter);
         });
-    }, [orders, search, paymentFilter, deliveryFilter]);
+
+        return [...result].sort((a, b) => {
+            const priorityDiff = getOrderPriority(a) - getOrderPriority(b);
+            if (priorityDiff !== 0) return priorityDiff;
+
+            return getDateMs(b?.createdAt) - getDateMs(a?.createdAt);
+        });
+    }, [orders, search, quickFilter]);
 
     /* ==============================
     Data load
@@ -300,8 +361,7 @@ export default function AdminPedidos() {
 
     const clearFilters = () => {
         setSearch("");
-        setPaymentFilter("active");
-        setDeliveryFilter("all");
+        setQuickFilter("pending_delivery");
     };
 
     /* ==============================
@@ -314,7 +374,7 @@ export default function AdminPedidos() {
                     <Badge variant="lavender">Admin</Badge>
                     <h2 className="text-2xl font-extrabold text-ui-text mt-2">Pedidos</h2>
                     <p className="text-sm text-ui-muted mt-2">
-                        Revisá pagos, entrega y detalle de cada compra.
+                        Primero ves lo importante para trabajar hoy.
                     </p>
                 </div>
 
@@ -333,8 +393,64 @@ export default function AdminPedidos() {
                 </Card>
             ) : null}
 
+            {/* ============================== */}
+            {/* Dashboard */}
+            {/* ============================== */}
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <Card
+                    className={`p-4 cursor-pointer border transition ${
+                        quickFilter === "pending_payment" ? "ring-2 ring-ui-primary/30" : ""
+                    }`}
+                    onClick={() => setQuickFilter("pending_payment")}
+                >
+                    <div className="text-sm text-ui-muted">Pendientes de pago</div>
+                    <div className="text-2xl font-extrabold text-ui-text mt-2">
+                        {counters.pendingPayment}
+                    </div>
+                </Card>
+
+                <Card
+                    className={`p-4 cursor-pointer border transition ${
+                        quickFilter === "pending_delivery" ? "ring-2 ring-ui-primary/30" : ""
+                    }`}
+                    onClick={() => setQuickFilter("pending_delivery")}
+                >
+                    <div className="text-sm text-ui-muted">Pendientes de entrega</div>
+                    <div className="text-2xl font-extrabold text-ui-text mt-2">
+                        {counters.pendingDelivery}
+                    </div>
+                </Card>
+
+                <Card
+                    className={`p-4 cursor-pointer border transition ${
+                        quickFilter === "delivered" ? "ring-2 ring-ui-primary/30" : ""
+                    }`}
+                    onClick={() => setQuickFilter("delivered")}
+                >
+                    <div className="text-sm text-ui-muted">Entregados</div>
+                    <div className="text-2xl font-extrabold text-ui-text mt-2">
+                        {counters.delivered}
+                    </div>
+                </Card>
+
+                <Card
+                    className={`p-4 cursor-pointer border transition ${
+                        quickFilter === "cancelled" ? "ring-2 ring-ui-primary/30" : ""
+                    }`}
+                    onClick={() => setQuickFilter("cancelled")}
+                >
+                    <div className="text-sm text-ui-muted">Cancelados</div>
+                    <div className="text-2xl font-extrabold text-ui-text mt-2">
+                        {counters.cancelled}
+                    </div>
+                </Card>
+            </div>
+
+            {/* ============================== */}
+            {/* Filters */}
+            {/* ============================== */}
             <Card className="p-4 grid gap-4">
-                <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
+                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
                     <Input
                         label="Buscar"
                         value={search}
@@ -342,103 +458,51 @@ export default function AdminPedidos() {
                         placeholder="Pedido, adulto, peque, email o teléfono"
                     />
 
-                    <label className="grid gap-1 text-sm">
-                        <span className="text-ui-muted">Estado de pago</span>
-                        <select
-                            className="rounded-2xl border border-ui-border bg-white px-3 py-2 text-ui-text outline-none"
-                            value={paymentFilter}
-                            onChange={(e) => setPaymentFilter(e.target.value)}
+                    <div className="flex items-end gap-2 flex-wrap">
+                        <Button
+                            variant={quickFilter === "pending_payment" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("pending_payment")}
                         >
-                            <option value="active">Activos</option>
-                            <option value="all">Todos</option>
-                            <option value="created">Creado</option>
-                            <option value="pending_payment">Pago pendiente</option>
-                            <option value="paid">Pagado</option>
-                            <option value="expired">Expirado</option>
-                            <option value="cancelled">Cancelado</option>
-                        </select>
-                    </label>
+                            Pendientes de pago
+                        </Button>
 
-                    <label className="grid gap-1 text-sm">
-                        <span className="text-ui-muted">Estado de entrega</span>
-                        <select
-                            className="rounded-2xl border border-ui-border bg-white px-3 py-2 text-ui-text outline-none"
-                            value={deliveryFilter}
-                            onChange={(e) => setDeliveryFilter(e.target.value)}
+                        <Button
+                            variant={quickFilter === "pending_delivery" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("pending_delivery")}
                         >
-                            <option value="all">Todos</option>
-                            <option value="pending_delivery">Pendiente de entrega</option>
-                            <option value="delivered">Entregado</option>
-                        </select>
-                    </label>
+                            Pendientes de entrega
+                        </Button>
 
-                    <div className="flex items-end">
+                        <Button
+                            variant={quickFilter === "delivered" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("delivered")}
+                        >
+                            Entregados
+                        </Button>
+
+                        <Button
+                            variant={quickFilter === "cancelled" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("cancelled")}
+                        >
+                            Cancelados
+                        </Button>
+
+                        <Button
+                            variant={quickFilter === "all" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("all")}
+                        >
+                            Todos
+                        </Button>
+
                         <Button variant="ghost" onClick={clearFilters}>
                             Limpiar
                         </Button>
                     </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 items-center justify-between">
-                    <div className="text-sm text-ui-muted">
-                        Mostrando <b className="text-ui-text">{filteredOrders.length}</b> de{" "}
-                        <b className="text-ui-text">{orders.length}</b> pedido(s)
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                        <Button
-                            variant={paymentFilter === "active" ? "primary" : "ghost"}
-                            size="sm"
-                            onClick={() => setPaymentFilter("active")}
-                        >
-                            Activos
-                        </Button>
-
-                        <Button
-                            variant={paymentFilter === "paid" ? "primary" : "ghost"}
-                            size="sm"
-                            onClick={() => setPaymentFilter("paid")}
-                        >
-                            Pagados
-                        </Button>
-
-                        <Button
-                            variant={
-                                paymentFilter === "paid" && deliveryFilter === "pending_delivery"
-                                    ? "primary"
-                                    : "ghost"
-                            }
-                            size="sm"
-                            onClick={() => {
-                                setPaymentFilter("paid");
-                                setDeliveryFilter("pending_delivery");
-                            }}
-                        >
-                            Pendientes de entrega
-                        </Button>
-
-                        <Button
-                            variant={deliveryFilter === "delivered" ? "primary" : "ghost"}
-                            size="sm"
-                            onClick={() => {
-                                setPaymentFilter("all");
-                                setDeliveryFilter("delivered");
-                            }}
-                        >
-                            Entregados
-                        </Button>
-
-                        <Button
-                            variant={paymentFilter === "cancelled" ? "primary" : "ghost"}
-                            size="sm"
-                            onClick={() => {
-                                setPaymentFilter("cancelled");
-                                setDeliveryFilter("all");
-                            }}
-                        >
-                            Cancelados
-                        </Button>
-                    </div>
+                <div className="text-sm text-ui-muted">
+                    Mostrando <b className="text-ui-text">{filteredOrders.length}</b> de{" "}
+                    <b className="text-ui-text">{orders.length}</b> pedido(s)
                 </div>
             </Card>
 
@@ -449,7 +513,7 @@ export default function AdminPedidos() {
             ) : filteredOrders.length === 0 ? (
                 <Card className="p-5">
                     <p className="text-ui-muted">
-                        No hay pedidos que coincidan con los filtros actuales.
+                        No hay pedidos que coincidan con la vista actual.
                     </p>
                 </Card>
             ) : (
@@ -461,6 +525,7 @@ export default function AdminPedidos() {
                         {filteredOrders.map((order) => {
                             const isSelected = selectedId === order.id;
                             const isWorking = workingId === order.id;
+                            const displayPaymentStatus = getDisplayPaymentStatus(order.status);
 
                             return (
                                 <Card
@@ -491,8 +556,8 @@ export default function AdminPedidos() {
                                     </div>
 
                                     <div className="flex flex-wrap gap-2">
-                                        <Badge variant={PAYMENT_STATUS_BADGE[order.status] || "lavender"}>
-                                            {PAYMENT_STATUS_LABELS[order.status] || order.status}
+                                        <Badge variant={PAYMENT_STATUS_BADGE[displayPaymentStatus] || "lavender"}>
+                                            {PAYMENT_STATUS_LABELS[displayPaymentStatus] || displayPaymentStatus}
                                         </Badge>
 
                                         <Badge
@@ -526,9 +591,7 @@ export default function AdminPedidos() {
                                         {canMarkDelivered(order) ? (
                                             <Button
                                                 variant="primary"
-                                                onClick={() =>
-                                                    handleDeliveryStatus(order, "delivered")
-                                                }
+                                                onClick={() => handleDeliveryStatus(order, "delivered")}
                                                 disabled={isWorking}
                                             >
                                                 Marcar entregado
@@ -539,10 +602,7 @@ export default function AdminPedidos() {
                                             <Button
                                                 variant="secondary"
                                                 onClick={() =>
-                                                    handleDeliveryStatus(
-                                                        order,
-                                                        "pending_delivery"
-                                                    )
+                                                    handleDeliveryStatus(order, "pending_delivery")
                                                 }
                                                 disabled={isWorking}
                                             >
@@ -566,9 +626,7 @@ export default function AdminPedidos() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() =>
-                                                    handlePaymentStatus(order, "pending_payment")
-                                                }
+                                                onClick={() => handlePaymentStatus(order, "pending_payment")}
                                                 disabled={isWorking}
                                             >
                                                 Pasar a pendiente
@@ -590,9 +648,7 @@ export default function AdminPedidos() {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() =>
-                                                    handlePaymentStatus(order, "expired")
-                                                }
+                                                onClick={() => handlePaymentStatus(order, "expired")}
                                                 disabled={isWorking}
                                             >
                                                 Marcar expirado
@@ -640,23 +696,23 @@ export default function AdminPedidos() {
                                 <div className="flex flex-wrap gap-2">
                                     <Badge
                                         variant={
-                                            PAYMENT_STATUS_BADGE[selectedOrder.status] || "lavender"
+                                            PAYMENT_STATUS_BADGE[
+                                                getDisplayPaymentStatus(selectedOrder.status)
+                                            ] || "lavender"
                                         }
                                     >
-                                        {PAYMENT_STATUS_LABELS[selectedOrder.status] ||
-                                            selectedOrder.status}
+                                        {PAYMENT_STATUS_LABELS[
+                                            getDisplayPaymentStatus(selectedOrder.status)
+                                        ] || getDisplayPaymentStatus(selectedOrder.status)}
                                     </Badge>
 
                                     <Badge
                                         variant={
-                                            DELIVERY_STATUS_BADGE[
-                                                selectedOrder.deliveryStatus
-                                            ] || "lavender"
+                                            DELIVERY_STATUS_BADGE[selectedOrder.deliveryStatus] || "lavender"
                                         }
                                     >
-                                        {DELIVERY_STATUS_LABELS[
-                                            selectedOrder.deliveryStatus
-                                        ] || selectedOrder.deliveryStatus}
+                                        {DELIVERY_STATUS_LABELS[selectedOrder.deliveryStatus] ||
+                                            selectedOrder.deliveryStatus}
                                     </Badge>
                                 </div>
 
@@ -707,8 +763,7 @@ export default function AdminPedidos() {
                                                         Talle: <b className="text-ui-text">{item.size}</b>
                                                     </div>
                                                     <div className="text-sm text-ui-muted">
-                                                        Cantidad:{" "}
-                                                        <b className="text-ui-text">{item.qty}</b>
+                                                        Cantidad: <b className="text-ui-text">{item.qty}</b>
                                                     </div>
                                                     <div className="text-sm text-ui-muted">
                                                         Unitario: $
