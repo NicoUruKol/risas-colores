@@ -5,10 +5,6 @@ export const adminLogin = async ({ email, password }) => {
         method: "POST",
         body: { email, password },
     });
-    
 
-    const token = r?.token;
-    if (!token) throw new Error(r?.message || "Login: no llegó token");
-    return token;
-
+    return r?.token;
 };
