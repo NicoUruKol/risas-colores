@@ -1,6 +1,8 @@
 import { request, authHeaders } from "./http";
 
-/* Superadmin */
+/* ==============================
+Superadmin
+============================== */
 export const adminListAdmins = async () => {
     const r = await request("/api/admins", { headers: authHeaders() });
     return r?.data ?? r;
@@ -23,7 +25,17 @@ export const adminDeactivateAdmin = async (id) => {
     return r?.data ?? r;
 };
 
-/* Admin logueado */
+export const adminReactivateAdmin = async (id) => {
+    const r = await request(`/api/admins/${id}/reactivate`, {
+        method: "PATCH",
+        headers: authHeaders(),
+    });
+    return r?.data ?? r;
+};
+
+/* ==============================
+Admin logueado
+============================== */
 export const adminChangeMyPassword = async ({ currentPassword, newPassword }) => {
     const r = await request("/api/admins/me/password", {
         method: "PATCH",
