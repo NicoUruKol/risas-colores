@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import {
     adminListOrders,
     adminGetOrderById,
@@ -39,9 +40,7 @@ const DELIVERY_STATUS_BADGE = {
     delivered: "blue",
 };
 
-const formatMoney = (n) => {
-    return Number(n || 0).toLocaleString("es-AR");
-};
+const formatMoney = (n) => Number(n || 0).toLocaleString("es-AR");
 
 const formatDate = (value) => {
     if (!value) return "—";
@@ -100,10 +99,15 @@ const canChangePaymentStatus = (order, nextStatus) => {
     return false;
 };
 
+const normalizeText = (value) => String(value || "").trim().toLowerCase();
+
 /* ==============================
 Component
 ============================== */
 export default function AdminPedidos() {
+    /* ==============================
+    State
+    ============================== */
     const [orders, setOrders] = useState([]);
     const [selectedId, setSelectedId] = useState("");
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -113,13 +117,55 @@ export default function AdminPedidos() {
     const [workingId, setWorkingId] = useState("");
     const [error, setError] = useState("");
 
+    const [search, setSearch] = useState("");
+    const [paymentFilter, setPaymentFilter] = useState("active");
+    const [deliveryFilter, setDeliveryFilter] = useState("all");
+
+    /* ==============================
+    Derived
+    ============================== */
     const selectedSummary = useMemo(
         () => orders.find((order) => order.id === selectedId) || null,
         [orders, selectedId]
     );
 
+    const filteredOrders = useMemo(() => {
+        const q = normalizeText(search);
+
+        return orders.filter((order) => {
+            const matchesSearch =
+                !q ||
+                normalizeText(order.id).includes(q) ||
+                normalizeText(order?.family?.adultName).includes(q) ||
+                normalizeText(order?.family?.kidName).includes(q) ||
+                normalizeText(order?.customer?.name).includes(q) ||
+                normalizeText(order?.customer?.email).includes(q) ||
+                normalizeText(order?.customer?.phone).includes(q);
+
+            if (!matchesSearch) return false;
+
+            let matchesPayment = true;
+
+            if (paymentFilter === "active") {
+                matchesPayment = order.status !== "cancelled";
+            } else if (paymentFilter !== "all") {
+                matchesPayment = order.status === paymentFilter;
+            }
+
+            if (!matchesPayment) return false;
+
+            let matchesDelivery = true;
+
+            if (deliveryFilter !== "all") {
+                matchesDelivery = order.deliveryStatus === deliveryFilter;
+            }
+
+            return matchesDelivery;
+        });
+    }, [orders, search, paymentFilter, deliveryFilter]);
+
     /* ==============================
-    Load list
+    Data load
     ============================== */
     const loadOrders = async ({ preserveSelected = true } = {}) => {
         setLoading(true);
@@ -149,9 +195,6 @@ export default function AdminPedidos() {
         }
     };
 
-    /* ==============================
-    Load detail
-    ============================== */
     const loadOrderDetail = async (id) => {
         if (!id) {
             setSelectedId("");
@@ -177,6 +220,17 @@ export default function AdminPedidos() {
         loadOrders({ preserveSelected: true });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (!selectedId) return;
+
+        const stillVisible = filteredOrders.some((order) => order.id === selectedId);
+
+        if (!stillVisible) {
+            setSelectedId("");
+            setSelectedOrder(null);
+        }
+    }, [filteredOrders, selectedId]);
 
     /* ==============================
     Actions
@@ -244,6 +298,12 @@ export default function AdminPedidos() {
         }
     };
 
+    const clearFilters = () => {
+        setSearch("");
+        setPaymentFilter("active");
+        setDeliveryFilter("all");
+    };
+
     /* ==============================
     Render
     ============================== */
@@ -273,13 +333,124 @@ export default function AdminPedidos() {
                 </Card>
             ) : null}
 
+            <Card className="p-4 grid gap-4">
+                <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
+                    <Input
+                        label="Buscar"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Pedido, adulto, peque, email o teléfono"
+                    />
+
+                    <label className="grid gap-1 text-sm">
+                        <span className="text-ui-muted">Estado de pago</span>
+                        <select
+                            className="rounded-2xl border border-ui-border bg-white px-3 py-2 text-ui-text outline-none"
+                            value={paymentFilter}
+                            onChange={(e) => setPaymentFilter(e.target.value)}
+                        >
+                            <option value="active">Activos</option>
+                            <option value="all">Todos</option>
+                            <option value="created">Creado</option>
+                            <option value="pending_payment">Pago pendiente</option>
+                            <option value="paid">Pagado</option>
+                            <option value="expired">Expirado</option>
+                            <option value="cancelled">Cancelado</option>
+                        </select>
+                    </label>
+
+                    <label className="grid gap-1 text-sm">
+                        <span className="text-ui-muted">Estado de entrega</span>
+                        <select
+                            className="rounded-2xl border border-ui-border bg-white px-3 py-2 text-ui-text outline-none"
+                            value={deliveryFilter}
+                            onChange={(e) => setDeliveryFilter(e.target.value)}
+                        >
+                            <option value="all">Todos</option>
+                            <option value="pending_delivery">Pendiente de entrega</option>
+                            <option value="delivered">Entregado</option>
+                        </select>
+                    </label>
+
+                    <div className="flex items-end">
+                        <Button variant="ghost" onClick={clearFilters}>
+                            Limpiar
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 items-center justify-between">
+                    <div className="text-sm text-ui-muted">
+                        Mostrando <b className="text-ui-text">{filteredOrders.length}</b> de{" "}
+                        <b className="text-ui-text">{orders.length}</b> pedido(s)
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                        <Button
+                            variant={paymentFilter === "active" ? "primary" : "ghost"}
+                            size="sm"
+                            onClick={() => setPaymentFilter("active")}
+                        >
+                            Activos
+                        </Button>
+
+                        <Button
+                            variant={paymentFilter === "paid" ? "primary" : "ghost"}
+                            size="sm"
+                            onClick={() => setPaymentFilter("paid")}
+                        >
+                            Pagados
+                        </Button>
+
+                        <Button
+                            variant={
+                                paymentFilter === "paid" && deliveryFilter === "pending_delivery"
+                                    ? "primary"
+                                    : "ghost"
+                            }
+                            size="sm"
+                            onClick={() => {
+                                setPaymentFilter("paid");
+                                setDeliveryFilter("pending_delivery");
+                            }}
+                        >
+                            Pendientes de entrega
+                        </Button>
+
+                        <Button
+                            variant={deliveryFilter === "delivered" ? "primary" : "ghost"}
+                            size="sm"
+                            onClick={() => {
+                                setPaymentFilter("all");
+                                setDeliveryFilter("delivered");
+                            }}
+                        >
+                            Entregados
+                        </Button>
+
+                        <Button
+                            variant={paymentFilter === "cancelled" ? "primary" : "ghost"}
+                            size="sm"
+                            onClick={() => {
+                                setPaymentFilter("cancelled");
+                                setDeliveryFilter("all");
+                            }}
+                        >
+                            Cancelados
+                        </Button>
+                    </div>
+                </div>
+            </Card>
+
             {loading ? (
                 <Card className="p-5">
                     <p className="text-ui-muted">Cargando pedidos...</p>
                 </Card>
-            ) : orders.length === 0 ? (
+            ) : filteredOrders.length === 0 ? (
                 <Card className="p-5">
-                    <p className="text-ui-muted">Todavía no hay pedidos cargados.</p>
+                    <p className="text-ui-muted">
+                        No hay pedidos que coincidan con los filtros actuales.
+                    </p>
                 </Card>
             ) : (
                 <div className="grid gap-4 lg:grid-cols-[1.2fr_0.9fr]">
@@ -287,7 +458,7 @@ export default function AdminPedidos() {
                     {/* Listado */}
                     {/* ============================== */}
                     <div className="grid gap-3">
-                        {orders.map((order) => {
+                        {filteredOrders.map((order) => {
                             const isSelected = selectedId === order.id;
                             const isWorking = workingId === order.id;
 
