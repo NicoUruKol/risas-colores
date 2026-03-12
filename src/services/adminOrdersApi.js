@@ -35,6 +35,14 @@ export const adminUpdateOrderDeliveryStatus = async (id, deliveryStatus) => {
     return r?.data ?? null;
 };
 
+export const adminMarkOrderReadyForPickup = async (id) => {
+    const r = await request(`/api/orders/${id}/ready-for-pickup`, {
+        method: "POST",
+        headers: authHeaders(),
+    });
+    return r?.data ?? null;
+};
+
 export const adminCancelOrder = async (id) => {
     const r = await request(`/api/orders/${id}/cancel`, {
         method: "POST",

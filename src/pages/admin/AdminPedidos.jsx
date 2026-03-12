@@ -8,6 +8,7 @@ import {
     adminGetOrderById,
     adminUpdateOrderStatus,
     adminUpdateOrderDeliveryStatus,
+    adminMarkOrderReadyForPickup,
     adminCancelOrder,
 } from "../../services/adminOrdersApi";
 
@@ -28,6 +29,7 @@ const PAYMENT_STATUS_LABELS = {
 
 const DELIVERY_STATUS_LABELS = {
     pending_delivery: "Pendiente de entrega",
+    ready_for_pickup: "Listo para retirar",
     delivered: "Entregado",
 };
 
@@ -40,6 +42,7 @@ const PAYMENT_STATUS_BADGE = {
 
 const DELIVERY_STATUS_BADGE = {
     pending_delivery: "orange",
+    ready_for_pickup: "lavender",
     delivered: "blue",
 };
 
@@ -86,11 +89,14 @@ const canCancelOrder = (order) => {
 };
 
 const canMarkDelivered = (order) => {
-    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "pending_delivery";
+    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "ready_for_pickup";
 };
 
 const canMarkPendingDelivery = (order) => {
-    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "delivered";
+    return (
+        getDisplayPaymentStatus(order?.status) === "paid" &&
+        (order?.deliveryStatus === "delivered" || order?.deliveryStatus === "ready_for_pickup")
+    );
 };
 
 const canChangePaymentStatus = (order, nextStatus) => {
@@ -128,6 +134,10 @@ const matchesQuickFilter = (order, quickFilter) => {
         return paymentStatus === "paid" && deliveryStatus === "pending_delivery";
     }
 
+    if (quickFilter === "ready_for_pickup") {
+        return paymentStatus === "paid" && deliveryStatus === "ready_for_pickup";
+    }
+
     if (quickFilter === "delivered") {
         return paymentStatus === "paid" && deliveryStatus === "delivered";
     }
@@ -144,14 +154,14 @@ const getOrderPriority = (order) => {
     const deliveryStatus = order?.deliveryStatus;
 
     if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") return 1;
-    if (paymentStatus === "pending_payment") return 2;
-    if (paymentStatus === "paid" && deliveryStatus === "delivered") return 3;
-    if (paymentStatus === "expired") return 4;
-    if (paymentStatus === "cancelled") return 5;
+    if (paymentStatus === "paid" && deliveryStatus === "ready_for_pickup") return 2;
+    if (paymentStatus === "pending_payment") return 3;
+    if (paymentStatus === "paid" && deliveryStatus === "delivered") return 4;
+    if (paymentStatus === "expired") return 5;
+    if (paymentStatus === "cancelled") return 6;
 
-    return 6;
+    return 7;
 };
-
 /* ==============================
 Component
 ============================== */
@@ -175,29 +185,32 @@ export default function AdminPedidos() {
     Derived
     ============================== */
     const counters = useMemo(() => {
-        let pendingPayment = 0;
-        let pendingDelivery = 0;
-        let delivered = 0;
-        let cancelled = 0;
+    let pendingPayment = 0;
+    let pendingDelivery = 0;
+    let readyForPickup = 0;
+    let delivered = 0;
+    let cancelled = 0;
 
-        for (const order of orders) {
-            const paymentStatus = getDisplayPaymentStatus(order?.status);
-            const deliveryStatus = order?.deliveryStatus;
+    for (const order of orders) {
+        const paymentStatus = getDisplayPaymentStatus(order?.status);
+        const deliveryStatus = order?.deliveryStatus;
 
-            if (paymentStatus === "pending_payment") pendingPayment += 1;
-            if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") pendingDelivery += 1;
-            if (paymentStatus === "paid" && deliveryStatus === "delivered") delivered += 1;
-            if (paymentStatus === "cancelled") cancelled += 1;
-        }
+        if (paymentStatus === "pending_payment") pendingPayment += 1;
+        if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") pendingDelivery += 1;
+        if (paymentStatus === "paid" && deliveryStatus === "ready_for_pickup") readyForPickup += 1;
+        if (paymentStatus === "paid" && deliveryStatus === "delivered") delivered += 1;
+        if (paymentStatus === "cancelled") cancelled += 1;
+    }
 
-        return {
-            pendingPayment,
-            pendingDelivery,
-            delivered,
-            cancelled,
-            total: orders.length,
-        };
-    }, [orders]);
+    return {
+        pendingPayment,
+        pendingDelivery,
+        readyForPickup,
+        delivered,
+        cancelled,
+        total: orders.length,
+    };
+}, [orders]);
 
     const filteredOrders = useMemo(() => {
         const q = normalizeText(search);
@@ -337,6 +350,22 @@ export default function AdminPedidos() {
         }
     };
 
+    const handleReadyForPickup = async (order) => {
+    if (!order?.id) return;
+
+    setWorkingId(order.id);
+    setError("");
+
+    try {
+        await adminMarkOrderReadyForPickup(order.id);
+        await refreshAfterAction(order.id);
+    } catch (err) {
+        setError(err?.data?.message || err?.message || "No se pudo marcar como listo para retirar.");
+    } finally {
+        setWorkingId("");
+    }
+};
+
     const handleCancel = async (order) => {
         if (!order?.id || !canCancelOrder(order)) return;
 
@@ -396,7 +425,7 @@ export default function AdminPedidos() {
             {/* ============================== */}
             {/* Dashboard */}
             {/* ============================== */}
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                 <Card
                     className={`p-4 cursor-pointer border transition ${
                         quickFilter === "pending_payment" ? "ring-2 ring-ui-primary/30" : ""
@@ -418,6 +447,18 @@ export default function AdminPedidos() {
                     <div className="text-sm text-ui-muted">Pendientes de entrega</div>
                     <div className="text-2xl font-extrabold text-ui-text mt-2">
                         {counters.pendingDelivery}
+                    </div>
+                </Card>
+
+                <Card
+                    className={`p-4 cursor-pointer border transition ${
+                        quickFilter === "ready_for_pickup" ? "ring-2 ring-ui-primary/30" : ""
+                    }`}
+                    onClick={() => setQuickFilter("ready_for_pickup")}
+                >
+                    <div className="text-sm text-ui-muted">Listos para retirar</div>
+                    <div className="text-2xl font-extrabold text-ui-text mt-2">
+                        {counters.readyForPickup}
                     </div>
                 </Card>
 
@@ -471,6 +512,13 @@ export default function AdminPedidos() {
                             onClick={() => setQuickFilter("pending_delivery")}
                         >
                             Pendientes de entrega
+                        </Button>
+
+                        <Button
+                            variant={quickFilter === "ready_for_pickup" ? "primary" : "ghost"}
+                            onClick={() => setQuickFilter("ready_for_pickup")}
+                        >
+                            Listos para retirar
                         </Button>
 
                         <Button
@@ -587,6 +635,17 @@ export default function AdminPedidos() {
                                         >
                                             {isSelected ? "Ocultar detalle" : "Ver detalle"}
                                         </Button>
+
+                                        {getDisplayPaymentStatus(order?.status) === "paid" &&
+                                            order?.deliveryStatus === "pending_delivery" ? (
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => handleReadyForPickup(order)}
+                                                    disabled={isWorking}
+                                                >
+                                                    Listo para retirar y avisar
+                                                </Button>
+                                            ) : null}
 
                                         {canMarkDelivered(order) ? (
                                             <Button
@@ -816,6 +875,15 @@ export default function AdminPedidos() {
                                     <div className="text-sm text-ui-muted">
                                         <b className="text-ui-text">Pago acreditado:</b>{" "}
                                         {formatDate(selectedOrder?.mp?.paidAt)}
+                                    </div>
+
+                                    <div className="text-sm text-ui-muted">
+                                        <b className="text-ui-text">Listo para retirar:</b>{" "}
+                                        {formatDate(selectedOrder?.readyForPickupAt)}
+                                    </div>
+                                    <div className="text-sm text-ui-muted">
+                                        <b className="text-ui-text">Mail listo para retirar:</b>{" "}
+                                        {selectedOrder?.notifications?.readyForPickupEmailSent ? "Enviado" : "No enviado"}
                                     </div>
 
                                     <div className="text-sm text-ui-muted">
