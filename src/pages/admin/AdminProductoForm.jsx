@@ -87,6 +87,7 @@ export default function AdminProductoForm() {
     const sizes = useMemo(() => (sizeMode === "unico" ? [UNICO] : TALLES), [sizeMode]);
 
     const [form, setForm] = useState({
+        id: "",
         name: "",
         description: "",
         active: true,
@@ -116,6 +117,7 @@ export default function AdminProductoForm() {
         setSizeMode(nextMode);
 
         setForm({
+        id: found.id ?? "",
         name: found.name ?? "",
         description: found.description ?? "",
         active: found.active !== false,
@@ -169,6 +171,11 @@ export default function AdminProductoForm() {
 
     const validate = () => {
         const e = {};
+
+        if (!editing && !String(form.id).trim()) {
+        e.id = "Obligatorio";
+        }
+
         if (!String(form.name).trim()) e.name = "Obligatorio";
 
         const avatars = cleanUrls(form.avatar);
@@ -247,6 +254,7 @@ export default function AdminProductoForm() {
         setSaving(true);
 
         const payload = {
+        ...(editing ? {} : { id: String(form.id).trim() }),
         category: "prenda",
         name: String(form.name).trim(),
         description: String(form.description || "").trim(),
@@ -353,6 +361,22 @@ export default function AdminProductoForm() {
             ) : (
             <Card className={styles.card}>
                 <form className={styles.form} onSubmit={handleSubmit}>
+                {!editing && (
+                    <div className={styles.field}>
+                    <label className={styles.label}>Código / ID</label>
+                    <input
+                        className={styles.input}
+                        value={form.id}
+                        onChange={(e) => setForm((p) => ({ ...p, id: e.target.value }))}
+                        placeholder="Ej: 010"
+                    />
+                    <div className={styles.helper}>
+                        Este código se usa como identificador del producto en Firestore.
+                    </div>
+                    {errors.id && <div className={styles.error}>{errors.id}</div>}
+                    </div>
+                )}
+
                 <div className={styles.field}>
                     <label className={styles.label}>Nombre</label>
                     <input
