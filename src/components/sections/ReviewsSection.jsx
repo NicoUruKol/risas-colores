@@ -49,7 +49,7 @@ export default function ReviewsSection({
     title = "Lo que dicen las familias",
     subtitle = "Reseñas reales en Google",
     badge = "Google Maps",
-    googleReviewsUrl = "https://maps.app.goo.gl/BtGnwQnfJ2pBCWco8?g_st=iw",
+    googleReviewsUrl = "https://www.google.com.ar/maps/place/Risas+y+Colores/@-34.5909792,-58.5036159,18.5z/data=!4m8!3m7!1s0x95bcb64a22cf03c1:0x9c1ceb0a2afdd6ce!8m2!3d-34.5912437!4d-58.5036519!9m1!1b1!16s%2Fg%2F11b6g8vbs6?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D",
     buttonText = "Ver más reseñas",
     limit = 4,
     reviews = [],
@@ -59,7 +59,7 @@ export default function ReviewsSection({
         return arr.slice(0, limit);
     }, [reviews, limit]);
 
-    const DEFAULT_URL = "https://maps.app.goo.gl/BtGnwQnfJ2pBCWco8?g_st=iw";
+    const DEFAULT_URL = "https://www.google.com.ar/maps/place/Risas+y+Colores/@-34.5909792,-58.5036159,18.5z/data=!4m8!3m7!1s0x95bcb64a22cf03c1:0x9c1ceb0a2afdd6ce!8m2!3d-34.5912437!4d-58.5036519!9m1!1b1!16s%2Fg%2F11b6g8vbs6?entry=ttu&g_ep=EgoyMDI2MDMxMC4wIKXMDSoASAFQAw%3D%3D";
     const link = String(googleReviewsUrl || "").trim() || DEFAULT_URL;
 
     const isDesktop = useIsDesktop();
