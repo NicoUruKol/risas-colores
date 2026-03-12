@@ -103,16 +103,14 @@ export default function ProductoDetalle() {
     const images = useMemo(() => {
         if (!item) return [];
         if (typeof item.avatar === "string") {
-            const s = item.avatar.trim();
-            return s ? [s] : [];
+        const s = item.avatar.trim();
+        return s ? [s] : [];
         }
         if (Array.isArray(item.avatar)) {
-            return item.avatar
-            .map((x) => String(x || "").trim())
-            .filter(Boolean);
+        return item.avatar.map((x) => String(x || "").trim()).filter(Boolean);
         }
         return [];
-        }, [item]);
+    }, [item]);
 
     useEffect(() => {
         setImgIndex((i) => Math.min(i, Math.max(0, images.length - 1)));
@@ -145,15 +143,17 @@ export default function ProductoDetalle() {
     return (
         <main className={`py-10 ${styles.stage}`}>
         <div className={styles.bg} />
-        <Container className="grid gap-6 max-w-[860px]">
-            <div className="flex items-center justify-between gap-4">
+
+        <Container className={`grid gap-6 ${styles.detailContainer}`}>
+            <div className={styles.topBar}>
             <Link to="/uniformes">
                 <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
                 <span className={styles.ctaIcon}>←</span>
                 Volver
                 </Button>
             </Link>
-            {!loading && item && <Badge variant="blue">Producto</Badge>}
+
+            {!loading && item ? <Badge variant="blue">Producto</Badge> : null}
             </div>
 
             {loading ? (
@@ -163,6 +163,7 @@ export default function ProductoDetalle() {
             ) : !item ? (
             <Card className={`p-5 ${styles.shell}`}>
                 <p className="text-ui-muted">No encontramos este producto.</p>
+
                 <div className="mt-3">
                 <Link to="/uniformes">
                     <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
@@ -173,9 +174,10 @@ export default function ProductoDetalle() {
                 </div>
             </Card>
             ) : (
-            <Card className={`p-5 ${styles.shell}`}>
-                <div className="grid gap-5 md:grid-cols-2">
-                <ProductoDetalleCarousel
+            <Card className={`${styles.shell} ${styles.detailCard}`}>
+                <div className={styles.detailGrid}>
+                <div className={styles.galleryCol}>
+                    <ProductoDetalleCarousel
                     images={images}
                     index={imgIndex}
                     onChange={setImgIndex}
@@ -183,10 +185,22 @@ export default function ProductoDetalle() {
                     onPrev={prevImg}
                     onNext={nextImg}
                     title={item.name}
-                />
+                    />
+                </div>
 
-                <div className="grid gap-3">
-                    <h1 className="text-2xl font-extrabold text-ui-text">{item.name}</h1>
+                <div className={styles.infoCol}>
+                    <div className={styles.headBlock}>
+                    <h1 className={styles.productTitle}>{item.name}</h1>
+
+                    <div className={styles.priceBlock}>
+                        <div className={styles.price}>${Number(unitPrice || 0).toLocaleString("es-AR")}</div>
+
+                        <div className={styles.stockLine}>
+                        Stock disponible (talle {talle}):{" "}
+                        <span className={stock > 0 ? styles.stockOk : styles.stockBad}>{stock}</span>
+                        </div>
+                    </div>
+                    </div>
 
                     <div className={styles.descBox}>
                     <div className={styles.descTitle}>Descripción</div>
@@ -195,85 +209,84 @@ export default function ProductoDetalle() {
                     </div>
                     </div>
 
-                    <p className="text-sm text-ui-muted">
-                    Talles:{" "}
-                    {sizes.length
+                    <div className={styles.metaRow}>
+                    <span className={styles.metaLabel}>Talles:</span>
+                    <span className={styles.metaValue}>
+                        {sizes.length
                         ? sizes.map((s) => (s === "U" ? "Único" : s)).join(" · ")
                         : "Consultar"}
-                    </p>
-
-                    <div className={`text-3xl font-extrabold text-brand-orange ${styles.price}`}>
-                    ${Number(unitPrice || 0).toLocaleString("es-AR")}
+                    </span>
                     </div>
 
-                    <p className="text-xs text-ui-muted">
-                    Stock disponible (talle {talle}):{" "}
-                    <span className={stock > 0 ? "text-ui-text font-bold" : "text-red-500 font-bold"}>
-                        {stock}
-                    </span>
-                    </p>
-
+                    <div className={styles.buyBox}>
                     <div className={styles.controlsGrid}>
-                    <div className={styles.controlBlock}>
+                        <div className={styles.controlBlock}>
                         <label className={styles.controlLabel}>Talle</label>
                         <select
-                        className={styles.select}
-                        value={talle}
-                        onChange={(e) => setTalle(e.target.value)}
-                        disabled={!sizes.length}
+                            className={styles.select}
+                            value={talle}
+                            onChange={(e) => setTalle(e.target.value)}
+                            disabled={!sizes.length}
                         >
-                        {(sizes.length ? sizes.map(toUiTalle) : ["1", "2", "3", "4", "5"]).map((t) => (
+                            {(sizes.length ? sizes.map(toUiTalle) : ["1", "2", "3", "4", "5"]).map((t) => (
                             <option key={t} value={t}>
-                            {t}
+                                {t}
                             </option>
-                        ))}
+                            ))}
                         </select>
-                    </div>
+                        </div>
 
-                    <div className={styles.controlBlock}>
+                        <div className={styles.controlBlock}>
                         <label className={styles.controlLabel}>Cantidad</label>
+
                         <div className={styles.stepper}>
-                        <Button
+                            <Button
                             variant="ghost"
                             size="sm"
                             className={styles.stepperBtn}
                             onClick={() => setQty((q) => Math.max(1, q - 1))}
-                        >
+                            >
                             −
-                        </Button>
+                            </Button>
 
-                        <div className={styles.qtyValue}>{qty}</div>
+                            <div className={styles.qtyValue}>{qty}</div>
 
-                        <Button
+                            <Button
                             variant="ghost"
                             size="sm"
                             className={styles.stepperBtn}
-                            onClick={() => setQty((q) => (stock > 0 ? Math.min(stock, q + 1) : q + 1))}
+                            onClick={() =>
+                                setQty((q) => (stock > 0 ? Math.min(stock, q + 1) : q + 1))
+                            }
                             disabled={stock > 0 ? qty >= stock : false}
-                        >
+                            >
                             +
-                        </Button>
+                            </Button>
                         </div>
-                    </div>
+                        </div>
                     </div>
 
                     <div className={styles.ctaRow}>
-                    <Button
+                        <Button
                         variant="secondary"
-                        className={`${styles.ctaReadable} ${styles.ctaBtn}`}
+                        className={`${styles.ctaReadable} ${styles.ctaBtn} ${styles.mainCta}`}
                         onClick={handleAdd}
                         disabled={!canAdd}
-                    >
+                        >
                         {stock <= 0 ? "Sin stock" : "Agregar al carrito"}
                         <span className={styles.ctaArrow}>→</span>
-                    </Button>
-
-                    <Link to="/carrito">
-                        <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
-                        Ir al carrito
-                        <span className={styles.ctaArrow}>→</span>
                         </Button>
-                    </Link>
+
+                        <Link to="/carrito" className={styles.ctaLink}>
+                        <Button
+                            variant="secondary"
+                            className={`${styles.ctaReadable} ${styles.ctaBtn}`}
+                        >
+                            Ir al carrito
+                            <span className={styles.ctaArrow}>→</span>
+                        </Button>
+                        </Link>
+                    </div>
                     </div>
                 </div>
                 </div>

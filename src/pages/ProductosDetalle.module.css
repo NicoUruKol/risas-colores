@@ -1,3 +1,112 @@
+/* ===== Layout detalle ===== */
+.detailContainer {
+  max-width: 1040px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shell {
+  border-radius: 28px;
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.detailCard {
+  padding: 1rem;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 20px;
+}
+
+@media (min-width: 900px) {
+  .detailGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+    align-items: start;
+  }
+}
+
+.galleryCol,
+.infoCol {
+  min-width: 0;
+}
+
+.infoCol {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.headBlock {
+  display: grid;
+  gap: 10px;
+}
+
+.productTitle {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.08;
+  font-weight: 900;
+  color: var(--ui-text);
+}
+
+.priceBlock {
+  display: grid;
+  gap: 6px;
+}
+
+.price {
+  font-size: 2.15rem;
+  line-height: 1;
+  font-weight: 900;
+  color: var(--brand-orange);
+}
+
+.stockLine {
+  font-size: 0.9rem;
+  color: var(--ui-muted);
+}
+
+.stockOk {
+  color: var(--ui-text);
+  font-weight: 900;
+}
+
+.stockBad {
+  color: #dc2626;
+  font-weight: 900;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.92rem;
+  color: var(--ui-muted);
+}
+
+.metaLabel {
+  font-weight: 800;
+  color: var(--ui-text);
+}
+
+.metaValue {
+  color: var(--ui-muted);
+}
+
+.buyBox {
+  display: grid;
+  gap: 14px;
+  padding-top: 4px;
+}
+
 /* ===== Galería ===== */
 .gallery {
   position: relative;
@@ -21,9 +130,9 @@
   font-size: 12px;
   padding: 6px 10px;
   border-radius: 999px;
-  color: rgba(0,0,0,.75);
-  background: rgba(255,255,255,.78);
-  border: 1px solid rgba(0,0,0,.12);
+  color: rgba(0, 0, 0, 0.75);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   backdrop-filter: blur(6px);
 }
 
@@ -35,8 +144,8 @@
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.12);
-  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(8px);
   cursor: pointer;
   font-size: 26px;
@@ -45,8 +154,13 @@
   place-items: center;
 }
 
-.navLeft { left: 10px; }
-.navRight { right: 10px; }
+.navLeft {
+  left: 10px;
+}
+
+.navRight {
+  right: 10px;
+}
 
 .dots {
   display: flex;
@@ -58,88 +172,87 @@
   width: 9px;
   height: 9px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.18);
-  background: rgba(0,0,0,.12);
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: rgba(0, 0, 0, 0.12);
   cursor: pointer;
 }
 
 .dotActive {
-  background: rgba(0,0,0,.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
-/* ===== CTA legibles (onda Home) ===== */
+/* ===== CTA legibles ===== */
 .ctaReadable {
   color: #2b2b2b !important;
-  border: 1px solid rgba(0,0,0,.10);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .ctaRow {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 10px;
   align-items: center;
 }
 
-.ctaRow > a {
+.ctaRow > a,
+.ctaLink {
   display: inline-block;
 }
 
-/* Botón con micro-animación */
-.ctaBtn{
+.mainCta {
+  min-width: 220px;
+}
+
+.ctaBtn {
   border-radius: 16px;
   letter-spacing: 0.2px;
   transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
 }
 
-.ctaBtn:active{
+.ctaBtn:active {
   transform: translateY(0);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
 }
 
-@media (hover: hover) and (pointer: fine){
-  .ctaBtn:hover{
+@media (hover: hover) and (pointer: fine) {
+  .ctaBtn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 16px 32px rgba(0,0,0,0.18);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
     filter: saturate(1.05);
   }
 }
 
-/* Flecha derecha estilo Home */
-.ctaArrow{
+.ctaArrow {
   display: inline-block;
   margin-left: 8px;
   transition: transform 160ms ease;
 }
 
-@media (hover: hover) and (pointer: fine){
-  .ctaBtn:hover .ctaArrow{
+@media (hover: hover) and (pointer: fine) {
+  .ctaBtn:hover .ctaArrow {
     transform: translateX(3px);
   }
 }
 
-/* Icono izquierdo para "Volver" */
-.ctaIcon{
+.ctaIcon {
   display: inline-block;
-  margin-left: 8px;
+  margin-right: 8px;
   transition: transform 160ms ease;
 }
 
-@media (hover: hover) and (pointer: fine){
-  .ctaBtn:hover .ctaIcon{
+@media (hover: hover) and (pointer: fine) {
+  .ctaBtn:hover .ctaIcon {
     transform: translateX(-3px);
   }
 }
 
-
-/* ===== Controles (mobile-first) ===== */
+/* ===== Controles ===== */
 .controlsGrid {
   display: grid;
   gap: 12px;
-  margin-top: 6px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .controlsGrid {
     grid-template-columns: 1fr 1fr;
     align-items: end;
@@ -154,7 +267,7 @@
 
 .controlLabel {
   font-size: 14px;
-  color: rgba(0,0,0,.55);
+  color: rgba(0, 0, 0, 0.55);
 }
 
 .select {
@@ -162,40 +275,38 @@
   min-height: 48px;
   padding: 0 12px;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.12);
-  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.85);
   color: #2b2b2b;
   outline: none;
 }
 
 .select:focus {
-  box-shadow: 0 0 0 4px rgba(74,144,194,.25);
-  border-color: rgba(74,144,194,.35);
+  box-shadow: 0 0 0 4px rgba(74, 144, 194, 0.25);
+  border-color: rgba(74, 144, 194, 0.35);
 }
 
-/* ===== Stepper (alineado) ===== */
+/* ===== Stepper ===== */
 .stepper {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  width: 50%;
-  height: 48px;
-
+  width: 100%;
+  min-height: 48px;
   padding: 0 10px;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(6px);
 }
 
 .stepperBtn {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 10px;
   display: grid;
   place-items: center;
-  border: none ;
+  border: none;
 }
 
 .qtyValue {
@@ -208,9 +319,13 @@
 /* ===== Descripción ===== */
 .descBox {
   border-radius: 18px;
-  border: 1px solid rgba(229,231,235,.90);
-  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(246,166,90,.08));
-  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94),
+    rgba(246, 166, 90, 0.08)
+  );
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
   padding: 12px 14px;
 }
 
@@ -222,17 +337,17 @@
 
 .descText {
   margin-top: 6px;
-  color: rgba(0,0,0,.62);
+  color: rgba(0, 0, 0, 0.62);
   font-size: 14px;
-  line-height: 1.35;
+  line-height: 1.42;
 }
 
-/* ===== Modal ===== */
+/* ===== Modal zoom ===== */
 .modalOverlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0,0,0,.72);
+  background: rgba(0, 0, 0, 0.72);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -245,8 +360,8 @@
   width: 100%;
   border-radius: 18px;
   overflow: hidden;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .modalImg {
@@ -255,7 +370,7 @@
   max-height: 92vh;
   object-fit: contain;
   display: block;
-  background: rgba(0,0,0,.15);
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .modalClose {
@@ -265,8 +380,8 @@
   width: 42px;
   height: 42px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
   color: #fff;
   cursor: pointer;
 }
@@ -279,8 +394,8 @@
   width: 46px;
   height: 46px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.35);
   color: #fff;
   cursor: pointer;
   font-size: 28px;
@@ -288,5 +403,37 @@
   place-items: center;
 }
 
-.modalNavLeft { left: 10px; }
-.modalNavRight { right: 10px; }
+.modalNavLeft {
+  left: 10px;
+}
+
+.modalNavRight {
+  right: 10px;
+}
+
+@media (max-width: 767px) {
+  .detailCard {
+    padding: 0.9rem;
+  }
+
+  .productTitle {
+    font-size: 1.55rem;
+  }
+
+  .price {
+    font-size: 1.8rem;
+  }
+
+  .ctaRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ctaRow :global(button) {
+    width: 100%;
+  }
+
+  .topBar {
+    align-items: flex-start;
+  }
+}
