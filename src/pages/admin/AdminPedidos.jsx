@@ -11,6 +11,7 @@ import {
     adminMarkOrderReadyForPickup,
     adminCancelOrder,
 } from "../../services/adminOrdersApi";
+import styles from "./AdminPedidos.module.css";
 
 /* ==============================
 Helpers
@@ -53,11 +54,11 @@ const formatDate = (value) => {
 
     try {
         if (typeof value?.toDate === "function") {
-            return value.toDate().toLocaleString("es-AR");
+        return value.toDate().toLocaleString("es-AR");
         }
 
         if (value?._seconds) {
-            return new Date(value._seconds * 1000).toLocaleString("es-AR");
+        return new Date(value._seconds * 1000).toLocaleString("es-AR");
         }
 
         return new Date(value).toLocaleString("es-AR");
@@ -89,13 +90,17 @@ const canCancelOrder = (order) => {
 };
 
 const canMarkDelivered = (order) => {
-    return getDisplayPaymentStatus(order?.status) === "paid" && order?.deliveryStatus === "ready_for_pickup";
+    return (
+        getDisplayPaymentStatus(order?.status) === "paid" &&
+        order?.deliveryStatus === "ready_for_pickup"
+    );
 };
 
 const canMarkPendingDelivery = (order) => {
     return (
         getDisplayPaymentStatus(order?.status) === "paid" &&
-        (order?.deliveryStatus === "delivered" || order?.deliveryStatus === "ready_for_pickup")
+        (order?.deliveryStatus === "delivered" ||
+        order?.deliveryStatus === "ready_for_pickup")
     );
 };
 
@@ -162,6 +167,48 @@ const getOrderPriority = (order) => {
 
     return 7;
 };
+
+const getPaymentActionCopy = (nextStatus) => {
+    if (nextStatus === "pending_payment") {
+        return {
+        title: "¿Pasar a pago pendiente?",
+        message:
+            "Vas a mover manualmente el pedido a estado de pago pendiente.",
+        confirmLabel: "Sí, pasar a pendiente",
+        };
+    }
+
+    if (nextStatus === "paid") {
+        return {
+        title: "¿Marcar como pagado?",
+        message: "Vas a marcar manualmente el pedido como pagado.",
+        confirmLabel: "Sí, marcar pagado",
+        };
+    }
+
+    if (nextStatus === "expired") {
+        return {
+        title: "¿Marcar como expirado?",
+        message: "Vas a marcar manualmente el pedido como expirado.",
+        confirmLabel: "Sí, marcar expirado",
+        };
+    }
+
+    if (nextStatus === "cancelled") {
+        return {
+        title: "¿Cancelar pedido?",
+        message: "Vas a cancelar manualmente el pedido.",
+        confirmLabel: "Sí, cancelar",
+        };
+    }
+
+    return {
+        title: "¿Confirmar cambio?",
+        message: "Se va a actualizar el estado del pedido.",
+        confirmLabel: "Confirmar",
+    };
+};
+
 /* ==============================
 Component
 ============================== */
@@ -181,17 +228,19 @@ export default function AdminPedidos() {
     const [search, setSearch] = useState("");
     const [quickFilter, setQuickFilter] = useState("pending_delivery");
 
+    const [confirmState, setConfirmState] = useState(null);
+
     /* ==============================
     Derived
     ============================== */
     const counters = useMemo(() => {
-    let pendingPayment = 0;
-    let pendingDelivery = 0;
-    let readyForPickup = 0;
-    let delivered = 0;
-    let cancelled = 0;
+        let pendingPayment = 0;
+        let pendingDelivery = 0;
+        let readyForPickup = 0;
+        let delivered = 0;
+        let cancelled = 0;
 
-    for (const order of orders) {
+        for (const order of orders) {
         const paymentStatus = getDisplayPaymentStatus(order?.status);
         const deliveryStatus = order?.deliveryStatus;
 
@@ -200,41 +249,41 @@ export default function AdminPedidos() {
         if (paymentStatus === "paid" && deliveryStatus === "ready_for_pickup") readyForPickup += 1;
         if (paymentStatus === "paid" && deliveryStatus === "delivered") delivered += 1;
         if (paymentStatus === "cancelled") cancelled += 1;
-    }
+        }
 
-    return {
+        return {
         pendingPayment,
         pendingDelivery,
         readyForPickup,
         delivered,
         cancelled,
         total: orders.length,
-    };
-}, [orders]);
+        };
+    }, [orders]);
 
     const filteredOrders = useMemo(() => {
         const q = normalizeText(search);
 
         const result = orders.filter((order) => {
-            const matchesSearch =
-                !q ||
-                normalizeText(order.id).includes(q) ||
-                normalizeText(order?.family?.adultName).includes(q) ||
-                normalizeText(order?.family?.kidName).includes(q) ||
-                normalizeText(order?.customer?.name).includes(q) ||
-                normalizeText(order?.customer?.email).includes(q) ||
-                normalizeText(order?.customer?.phone).includes(q);
+        const matchesSearch =
+            !q ||
+            normalizeText(order.id).includes(q) ||
+            normalizeText(order?.family?.adultName).includes(q) ||
+            normalizeText(order?.family?.kidName).includes(q) ||
+            normalizeText(order?.customer?.name).includes(q) ||
+            normalizeText(order?.customer?.email).includes(q) ||
+            normalizeText(order?.customer?.phone).includes(q);
 
-            if (!matchesSearch) return false;
+        if (!matchesSearch) return false;
 
-            return matchesQuickFilter(order, quickFilter);
+        return matchesQuickFilter(order, quickFilter);
         });
 
         return [...result].sort((a, b) => {
-            const priorityDiff = getOrderPriority(a) - getOrderPriority(b);
-            if (priorityDiff !== 0) return priorityDiff;
+        const priorityDiff = getOrderPriority(a) - getOrderPriority(b);
+        if (priorityDiff !== 0) return priorityDiff;
 
-            return getDateMs(b?.createdAt) - getDateMs(a?.createdAt);
+        return getDateMs(b?.createdAt) - getDateMs(a?.createdAt);
         });
     }, [orders, search, quickFilter]);
 
@@ -246,34 +295,34 @@ export default function AdminPedidos() {
         setError("");
 
         try {
-            const data = await adminListOrders();
-            setOrders(data);
+        const data = await adminListOrders();
+        setOrders(data);
 
-            if (!preserveSelected) {
-                setSelectedId("");
-                setSelectedOrder(null);
-                return;
-            }
+        if (!preserveSelected) {
+            setSelectedId("");
+            setSelectedOrder(null);
+            return;
+        }
 
-            if (selectedId) {
-                const stillExists = data.some((order) => order.id === selectedId);
-                if (!stillExists) {
-                    setSelectedId("");
-                    setSelectedOrder(null);
-                }
+        if (selectedId) {
+            const stillExists = data.some((order) => order.id === selectedId);
+            if (!stillExists) {
+            setSelectedId("");
+            setSelectedOrder(null);
             }
+        }
         } catch (err) {
-            setError(err?.data?.message || err?.message || "No se pudieron cargar los pedidos.");
+        setError(err?.data?.message || err?.message || "No se pudieron cargar los pedidos.");
         } finally {
-            setLoading(false);
+        setLoading(false);
         }
     };
 
     const loadOrderDetail = async (id) => {
         if (!id) {
-            setSelectedId("");
-            setSelectedOrder(null);
-            return;
+        setSelectedId("");
+        setSelectedOrder(null);
+        return;
         }
 
         setSelectedId(id);
@@ -281,12 +330,12 @@ export default function AdminPedidos() {
         setError("");
 
         try {
-            const data = await adminGetOrderById(id);
-            setSelectedOrder(data);
+        const data = await adminGetOrderById(id);
+        setSelectedOrder(data);
         } catch (err) {
-            setError(err?.data?.message || err?.message || "No se pudo cargar el detalle del pedido.");
+        setError(err?.data?.message || err?.message || "No se pudo cargar el detalle del pedido.");
         } finally {
-            setLoadingDetail(false);
+        setLoadingDetail(false);
         }
     };
 
@@ -301,8 +350,8 @@ export default function AdminPedidos() {
         const stillVisible = filteredOrders.some((order) => order.id === selectedId);
 
         if (!stillVisible) {
-            setSelectedId("");
-            setSelectedOrder(null);
+        setSelectedId("");
+        setSelectedOrder(null);
         }
     }, [filteredOrders, selectedId]);
 
@@ -313,7 +362,7 @@ export default function AdminPedidos() {
         await loadOrders({ preserveSelected: true });
 
         if (idToReload) {
-            await loadOrderDetail(idToReload);
+        await loadOrderDetail(idToReload);
         }
     };
 
@@ -325,12 +374,12 @@ export default function AdminPedidos() {
         setError("");
 
         try {
-            await adminUpdateOrderStatus(order.id, nextStatus);
-            await refreshAfterAction(order.id);
+        await adminUpdateOrderStatus(order.id, nextStatus);
+        await refreshAfterAction(order.id);
         } catch (err) {
-            setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de pago.");
+        setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de pago.");
         } finally {
-            setWorkingId("");
+        setWorkingId("");
         }
     };
 
@@ -341,51 +390,145 @@ export default function AdminPedidos() {
         setError("");
 
         try {
-            await adminUpdateOrderDeliveryStatus(order.id, nextDeliveryStatus);
-            await refreshAfterAction(order.id);
+        await adminUpdateOrderDeliveryStatus(order.id, nextDeliveryStatus);
+        await refreshAfterAction(order.id);
         } catch (err) {
-            setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de entrega.");
+        setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de entrega.");
         } finally {
-            setWorkingId("");
+        setWorkingId("");
         }
     };
 
     const handleReadyForPickup = async (order) => {
-    if (!order?.id) return;
-
-    setWorkingId(order.id);
-    setError("");
-
-    try {
-        await adminMarkOrderReadyForPickup(order.id);
-        await refreshAfterAction(order.id);
-    } catch (err) {
-        setError(err?.data?.message || err?.message || "No se pudo marcar como listo para retirar.");
-    } finally {
-        setWorkingId("");
-    }
-};
-
-    const handleCancel = async (order) => {
-        if (!order?.id || !canCancelOrder(order)) return;
-
-        const ok = window.confirm(
-            `Vas a cancelar el pedido #${order.id}. Esta acción puede devolver stock. ¿Querés continuar?`
-        );
-
-        if (!ok) return;
+        if (!order?.id) return;
 
         setWorkingId(order.id);
         setError("");
 
         try {
-            await adminCancelOrder(order.id);
-            await refreshAfterAction(order.id);
+        await adminMarkOrderReadyForPickup(order.id);
+        await refreshAfterAction(order.id);
         } catch (err) {
-            setError(err?.data?.message || err?.message || "No se pudo cancelar el pedido.");
+        setError(err?.data?.message || err?.message || "No se pudo marcar como listo para retirar.");
         } finally {
-            setWorkingId("");
+        setWorkingId("");
         }
+    };
+
+    const handleCancel = async (order) => {
+        if (!order?.id || !canCancelOrder(order)) return;
+
+        setWorkingId(order.id);
+        setError("");
+
+        try {
+        await adminCancelOrder(order.id);
+        await refreshAfterAction(order.id);
+        } catch (err) {
+        setError(err?.data?.message || err?.message || "No se pudo cancelar el pedido.");
+        } finally {
+        setWorkingId("");
+        }
+    };
+
+    const openConfirm = (config) => {
+        setConfirmState(config);
+    };
+
+    const closeConfirm = () => {
+        if (workingId) return;
+        setConfirmState(null);
+    };
+
+    const onConfirmAction = async () => {
+        if (!confirmState?.order) return;
+
+        const { order, kind, nextStatus, nextDeliveryStatus } = confirmState;
+
+        try {
+        if (kind === "cancel") {
+            await handleCancel(order);
+        }
+
+        if (kind === "ready_for_pickup") {
+            await handleReadyForPickup(order);
+        }
+
+        if (kind === "delivery_status") {
+            await handleDeliveryStatus(order, nextDeliveryStatus);
+        }
+
+        if (kind === "payment_status") {
+            await handlePaymentStatus(order, nextStatus);
+        }
+        } finally {
+        setConfirmState(null);
+        }
+    };
+
+    const askCancelOrder = (order) => {
+        openConfirm({
+        kind: "cancel",
+        order,
+        title: `¿Cancelar pedido #${order.id}?`,
+        message:
+            "Esta acción puede devolver stock y dejar el pedido como cancelado.",
+        confirmLabel: "Sí, cancelar",
+        tone: "danger",
+        });
+    };
+
+    const askReadyForPickup = (order) => {
+        openConfirm({
+        kind: "ready_for_pickup",
+        order,
+        title: `¿Marcar pedido #${order.id} como listo para retirar?`,
+        message:
+            "Además de cambiar el estado, se puede disparar el aviso correspondiente.",
+        confirmLabel: "Sí, marcar listo",
+        tone: "primary",
+        });
+    };
+
+    const askDeliveryStatus = (order, nextDeliveryStatus) => {
+        if (nextDeliveryStatus === "delivered") {
+        openConfirm({
+            kind: "delivery_status",
+            order,
+            nextDeliveryStatus,
+            title: `¿Marcar pedido #${order.id} como entregado?`,
+            message: "Se va a registrar el pedido como entregado.",
+            confirmLabel: "Sí, marcar entregado",
+            tone: "primary",
+        });
+        return;
+        }
+
+        if (nextDeliveryStatus === "pending_delivery") {
+        openConfirm({
+            kind: "delivery_status",
+            order,
+            nextDeliveryStatus,
+            title: `¿Volver pedido #${order.id} a pendiente de entrega?`,
+            message: "Se va a revertir el estado de entrega actual.",
+            confirmLabel: "Sí, volver a pendiente",
+            tone: "secondary",
+        });
+        }
+    };
+
+    const askPaymentStatus = (order, nextStatus) => {
+        const copy = getPaymentActionCopy(nextStatus);
+
+        openConfirm({
+        kind: "payment_status",
+        order,
+        nextStatus,
+        title: `${copy.title} #${order.id}?`,
+        message: copy.message,
+        confirmLabel: copy.confirmLabel,
+        tone: nextStatus === "expired" ? "secondary" : "primary",
+        });
     };
 
     const clearFilters = () => {
@@ -397,505 +540,523 @@ export default function AdminPedidos() {
     Render
     ============================== */
     return (
-        <div className="grid gap-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                    <Badge variant="lavender">Admin</Badge>
-                    <h2 className="text-2xl font-extrabold text-ui-text mt-2">Pedidos</h2>
-                    <p className="text-sm text-ui-muted mt-2">
-                        Primero ves lo importante para trabajar hoy.
-                    </p>
+        <section className={styles.page}>
+        <header className={styles.head}>
+            <div className={styles.headInfo}>
+            <div className={styles.badgeWrap}>
+                <Badge variant="lavender">Admin</Badge>
+            </div>
+
+            <h2 className={styles.title}>Pedidos</h2>
+            <p className={styles.sub}>Primero ves lo importante para trabajar hoy.</p>
+            </div>
+
+            <Button
+            variant="secondary"
+            onClick={() => loadOrders({ preserveSelected: true })}
+            disabled={loading}
+            className={styles.reloadBtn}
+            >
+            Recargar
+            </Button>
+        </header>
+
+        {error ? (
+            <Card className={styles.errorCard}>
+            <p className={styles.errorText}>{error}</p>
+            </Card>
+        ) : null}
+
+        <div className={styles.dashboard}>
+            <Card
+            className={`${styles.metricCard} ${
+                quickFilter === "pending_payment" ? styles.metricCardActive : ""
+            }`}
+            onClick={() => setQuickFilter("pending_payment")}
+            >
+            <div className={styles.metricLabel}>Pendientes de pago</div>
+            <div className={styles.metricValue}>{counters.pendingPayment}</div>
+            </Card>
+
+            <Card
+            className={`${styles.metricCard} ${
+                quickFilter === "pending_delivery" ? styles.metricCardActive : ""
+            }`}
+            onClick={() => setQuickFilter("pending_delivery")}
+            >
+            <div className={styles.metricLabel}>Pendientes de entrega</div>
+            <div className={styles.metricValue}>{counters.pendingDelivery}</div>
+            </Card>
+
+            <Card
+            className={`${styles.metricCard} ${
+                quickFilter === "ready_for_pickup" ? styles.metricCardActive : ""
+            }`}
+            onClick={() => setQuickFilter("ready_for_pickup")}
+            >
+            <div className={styles.metricLabel}>Listos para retirar</div>
+            <div className={styles.metricValue}>{counters.readyForPickup}</div>
+            </Card>
+
+            <Card
+            className={`${styles.metricCard} ${
+                quickFilter === "delivered" ? styles.metricCardActive : ""
+            }`}
+            onClick={() => setQuickFilter("delivered")}
+            >
+            <div className={styles.metricLabel}>Entregados</div>
+            <div className={styles.metricValue}>{counters.delivered}</div>
+            </Card>
+
+            <Card
+            className={`${styles.metricCard} ${
+                quickFilter === "cancelled" ? styles.metricCardActive : ""
+            }`}
+            onClick={() => setQuickFilter("cancelled")}
+            >
+            <div className={styles.metricLabel}>Cancelados</div>
+            <div className={styles.metricValue}>{counters.cancelled}</div>
+            </Card>
+        </div>
+
+        <Card className={styles.filtersCard}>
+            <div className={styles.filtersGrid}>
+                <div className={styles.filterButtons}>
+                    <Button
+                        variant={quickFilter === "pending_payment" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("pending_payment")}
+                    >
+                        Pendientes de pago
+                    </Button>
+
+                    <Button
+                        variant={quickFilter === "pending_delivery" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("pending_delivery")}
+                    >
+                        Pendientes de entrega
+                    </Button>
+
+                    <Button
+                        variant={quickFilter === "ready_for_pickup" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("ready_for_pickup")}
+                    >
+                        Listos para retirar
+                    </Button>
+
+                    <Button
+                        variant={quickFilter === "delivered" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("delivered")}
+                    >
+                        Entregados
+                    </Button>
+
+                    <Button
+                        variant={quickFilter === "cancelled" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("cancelled")}
+                    >
+                        Cancelados
+                    </Button>
+
+                    <Button
+                        variant={quickFilter === "all" ? "primary" : "ghost"}
+                        onClick={() => setQuickFilter("all")}
+                    >
+                        Todos
+                    </Button>
                 </div>
-
-                <Button
-                    variant="secondary"
-                    onClick={() => loadOrders({ preserveSelected: true })}
-                    disabled={loading}
-                >
-                    Recargar
-                </Button>
             </div>
 
-            {error ? (
-                <Card className="p-4 border border-red-200">
-                    <p className="text-sm text-red-600">{error}</p>
-                </Card>
-            ) : null}
-
-            {/* ============================== */}
-            {/* Dashboard */}
-            {/* ============================== */}
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                <Card
-                    className={`p-4 cursor-pointer border transition ${
-                        quickFilter === "pending_payment" ? "ring-2 ring-ui-primary/30" : ""
-                    }`}
-                    onClick={() => setQuickFilter("pending_payment")}
-                >
-                    <div className="text-sm text-ui-muted">Pendientes de pago</div>
-                    <div className="text-2xl font-extrabold text-ui-text mt-2">
-                        {counters.pendingPayment}
-                    </div>
-                </Card>
-
-                <Card
-                    className={`p-4 cursor-pointer border transition ${
-                        quickFilter === "pending_delivery" ? "ring-2 ring-ui-primary/30" : ""
-                    }`}
-                    onClick={() => setQuickFilter("pending_delivery")}
-                >
-                    <div className="text-sm text-ui-muted">Pendientes de entrega</div>
-                    <div className="text-2xl font-extrabold text-ui-text mt-2">
-                        {counters.pendingDelivery}
-                    </div>
-                </Card>
-
-                <Card
-                    className={`p-4 cursor-pointer border transition ${
-                        quickFilter === "ready_for_pickup" ? "ring-2 ring-ui-primary/30" : ""
-                    }`}
-                    onClick={() => setQuickFilter("ready_for_pickup")}
-                >
-                    <div className="text-sm text-ui-muted">Listos para retirar</div>
-                    <div className="text-2xl font-extrabold text-ui-text mt-2">
-                        {counters.readyForPickup}
-                    </div>
-                </Card>
-
-                <Card
-                    className={`p-4 cursor-pointer border transition ${
-                        quickFilter === "delivered" ? "ring-2 ring-ui-primary/30" : ""
-                    }`}
-                    onClick={() => setQuickFilter("delivered")}
-                >
-                    <div className="text-sm text-ui-muted">Entregados</div>
-                    <div className="text-2xl font-extrabold text-ui-text mt-2">
-                        {counters.delivered}
-                    </div>
-                </Card>
-
-                <Card
-                    className={`p-4 cursor-pointer border transition ${
-                        quickFilter === "cancelled" ? "ring-2 ring-ui-primary/30" : ""
-                    }`}
-                    onClick={() => setQuickFilter("cancelled")}
-                >
-                    <div className="text-sm text-ui-muted">Cancelados</div>
-                    <div className="text-2xl font-extrabold text-ui-text mt-2">
-                        {counters.cancelled}
-                    </div>
-                </Card>
-            </div>
-
-            {/* ============================== */}
-            {/* Filters */}
-            {/* ============================== */}
-            <Card className="p-4 grid gap-4">
-                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+            <div className={styles.searchWrap}>
                     <Input
                         label="Buscar"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Pedido, adulto, peque, email o teléfono"
+                        placeholder="Pedido, email o tel"
                     />
+            </div>
 
-                    <div className="flex items-end gap-2 flex-wrap">
-                        <Button
-                            variant={quickFilter === "pending_payment" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("pending_payment")}
-                        >
-                            Pendientes de pago
-                        </Button>
-
-                        <Button
-                            variant={quickFilter === "pending_delivery" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("pending_delivery")}
-                        >
-                            Pendientes de entrega
-                        </Button>
-
-                        <Button
-                            variant={quickFilter === "ready_for_pickup" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("ready_for_pickup")}
-                        >
-                            Listos para retirar
-                        </Button>
-
-                        <Button
-                            variant={quickFilter === "delivered" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("delivered")}
-                        >
-                            Entregados
-                        </Button>
-
-                        <Button
-                            variant={quickFilter === "cancelled" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("cancelled")}
-                        >
-                            Cancelados
-                        </Button>
-
-                        <Button
-                            variant={quickFilter === "all" ? "primary" : "ghost"}
-                            onClick={() => setQuickFilter("all")}
-                        >
-                            Todos
-                        </Button>
-
-                        <Button variant="ghost" onClick={clearFilters}>
-                            Limpiar
-                        </Button>
-                    </div>
+            <div className={styles.filtersFooter}>
+                <div className={styles.filtersSummary}>
+                Mostrando <b className={styles.strongText}>{filteredOrders.length}</b> de{" "}
+                <b className={styles.strongText}>{orders.length}</b> pedido(s)
                 </div>
 
-                <div className="text-sm text-ui-muted">
-                    Mostrando <b className="text-ui-text">{filteredOrders.length}</b> de{" "}
-                    <b className="text-ui-text">{orders.length}</b> pedido(s)
-                </div>
+                <Button
+                    variant="ghost"
+                    onClick={clearFilters}
+                    className={styles.clearBtn}
+                    >
+                    Limpiar
+                </Button>
+            </div>
+        </Card>
+
+        {loading ? (
+            <Card className={styles.stateCard}>
+            <p className={styles.stateText}>Cargando pedidos...</p>
             </Card>
+        ) : filteredOrders.length === 0 ? (
+            <Card className={styles.stateCard}>
+            <p className={styles.stateText}>
+                No hay pedidos que coincidan con la vista actual.
+            </p>
+            </Card>
+        ) : (
+            <div className={styles.contentGrid}>
+            <div className={styles.ordersList}>
+                {filteredOrders.map((order) => {
+                const isSelected = selectedId === order.id;
+                const isWorking = workingId === order.id;
+                const displayPaymentStatus = getDisplayPaymentStatus(order.status);
 
-            {loading ? (
-                <Card className="p-5">
-                    <p className="text-ui-muted">Cargando pedidos...</p>
-                </Card>
-            ) : filteredOrders.length === 0 ? (
-                <Card className="p-5">
-                    <p className="text-ui-muted">
-                        No hay pedidos que coincidan con la vista actual.
-                    </p>
-                </Card>
-            ) : (
-                <div className="grid gap-4 lg:grid-cols-[1.2fr_0.9fr]">
-                    {/* ============================== */}
-                    {/* Listado */}
-                    {/* ============================== */}
-                    <div className="grid gap-3">
-                        {filteredOrders.map((order) => {
-                            const isSelected = selectedId === order.id;
-                            const isWorking = workingId === order.id;
-                            const displayPaymentStatus = getDisplayPaymentStatus(order.status);
+                return (
+                    <Card
+                    key={order.id}
+                    className={`${styles.orderCard} ${
+                        isSelected ? styles.orderCardSelected : ""
+                    }`}
+                    >
+                    <div className={styles.orderTop}>
+                        <div className={styles.orderTopInfo}>
+                        <div className={styles.orderCode}>
+                            Pedido <b className={styles.strongText}>#{order.id}</b>
+                        </div>
+                        <div className={styles.orderFamily}>{getFamilyLabel(order)}</div>
+                        <div className={styles.orderDate}>{formatDate(order.createdAt)}</div>
+                        </div>
 
-                            return (
-                                <Card
-                                    key={order.id}
-                                    className={`p-4 grid gap-3 border transition ${
-                                        isSelected ? "ring-2 ring-ui-primary/30" : ""
-                                    }`}
-                                >
-                                    <div className="flex flex-wrap items-start justify-between gap-3">
-                                        <div className="grid gap-1">
-                                            <div className="text-sm text-ui-muted">
-                                                Pedido <b className="text-ui-text">#{order.id}</b>
-                                            </div>
-                                            <div className="text-sm text-ui-text font-semibold">
-                                                {getFamilyLabel(order)}
-                                            </div>
-                                            <div className="text-xs text-ui-muted">
-                                                {formatDate(order.createdAt)}
-                                            </div>
-                                        </div>
-
-                                        <div className="text-right">
-                                            <div className="text-xs text-ui-muted">Total</div>
-                                            <div className="text-lg font-extrabold text-ui-text">
-                                                ${formatMoney(order.total)}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        <Badge variant={PAYMENT_STATUS_BADGE[displayPaymentStatus] || "lavender"}>
-                                            {PAYMENT_STATUS_LABELS[displayPaymentStatus] || displayPaymentStatus}
-                                        </Badge>
-
-                                        <Badge
-                                            variant={
-                                                DELIVERY_STATUS_BADGE[order.deliveryStatus] || "lavender"
-                                            }
-                                        >
-                                            {DELIVERY_STATUS_LABELS[order.deliveryStatus] ||
-                                                order.deliveryStatus ||
-                                                "Sin estado"}
-                                        </Badge>
-                                    </div>
-
-                                    <div className="text-sm text-ui-muted">
-                                        {Array.isArray(order.items) ? order.items.length : 0} producto(s)
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2">
-                                        <Button
-                                            variant={isSelected ? "secondary" : "ghost"}
-                                            onClick={() =>
-                                                isSelected
-                                                    ? loadOrderDetail("")
-                                                    : loadOrderDetail(order.id)
-                                            }
-                                            disabled={loadingDetail && isSelected}
-                                        >
-                                            {isSelected ? "Ocultar detalle" : "Ver detalle"}
-                                        </Button>
-
-                                        {getDisplayPaymentStatus(order?.status) === "paid" &&
-                                            order?.deliveryStatus === "pending_delivery" ? (
-                                                <Button
-                                                    variant="primary"
-                                                    onClick={() => handleReadyForPickup(order)}
-                                                    disabled={isWorking}
-                                                >
-                                                    Listo para retirar y avisar
-                                                </Button>
-                                            ) : null}
-
-                                        {canMarkDelivered(order) ? (
-                                            <Button
-                                                variant="primary"
-                                                onClick={() => handleDeliveryStatus(order, "delivered")}
-                                                disabled={isWorking}
-                                            >
-                                                Marcar entregado
-                                            </Button>
-                                        ) : null}
-
-                                        {canMarkPendingDelivery(order) ? (
-                                            <Button
-                                                variant="secondary"
-                                                onClick={() =>
-                                                    handleDeliveryStatus(order, "pending_delivery")
-                                                }
-                                                disabled={isWorking}
-                                            >
-                                                Volver a pendiente
-                                            </Button>
-                                        ) : null}
-
-                                        {canCancelOrder(order) ? (
-                                            <Button
-                                                variant="ghost"
-                                                onClick={() => handleCancel(order)}
-                                                disabled={isWorking}
-                                            >
-                                                Cancelar
-                                            </Button>
-                                        ) : null}
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-2 pt-1 border-t border-ui-border">
-                                        {canChangePaymentStatus(order, "pending_payment") ? (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handlePaymentStatus(order, "pending_payment")}
-                                                disabled={isWorking}
-                                            >
-                                                Pasar a pendiente
-                                            </Button>
-                                        ) : null}
-
-                                        {canChangePaymentStatus(order, "paid") ? (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handlePaymentStatus(order, "paid")}
-                                                disabled={isWorking}
-                                            >
-                                                Marcar pagado
-                                            </Button>
-                                        ) : null}
-
-                                        {canChangePaymentStatus(order, "expired") ? (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handlePaymentStatus(order, "expired")}
-                                                disabled={isWorking}
-                                            >
-                                                Marcar expirado
-                                            </Button>
-                                        ) : null}
-                                    </div>
-                                </Card>
-                            );
-                        })}
+                        <div className={styles.orderTotalBox}>
+                        <div className={styles.orderTotalLabel}>Total</div>
+                        <div className={styles.orderTotal}>${formatMoney(order.total)}</div>
+                        </div>
                     </div>
 
-                    {/* ============================== */}
-                    {/* Detalle */}
-                    {/* ============================== */}
-                    <Card className="p-5 h-fit sticky top-4">
-                        {!selectedId ? (
-                            <div className="grid gap-2">
-                                <div className="text-lg font-bold text-ui-text">
-                                    Detalle del pedido
-                                </div>
-                                <p className="text-sm text-ui-muted">
-                                    Seleccioná un pedido para ver la información completa.
-                                </p>
-                            </div>
-                        ) : loadingDetail ? (
-                            <p className="text-ui-muted">Cargando detalle...</p>
-                        ) : !selectedOrder ? (
-                            <p className="text-ui-muted">
-                                No se pudo cargar el detalle del pedido.
-                            </p>
-                        ) : (
-                            <div className="grid gap-4">
-                                <div className="grid gap-1">
-                                    <div className="text-xs uppercase tracking-wide text-ui-muted">
-                                        Pedido
-                                    </div>
-                                    <div className="text-lg font-extrabold text-ui-text">
-                                        #{selectedOrder.id}
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        Creado: {formatDate(selectedOrder.createdAt)}
-                                    </div>
-                                </div>
+                    <div className={styles.badgesRow}>
+                        <Badge variant={PAYMENT_STATUS_BADGE[displayPaymentStatus] || "lavender"}>
+                        {PAYMENT_STATUS_LABELS[displayPaymentStatus] || displayPaymentStatus}
+                        </Badge>
 
-                                <div className="flex flex-wrap gap-2">
-                                    <Badge
-                                        variant={
-                                            PAYMENT_STATUS_BADGE[
-                                                getDisplayPaymentStatus(selectedOrder.status)
-                                            ] || "lavender"
-                                        }
-                                    >
-                                        {PAYMENT_STATUS_LABELS[
-                                            getDisplayPaymentStatus(selectedOrder.status)
-                                        ] || getDisplayPaymentStatus(selectedOrder.status)}
-                                    </Badge>
+                        <Badge
+                        variant={DELIVERY_STATUS_BADGE[order.deliveryStatus] || "lavender"}
+                        >
+                        {DELIVERY_STATUS_LABELS[order.deliveryStatus] ||
+                            order.deliveryStatus ||
+                            "Sin estado"}
+                        </Badge>
+                    </div>
 
-                                    <Badge
-                                        variant={
-                                            DELIVERY_STATUS_BADGE[selectedOrder.deliveryStatus] || "lavender"
-                                        }
-                                    >
-                                        {DELIVERY_STATUS_LABELS[selectedOrder.deliveryStatus] ||
-                                            selectedOrder.deliveryStatus}
-                                    </Badge>
-                                </div>
+                    <div className={styles.itemsCount}>
+                        {Array.isArray(order.items) ? order.items.length : 0} producto(s)
+                    </div>
 
-                                <div className="grid gap-2">
-                                    <div className="text-sm font-bold text-ui-text">
-                                        Datos de la familia
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Adulto:</b>{" "}
-                                        {selectedOrder?.family?.adultName ||
-                                            selectedOrder?.customer?.name ||
-                                            "—"}
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Peque:</b>{" "}
-                                        {selectedOrder?.family?.kidName || "—"}
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Email:</b>{" "}
-                                        {selectedOrder?.customer?.email || "—"}
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Teléfono:</b>{" "}
-                                        {selectedOrder?.customer?.phone || "—"}
-                                    </div>
-                                </div>
+                    <div className={styles.actionsRow}>
+                        <Button
+                        variant={isSelected ? "secondary" : "ghost"}
+                        onClick={() =>
+                            isSelected ? loadOrderDetail("") : loadOrderDetail(order.id)
+                        }
+                        disabled={loadingDetail && isSelected}
+                        >
+                        {isSelected ? "Ocultar detalle" : "Ver detalle"}
+                        </Button>
 
-                                <div className="grid gap-2">
-                                    <div className="text-sm font-bold text-ui-text">
-                                        Productos
-                                    </div>
+                        {getDisplayPaymentStatus(order?.status) === "paid" &&
+                        order?.deliveryStatus === "pending_delivery" ? (
+                        <Button
+                            variant="primary"
+                            onClick={() => askReadyForPickup(order)}
+                            disabled={isWorking}
+                        >
+                            Listo para retirar y avisar
+                        </Button>
+                        ) : null}
 
-                                    {Array.isArray(selectedOrder.items) &&
-                                    selectedOrder.items.length > 0 ? (
-                                        <div className="grid gap-2">
-                                            {selectedOrder.items.map((item, index) => (
-                                                <div
-                                                    key={`${item.code}-${item.size}-${index}`}
-                                                    className="rounded-2xl border border-ui-border p-3 grid gap-1"
-                                                >
-                                                    <div className="font-semibold text-ui-text">
-                                                        {item.name}
-                                                    </div>
-                                                    <div className="text-sm text-ui-muted">
-                                                        Código: {item.code}
-                                                    </div>
-                                                    <div className="text-sm text-ui-muted">
-                                                        Talle: <b className="text-ui-text">{item.size}</b>
-                                                    </div>
-                                                    <div className="text-sm text-ui-muted">
-                                                        Cantidad: <b className="text-ui-text">{item.qty}</b>
-                                                    </div>
-                                                    <div className="text-sm text-ui-muted">
-                                                        Unitario: $
-                                                        <b className="text-ui-text">
-                                                            {formatMoney(item.unitPrice)}
-                                                        </b>
-                                                    </div>
-                                                    <div className="text-sm text-ui-muted">
-                                                        Subtotal: $
-                                                        <b className="text-ui-text">
-                                                            {formatMoney(item.lineTotal)}
-                                                        </b>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-ui-muted">
-                                            Este pedido no tiene items visibles.
-                                        </p>
-                                    )}
-                                </div>
+                        {canMarkDelivered(order) ? (
+                        <Button
+                            variant="primary"
+                            onClick={() => askDeliveryStatus(order, "delivered")}
+                            disabled={isWorking}
+                        >
+                            Marcar entregado
+                        </Button>
+                        ) : null}
 
-                                <div className="pt-3 border-t border-ui-border grid gap-1">
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Total:</b> $
-                                        {formatMoney(selectedOrder.total)}
-                                    </div>
+                        {canMarkPendingDelivery(order) ? (
+                        <Button
+                            variant="secondary"
+                            onClick={() => askDeliveryStatus(order, "pending_delivery")}
+                            disabled={isWorking}
+                        >
+                            Volver a pendiente
+                        </Button>
+                        ) : null}
 
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Preference ID:</b>{" "}
-                                        {selectedOrder?.mp?.preferenceId || "—"}
-                                    </div>
+                        {canCancelOrder(order) ? (
+                        <Button
+                            variant="ghost"
+                            onClick={() => askCancelOrder(order)}
+                            disabled={isWorking}
+                        >
+                            Cancelar
+                        </Button>
+                        ) : null}
+                    </div>
 
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Payment ID:</b>{" "}
-                                        {selectedOrder?.mp?.paymentId || "—"}
-                                    </div>
+                    <div className={styles.paymentActions}>
+                        {canChangePaymentStatus(order, "pending_payment") ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => askPaymentStatus(order, "pending_payment")}
+                            disabled={isWorking}
+                        >
+                            Pasar a pendiente
+                        </Button>
+                        ) : null}
 
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Estado MP:</b>{" "}
-                                        {selectedOrder?.mp?.status || "—"}
-                                    </div>
+                        {canChangePaymentStatus(order, "paid") ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => askPaymentStatus(order, "paid")}
+                            disabled={isWorking}
+                        >
+                            Marcar pagado
+                        </Button>
+                        ) : null}
 
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Webhook:</b>{" "}
-                                        {formatDate(selectedOrder?.mp?.lastWebhookAt)}
-                                    </div>
-
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Pago acreditado:</b>{" "}
-                                        {formatDate(selectedOrder?.mp?.paidAt)}
-                                    </div>
-
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Listo para retirar:</b>{" "}
-                                        {formatDate(selectedOrder?.readyForPickupAt)}
-                                    </div>
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Mail listo para retirar:</b>{" "}
-                                        {selectedOrder?.notifications?.readyForPickupEmailSent ? "Enviado" : "No enviado"}
-                                    </div>
-
-                                    <div className="text-sm text-ui-muted">
-                                        <b className="text-ui-text">Entregado:</b>{" "}
-                                        {formatDate(selectedOrder?.deliveredAt)}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {canChangePaymentStatus(order, "expired") ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => askPaymentStatus(order, "expired")}
+                            disabled={isWorking}
+                        >
+                            Marcar expirado
+                        </Button>
+                        ) : null}
+                    </div>
                     </Card>
+                );
+                })}
+            </div>
+
+            <Card className={styles.detailCard}>
+                {!selectedId ? (
+                <div className={styles.emptyDetail}>
+                    <div className={styles.detailTitle}>Detalle del pedido</div>
+                    <p className={styles.detailMuted}>
+                    Seleccioná un pedido para ver la información completa.
+                    </p>
                 </div>
-            )}
-        </div>
+                ) : loadingDetail ? (
+                <p className={styles.detailMuted}>Cargando detalle...</p>
+                ) : !selectedOrder ? (
+                <p className={styles.detailMuted}>No se pudo cargar el detalle del pedido.</p>
+                ) : (
+                <div className={styles.detailContent}>
+                    <div className={styles.detailHead}>
+                    <div className={styles.detailOverline}>Pedido</div>
+                    <div className={styles.detailOrderId}>#{selectedOrder.id}</div>
+                    <div className={styles.detailMuted}>
+                        Creado: {formatDate(selectedOrder.createdAt)}
+                    </div>
+                    </div>
+
+                    <div className={styles.badgesRow}>
+                    <Badge
+                        variant={
+                        PAYMENT_STATUS_BADGE[getDisplayPaymentStatus(selectedOrder.status)] ||
+                        "lavender"
+                        }
+                    >
+                        {PAYMENT_STATUS_LABELS[getDisplayPaymentStatus(selectedOrder.status)] ||
+                        getDisplayPaymentStatus(selectedOrder.status)}
+                    </Badge>
+
+                    <Badge
+                        variant={DELIVERY_STATUS_BADGE[selectedOrder.deliveryStatus] || "lavender"}
+                    >
+                        {DELIVERY_STATUS_LABELS[selectedOrder.deliveryStatus] ||
+                        selectedOrder.deliveryStatus}
+                    </Badge>
+                    </div>
+
+                    <div className={styles.detailBlock}>
+                    <div className={styles.blockTitle}>Datos de la familia</div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Adulto:</b>{" "}
+                        {selectedOrder?.family?.adultName ||
+                        selectedOrder?.customer?.name ||
+                        "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Peque:</b>{" "}
+                        {selectedOrder?.family?.kidName || "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Email:</b>{" "}
+                        {selectedOrder?.customer?.email || "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Teléfono:</b>{" "}
+                        {selectedOrder?.customer?.phone || "—"}
+                    </div>
+                    </div>
+
+                    <div className={styles.detailBlock}>
+                    <div className={styles.blockTitle}>Productos</div>
+
+                    {Array.isArray(selectedOrder.items) && selectedOrder.items.length > 0 ? (
+                        <div className={styles.itemsList}>
+                        {selectedOrder.items.map((item, index) => (
+                            <div
+                            key={`${item.code}-${item.size}-${index}`}
+                            className={styles.itemCard}
+                            >
+                            <div className={styles.itemName}>{item.name}</div>
+                            <div className={styles.detailMuted}>Código: {item.code}</div>
+                            <div className={styles.detailMuted}>
+                                Talle: <b className={styles.strongText}>{item.size}</b>
+                            </div>
+                            <div className={styles.detailMuted}>
+                                Cantidad: <b className={styles.strongText}>{item.qty}</b>
+                            </div>
+                            <div className={styles.detailMuted}>
+                                Unitario: $
+                                <b className={styles.strongText}>
+                                {formatMoney(item.unitPrice)}
+                                </b>
+                            </div>
+                            <div className={styles.detailMuted}>
+                                Subtotal: $
+                                <b className={styles.strongText}>
+                                {formatMoney(item.lineTotal)}
+                                </b>
+                            </div>
+                            </div>
+                        ))}
+                        </div>
+                    ) : (
+                        <p className={styles.detailMuted}>Este pedido no tiene items visibles.</p>
+                    )}
+                    </div>
+
+                    <div className={styles.detailSummary}>
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Total:</b> $
+                        {formatMoney(selectedOrder.total)}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Preference ID:</b>{" "}
+                        {selectedOrder?.mp?.preferenceId || "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Payment ID:</b>{" "}
+                        {selectedOrder?.mp?.paymentId || "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Estado MP:</b>{" "}
+                        {selectedOrder?.mp?.status || "—"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Webhook:</b>{" "}
+                        {formatDate(selectedOrder?.mp?.lastWebhookAt)}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Pago acreditado:</b>{" "}
+                        {formatDate(selectedOrder?.mp?.paidAt)}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Listo para retirar:</b>{" "}
+                        {formatDate(selectedOrder?.readyForPickupAt)}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Mail listo para retirar:</b>{" "}
+                        {selectedOrder?.notifications?.readyForPickupEmailSent
+                        ? "Enviado"
+                        : "No enviado"}
+                    </div>
+
+                    <div className={styles.detailMuted}>
+                        <b className={styles.strongText}>Entregado:</b>{" "}
+                        {formatDate(selectedOrder?.deliveredAt)}
+                    </div>
+                    </div>
+                </div>
+                )}
+            </Card>
+            </div>
+        )}
+
+        {confirmState ? (
+            <div
+            className={styles.modalOverlay}
+            onClick={closeConfirm}
+            role="presentation"
+            >
+            <div
+                className={styles.modalCard}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="confirm-order-action-title"
+            >
+                <div className={styles.modalBadgeWrap}>
+                <Badge variant={confirmState.tone === "danger" ? "orange" : "lavender"}>
+                    Confirmación
+                </Badge>
+                </div>
+
+                <div className={styles.modalHead}>
+                <h3 id="confirm-order-action-title" className={styles.modalTitle}>
+                    {confirmState.title}
+                </h3>
+
+                <p className={styles.modalText}>{confirmState.message}</p>
+
+                <p className={styles.modalText}>
+                    Familia: <b className={styles.strongText}>{getFamilyLabel(confirmState.order)}</b>
+                </p>
+                </div>
+
+                <div className={styles.modalActions}>
+                <Button
+                    variant="ghost"
+                    onClick={closeConfirm}
+                    disabled={Boolean(workingId)}
+                    className={styles.modalCancelBtn}
+                >
+                    Cancelar
+                </Button>
+
+                <Button
+                    variant={confirmState.tone === "danger" ? "ghost" : "primary"}
+                    onClick={onConfirmAction}
+                    disabled={Boolean(workingId)}
+                    className={
+                    confirmState.tone === "danger"
+                        ? styles.modalDangerBtn
+                        : styles.modalConfirmBtn
+                    }
+                >
+                    {workingId ? "Procesando..." : confirmState.confirmLabel}
+                </Button>
+                </div>
+            </div>
+            </div>
+        ) : null}
+        </section>
     );
 }

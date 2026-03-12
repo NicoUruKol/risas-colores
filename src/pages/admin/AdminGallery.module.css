@@ -1,9 +1,8 @@
 /* ==============================
-AdminGallery (mobile-first)
+AdminGallery
 ============================== */
-
 .page {
-  padding: 40px 0;
+  padding: 2.5rem 0;
 }
 
 .wrap {
@@ -11,163 +10,263 @@ AdminGallery (mobile-first)
   margin: 0 auto;
   padding: 0 16px;
   display: grid;
-  gap: 16px;
+  gap: 1rem;
+}
+
+.linkReset {
+  text-decoration: none;
+  color: inherit;
+}
+
+.hiddenInput {
+  display: none;
 }
 
 /* ==============================
 Header
 ============================== */
-
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 0.85rem;
+  flex-wrap: wrap;
 }
 
 .headerLeft {
   display: grid;
-  gap: 8px;
+  gap: 0.35rem;
   min-width: 0;
+}
+
+.badgeWrap {
+  width: fit-content;
 }
 
 .headerRight {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .title {
-  font-size: 26px;
-  line-height: 1.1;
-  font-weight: 800;
-  margin: 0;
+  margin: 0.15rem 0 0;
+  font-size: 1.55rem;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  font-weight: 900;
+  color: var(--ui-text);
 }
 
 .sub {
-  font-size: 14px;
-  opacity: 0.75;
   margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ui-muted);
+}
+
+.backBtn {
+  border-radius: 14px;
 }
 
 /* ==============================
-Status cards
+Cards base
 ============================== */
+.errorCard,
+.actionsCard,
+.loadingCard,
+.panel,
+.modalCard {
+  position: relative;
+  border-radius: 28px;
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.92) 100%
+  );
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.03);
+}
 
+.actionsCard,
+.loadingCard,
+.panel,
+.modalCard {
+  overflow: hidden;
+}
+
+.actionsCard::before,
+.loadingCard::before,
+.panel::before,
+.modalCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 6px;
+  border-radius: 0 0 14px 14px;
+}
+
+.actionsCard::before,
+.loadingCard::before,
+.panel::before {
+  background: linear-gradient(
+    90deg,
+    rgba(246, 166, 90, 0.95),
+    rgba(74, 144, 194, 0.9),
+    rgba(200, 182, 226, 0.95)
+  );
+}
+
+/* ==============================
+Status
+============================== */
 .errorCard {
-  padding: 14px;
+  padding: 1rem 1.1rem;
+  border-color: rgba(248, 113, 113, 0.2);
+  background: linear-gradient(
+    180deg,
+    rgba(254, 242, 242, 0.98) 0%,
+    rgba(254, 226, 226, 0.92) 100%
+  );
 }
 
 .errorText {
-  font-size: 14px;
-  color: #ef4444;
+  font-size: 0.92rem;
+  color: #b91c1c;
+  font-weight: 600;
+  line-height: 1.45;
   margin: 0;
 }
 
 .loadingCard {
-  padding: 16px;
+  padding: 1.1rem 1.2rem;
 }
 
 .muted {
-  font-size: 14px;
-  opacity: 0.75;
+  font-size: 0.92rem;
+  color: var(--ui-muted);
+  line-height: 1.5;
   margin: 0;
 }
 
 /* ==============================
 Actions
 ============================== */
-
 .actionsCard {
-  padding: 14px;
+  padding: 1rem;
   display: grid;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
 .actionsTop {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
 .meta {
   display: grid;
-  gap: 6px;
-  font-size: 13px;
-  opacity: 0.85;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+  color: var(--ui-muted);
 }
 
 .metaRow {
-  line-height: 1.2;
+  line-height: 1.35;
 }
 
 .metaStrong {
-  opacity: 1;
+  color: var(--ui-text);
 }
 
 .actionsBtns {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.65rem;
 }
 
-/* Botones bajos + aire (sin que se peguen) */
-.actionsBtns :global(button) {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
+.tip,
+.tipSmall {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ui-muted);
 }
 
-.tip {
-  font-size: 12px;
-  opacity: 0.75;
+.primaryBtn {
+  border-radius: 14px;
+  border: 1px solid rgba(74, 144, 194, 0.22);
+  box-shadow: 0 8px 18px rgba(74, 144, 194, 0.1);
+}
+
+.secondaryBtn {
+  border-radius: 14px;
+}
+
+.dangerBtn {
+  border-radius: 14px;
+  border-color: rgba(239, 68, 68, 0.28) !important;
+  color: #b91c1c !important;
 }
 
 /* ==============================
 Main split
 ============================== */
-
 .twoCol {
   display: grid;
-  gap: 14px;
+  gap: 0.9rem;
 }
 
 .panel {
-  padding: 14px;
+  padding: 1rem;
   display: grid;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
 .panelHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 0.65rem;
 }
 
 .panelTitle {
   font-weight: 800;
-  font-size: 14px;
+  font-size: 0.98rem;
+  color: var(--ui-text);
 }
 
 /* ==============================
-Library (Cloudinary)
+Library
 ============================== */
-
 .gridLibrary {
   display: grid;
-  gap: 12px;
+  gap: 0.85rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .itemCard {
-  border: 1px solid rgba(0, 0, 0, 0.10);
-  border-radius: 16px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.72);
   display: grid;
-  gap: 10px;
+  gap: 0.65rem;
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.itemCard:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
 .itemCardSelected {
@@ -188,108 +287,85 @@ Library (Cloudinary)
   display: block;
 }
 
-.itemMeta{
+.itemMeta {
   display: grid;
-  gap: 4px;
+  gap: 0.25rem;
   align-items: start;
 }
 
-.itemName{
-  font-size: 12px;
-  opacity: 0.80;
+.itemName {
+  font-size: 0.8rem;
+  color: var(--ui-muted);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
-.itemMark{
-  font-size: 12px;
-  opacity: 0.70;
+.itemMark {
+  font-size: 0.78rem;
+  color: var(--ui-muted);
   line-height: 1.2;
   white-space: nowrap;
 }
 
-/* botones con aire y sin “aplastar” */
-.itemActions{
+.itemActions {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* en desktop, 2 columnas */
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.itemActions :global(button){
-  height: 32px;         /* un toque más bajos */
-  padding: 0 10px;
-  font-size: 13px;
-}
-
-/* En mobile, vuelven a 1 columna para que no se peguen */
-@media (max-width: 639px){
-  .itemActions{
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+  margin-top: 0.2rem;
 }
 
 .moreWrap {
-  padding-top: 6px;
+  padding-top: 0.35rem;
 }
 
 /* ==============================
-Selected (orden público)
+Selected
 ============================== */
-
 .selectedList {
   display: grid;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
 .selectedCard {
-  border: 1px solid rgba(0, 0, 0, 0.10);
-  border-radius: 16px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  padding: 0.85rem;
+  background: rgba(255, 255, 255, 0.72);
   display: grid;
-  gap: 12px;
+  gap: 0.85rem;
 }
 
 .selectedHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 0.65rem;
 }
 
 .selectedIndex {
-  font-size: 12px;
-  opacity: 0.75;
+  font-size: 0.78rem;
+  color: var(--ui-muted);
 }
 
-/* Botonera compacta (no alta) */
 .selectedBtns {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   flex-wrap: nowrap;
   justify-content: flex-end;
 }
 
-.selectedBtns :global(button) {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
-}
-
-/* Flechas compactas */
-.selectedBtns :global(button:nth-child(1)),
-.selectedBtns :global(button:nth-child(2)) {
+.secondaryBtnIcon {
   width: 38px;
   min-width: 38px;
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
   display: inline-flex;
   justify-content: center;
+  border-radius: 14px;
 }
 
 .selectedThumb {
@@ -307,41 +383,121 @@ Selected (orden público)
 
 .altField {
   display: grid;
-  gap: 6px;
+  gap: 0.4rem;
 }
 
 .altLabel {
-  font-size: 12px;
-  opacity: 0.75;
+  font-size: 0.78rem;
+  color: var(--ui-muted);
 }
 
 .altInput {
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background: rgba(255, 255, 255, 0.65);
+  height: 44px;
+  padding: 0 0.9rem;
+  border-radius: 14px;
+  border: 1px solid var(--ui-border);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ui-text);
   outline: none;
 }
 
 .altInput:focus {
-  box-shadow: 0 0 0 4px rgba(74, 144, 194, 0.25);
-}
-
-.tipSmall {
-  font-size: 12px;
-  opacity: 0.75;
+  box-shadow: 0 0 0 4px rgba(74, 144, 194, 0.14);
+  border-color: rgba(74, 144, 194, 0.38);
 }
 
 /* ==============================
->= 640px
+Modal
 ============================== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.34);
+  backdrop-filter: blur(6px);
+}
+
+.modalCard {
+  width: min(100%, 500px);
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+
+.modalCard::before {
+  background: linear-gradient(
+    90deg,
+    rgba(246, 166, 90, 0.98),
+    rgba(239, 68, 68, 0.88)
+  );
+}
+
+.modalBadgeWrap {
+  width: fit-content;
+}
+
+.modalHead {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  font-weight: 900;
+  color: var(--ui-text);
+}
+
+.modalText {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.5;
+  color: var(--ui-muted);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.modalCancelBtn,
+.modalDangerBtn {
+  border-radius: 14px;
+}
+
+.modalDangerBtn {
+  border-color: rgba(239, 68, 68, 0.28) !important;
+  color: #b91c1c !important;
+}
+
+/* ==============================
+Responsive
+============================== */
+@media (max-width: 639px) {
+  .itemActions {
+    grid-template-columns: 1fr;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+
+  .modalActions :global(button) {
+    width: 100%;
+  }
+}
+
 @media (min-width: 640px) {
   .actionsTop {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
   }
 
   .actionsBtns {
@@ -349,25 +505,11 @@ Selected (orden público)
     align-items: center;
   }
 
-  .gridLibrary {
-  display: grid;
-  gap: 16px;
-
-}
-
-  /* En desktop: botones en 2 columnas (no se pisan y quedan “como antes”) */
-  .itemActions {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .thumbImg {
     height: 160px;
   }
 }
 
-/* ==============================
->= 1024px (2 columnas: biblioteca + seleccionadas)
-============================== */
 @media (min-width: 1024px) {
   .twoCol {
     grid-template-columns: minmax(0, 1fr) 420px;

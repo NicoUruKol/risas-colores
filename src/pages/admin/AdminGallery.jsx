@@ -62,12 +62,15 @@ export default function AdminGallery() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [deletingPublicId, setDeletingPublicId] = useState("");
     const [err, setErr] = useState("");
 
     const [library, setLibrary] = useState([]);
     const [nextCursor, setNextCursor] = useState(null);
 
     const [selected, setSelected] = useState([]);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+
     const selectedSet = useMemo(
         () => new Set(selected.map((x) => x.public_id)),
         [selected]
@@ -110,6 +113,7 @@ export default function AdminGallery() {
     const loadAll = async () => {
         setErr("");
         setLoading(true);
+
         try {
         await Promise.all([fetchLibrary({ append: false }), fetchSaved()]);
         } catch (e) {
@@ -201,12 +205,23 @@ export default function AdminGallery() {
         }
     };
 
-    const onDeleteCloudinary = async (publicId) => {
+    const askDeleteCloudinary = (item) => {
+        if (!item?.public_id) return;
+        setConfirmDelete(item);
+    };
+
+    const closeDeleteConfirm = () => {
+        if (deletingPublicId) return;
+        setConfirmDelete(null);
+    };
+
+    const onDeleteCloudinary = async () => {
+        const publicId = confirmDelete?.public_id;
         if (!publicId) return;
-        const ok = window.confirm("¿Eliminar esta imagen de Cloudinary? (No se puede deshacer)");
-        if (!ok) return;
 
         setErr("");
+        setDeletingPublicId(publicId);
+
         try {
         const res = await fetch(
             joinUrl(API_BASE, `/api/media/delete?public_id=${encodeURIComponent(publicId)}`),
@@ -225,10 +240,13 @@ export default function AdminGallery() {
         }
 
         removeSelected(publicId);
+        setConfirmDelete(null);
         await fetchLibrary({ append: false });
         } catch (e) {
         if (e?.status === 401 || e?.status === 403) return goLogin();
         setErr(e?.message || "Error eliminando imagen");
+        } finally {
+        setDeletingPublicId("");
         }
     };
 
@@ -263,6 +281,7 @@ export default function AdminGallery() {
         if (!nextCursor) return;
         setErr("");
         setLoadingMore(true);
+
         try {
         await fetchLibrary({ cursor: nextCursor, append: true });
         } catch (e) {
@@ -276,10 +295,12 @@ export default function AdminGallery() {
     return (
         <main className={styles.page}>
         <div className={styles.wrap}>
-            {/* Header */}
-            <div className={styles.header}>
+            <header className={styles.header}>
             <div className={styles.headerLeft}>
+                <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
+                </div>
+
                 <h1 className={styles.title}>Galería “El Jardín”</h1>
                 <p className={styles.sub}>
                 Elegí imágenes desde Cloudinary, ordenalas y guardá la selección en Firestore.
@@ -287,13 +308,13 @@ export default function AdminGallery() {
             </div>
 
             <div className={styles.headerRight}>
-                <Link to="/admin/contenido">
-                <Button variant="ghost" className="text-black border-black">
+                <Link to="/admin/contenido" className={styles.linkReset}>
+                <Button variant="ghost" className={styles.backBtn}>
                     ← Volver
                 </Button>
                 </Link>
             </div>
-            </div>
+            </header>
 
             {err ? (
             <Card className={styles.errorCard}>
@@ -301,7 +322,6 @@ export default function AdminGallery() {
             </Card>
             ) : null}
 
-            {/* Actions */}
             <Card className={styles.actionsCard}>
             <div className={styles.actionsTop}>
                 <div className={styles.meta}>
@@ -322,13 +342,13 @@ export default function AdminGallery() {
                     type="file"
                     accept="image/*"
                     onChange={onPickFile}
-                    style={{ display: "none" }}
+                    className={styles.hiddenInput}
                 />
 
                 <Button
                     type="button"
                     variant="ghost"
-                    className="text-black border-black"
+                    className={styles.secondaryBtn}
                     disabled={uploading}
                     onClick={() => fileRef.current?.click()}
                 >
@@ -340,6 +360,7 @@ export default function AdminGallery() {
                     variant="ghost"
                     disabled={saving || selected.length === 0}
                     onClick={onSave}
+                    className={styles.primaryBtn}
                 >
                     {saving ? "Guardando…" : "Guardar galería"}
                 </Button>
@@ -357,13 +378,13 @@ export default function AdminGallery() {
             </Card>
             ) : (
             <div className={styles.twoCol}>
-                {/* Biblioteca */}
                 <Card className={styles.panel}>
                 <div className={styles.panelHead}>
                     <div className={styles.panelTitle}>Biblioteca (Cloudinary)</div>
+
                     <Button
                     variant="ghost"
-                    className="text-black border-black"
+                    className={styles.secondaryBtn}
                     onClick={loadAll}
                     type="button"
                     >
@@ -382,7 +403,9 @@ export default function AdminGallery() {
                         return (
                         <article
                             key={pid}
-                            className={`${styles.itemCard} ${isSel ? styles.itemCardSelected : ""}`}
+                            className={`${styles.itemCard} ${
+                            isSel ? styles.itemCardSelected : ""
+                            }`}
                         >
                             <div className={styles.thumb}>
                             <img
@@ -398,14 +421,16 @@ export default function AdminGallery() {
                             <div className={styles.itemName} title={it.filename || pid}>
                                 {it.filename || pid}
                             </div>
-                            <div className={styles.itemMark}>{isSel ? "✓ Seleccionada" : " "}</div>
+                            <div className={styles.itemMark}>
+                                {isSel ? "✓ Seleccionada" : " "}
+                            </div>
                             </div>
 
                             <div className={styles.itemActions}>
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtn}
                                 onClick={() => toggleSelect(it)}
                                 disabled={!isSel && selected.length >= MAX_SELECT}
                             >
@@ -415,8 +440,8 @@ export default function AdminGallery() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
-                                onClick={() => onDeleteCloudinary(pid)}
+                                className={styles.dangerBtn}
+                                onClick={() => askDeleteCloudinary(it)}
                             >
                                 Borrar
                             </Button>
@@ -441,7 +466,6 @@ export default function AdminGallery() {
                 ) : null}
                 </Card>
 
-                {/* Seleccionadas */}
                 <Card className={styles.panel}>
                 <div className={styles.panelTitle}>Seleccionadas (orden público)</div>
 
@@ -458,25 +482,27 @@ export default function AdminGallery() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtnIcon}
                                 onClick={() => moveSelected(it.public_id, -1)}
                                 disabled={idx === 0}
                             >
                                 ↑
                             </Button>
+
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtnIcon}
                                 onClick={() => moveSelected(it.public_id, +1)}
                                 disabled={idx === selected.length - 1}
                             >
                                 ↓
                             </Button>
+
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtn}
                                 onClick={() => removeSelected(it.public_id)}
                             >
                                 Quitar
@@ -495,7 +521,9 @@ export default function AdminGallery() {
                         </div>
 
                         <div className={styles.altField}>
-                            <label className={styles.altLabel}>Alt (opcional) para que Google sepa que es</label>
+                            <label className={styles.altLabel}>
+                            Alt (opcional) para que Google sepa que es
+                            </label>
                             <input
                             className={styles.altInput}
                             value={it.alt || ""}
@@ -509,11 +537,68 @@ export default function AdminGallery() {
                 )}
 
                 <div className={styles.tipSmall}>
-                    Presione guardar para verlo en la pagina de jardin
+                    Presioná guardar para verlo en la página de jardín.
                 </div>
                 </Card>
             </div>
             )}
+
+            {confirmDelete ? (
+            <div
+                className={styles.modalOverlay}
+                onClick={closeDeleteConfirm}
+                role="presentation"
+            >
+                <div
+                className={styles.modalCard}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-gallery-image-title"
+                >
+                <div className={styles.modalBadgeWrap}>
+                    <Badge variant="orange">Confirmación</Badge>
+                </div>
+
+                <div className={styles.modalHead}>
+                    <h2 id="delete-gallery-image-title" className={styles.modalTitle}>
+                    ¿Eliminar imagen de Cloudinary?
+                    </h2>
+
+                    <p className={styles.modalText}>
+                    Esta acción no se puede deshacer. Si la imagen está seleccionada,
+                    también se quitará de la galería.
+                    </p>
+
+                    <p className={styles.modalText}>
+                    <b>{confirmDelete.filename || confirmDelete.public_id}</b>
+                    </p>
+                </div>
+
+                <div className={styles.modalActions}>
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalCancelBtn}
+                    onClick={closeDeleteConfirm}
+                    disabled={Boolean(deletingPublicId)}
+                    >
+                    Cancelar
+                    </Button>
+
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalDangerBtn}
+                    onClick={onDeleteCloudinary}
+                    disabled={Boolean(deletingPublicId)}
+                    >
+                    {deletingPublicId ? "Borrando…" : "Sí, borrar"}
+                    </Button>
+                </div>
+                </div>
+            </div>
+            ) : null}
         </div>
         </main>
     );

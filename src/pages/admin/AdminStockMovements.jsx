@@ -30,7 +30,6 @@ const LIMIT_OPTIONS = ["50", "100", "200", "300"];
 /* ==============================
 Utils
 ============================== */
-
 const toDateString = (ts) => {
     if (!ts) return "-";
     const seconds = ts?.seconds;
@@ -56,7 +55,6 @@ const formatDelta = (n) => {
 /* ==============================
 Component
 ============================== */
-
 export default function AdminStockMovements() {
     const nav = useNavigate();
     const loc = useLocation();
@@ -87,6 +85,7 @@ export default function AdminStockMovements() {
     const load = async (q = query) => {
         setErr("");
         setLoading(true);
+
         try {
         const data = await adminListStockMovements(q);
         setItems(Array.isArray(data) ? data : []);
@@ -113,51 +112,62 @@ export default function AdminStockMovements() {
     };
 
     const onClear = () => {
-        const next = { productCode: "", size: "", type: "", orderId: "", limit: "100" };
+        const next = {
+        productCode: "",
+        size: "",
+        type: "",
+        orderId: "",
+        limit: "100",
+        };
         setFilters(next);
         load(next);
     };
 
     return (
-        <main className="py-10">
-        <Container className={styles.page}>
-            {/* Header */}
-            <div className={styles.head}>
-            <div>
+        <main className={styles.page}>
+        <Container className={styles.wrap}>
+            <header className={styles.head}>
+            <div className={styles.headInfo}>
+                <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
+                </div>
+
                 <h1 className={styles.title}>Movimientos de stock</h1>
-                <p className={styles.sub}>Historial de ajustes y movimientos por producto/talle.</p>
+                <p className={styles.sub}>
+                Historial de ajustes y movimientos por producto/talle.
+                </p>
             </div>
 
-            <Link to="/admin/productos">
-                <Button variant="ghost" className="text-black border-black">
+            <Link to="/admin/productos" className={styles.linkReset}>
+                <Button variant="ghost" className={styles.headerBtn}>
                 Ver productos
                 </Button>
             </Link>
-            </div>
+            </header>
 
-            {/* Filtros */}
             <Card className={styles.filtersCard}>
             <form className={styles.form} onSubmit={onSubmit}>
                 <div className={styles.filtersRow}>
-                {/* Producto */}
                 <div className={`${styles.field} ${styles.wCode}`}>
                     <label className={styles.label}>Producto (código)</label>
                     <input
                     className={styles.input}
                     value={filters.productCode}
-                    onChange={(e) => setFilters((p) => ({ ...p, productCode: e.target.value }))}
+                    onChange={(e) =>
+                        setFilters((p) => ({ ...p, productCode: e.target.value }))
+                    }
                     placeholder="010"
                     />
                 </div>
 
-                {/* Talle */}
                 <div className={`${styles.field} ${styles.wSize}`}>
                     <label className={styles.label}>Talle</label>
                     <select
                     className={styles.input}
                     value={filters.size}
-                    onChange={(e) => setFilters((p) => ({ ...p, size: e.target.value }))}
+                    onChange={(e) =>
+                        setFilters((p) => ({ ...p, size: e.target.value }))
+                    }
                     >
                     {SIZE_OPTIONS.map((o) => (
                         <option key={o.value || "all"} value={o.value}>
@@ -167,13 +177,14 @@ export default function AdminStockMovements() {
                     </select>
                 </div>
 
-                {/* Tipo */}
                 <div className={`${styles.field} ${styles.wType}`}>
                     <label className={styles.label}>Tipo</label>
                     <select
                     className={styles.input}
                     value={filters.type}
-                    onChange={(e) => setFilters((p) => ({ ...p, type: e.target.value }))}
+                    onChange={(e) =>
+                        setFilters((p) => ({ ...p, type: e.target.value }))
+                    }
                     >
                     {TYPE_OPTIONS.map((o) => (
                         <option key={o.value || "all"} value={o.value}>
@@ -183,24 +194,26 @@ export default function AdminStockMovements() {
                     </select>
                 </div>
 
-                {/* Order */}
                 <div className={`${styles.field} ${styles.wOrder}`}>
                     <label className={styles.label}>Order ID</label>
                     <input
                     className={styles.input}
                     value={filters.orderId}
-                    onChange={(e) => setFilters((p) => ({ ...p, orderId: e.target.value }))}
+                    onChange={(e) =>
+                        setFilters((p) => ({ ...p, orderId: e.target.value }))
+                    }
                     placeholder="opcional"
                     />
                 </div>
 
-                {/* Límite */}
                 <div className={`${styles.field} ${styles.wLimit}`}>
                     <label className={styles.label}>Límite</label>
                     <select
                     className={styles.input}
                     value={filters.limit}
-                    onChange={(e) => setFilters((p) => ({ ...p, limit: e.target.value }))}
+                    onChange={(e) =>
+                        setFilters((p) => ({ ...p, limit: e.target.value }))
+                    }
                     >
                     {LIMIT_OPTIONS.map((n) => (
                         <option key={n} value={n}>
@@ -215,13 +228,18 @@ export default function AdminStockMovements() {
                 <Button
                     type="button"
                     variant="ghost"
-                    className={`text-black border-black ${styles.actionBtn}`}
+                    className={styles.clearBtn}
                     onClick={onClear}
                 >
                     Limpiar
                 </Button>
 
-                <Button type="submit" variant="ghost" disabled={loading} className={styles.actionBtn}>
+                <Button
+                    type="submit"
+                    variant="ghost"
+                    disabled={loading}
+                    className={styles.searchBtn}
+                >
                     {loading ? "Buscando…" : "Buscar"}
                 </Button>
                 </div>
@@ -230,18 +248,16 @@ export default function AdminStockMovements() {
             </form>
             </Card>
 
-            {/* Resultados */}
             {loading ? (
-            <Card className="p-5">
-                <p className="text-ui-muted">Cargando…</p>
+            <Card className={styles.stateCard}>
+                <p className={styles.stateText}>Cargando…</p>
             </Card>
             ) : items.length === 0 ? (
-            <Card className="p-5">
-                <p className="text-ui-muted">No hay movimientos para esos filtros.</p>
+            <Card className={styles.stateCard}>
+                <p className={styles.stateText}>No hay movimientos para esos filtros.</p>
             </Card>
             ) : (
             <>
-                {/* Desktop table */}
                 <Card className={styles.tableWrap}>
                 <div className={styles.tableHead}>
                     <div>Fecha</div>
@@ -255,12 +271,17 @@ export default function AdminStockMovements() {
                 <div>
                     {items.map((m) => (
                     <div key={m.id} className={styles.tableRow}>
-                        <div className="text-ui-text">{toDateString(m.createdAt)}</div>
-                        <div className={`${styles.bold} text-ui-text`}>{m.productCode || "-"}</div>
-                        <div className="text-ui-text">{m.size === "U" ? "Único" : m.size || "-"}</div>
-                        <div className="text-ui-text">{formatDelta(m.qtyDelta)}</div>
-                        <div className="text-ui-text">
-                        {Number.isFinite(Number(m.stockBefore)) && Number.isFinite(Number(m.stockAfter))
+                        <div className={styles.tableText}>{toDateString(m.createdAt)}</div>
+                        <div className={`${styles.bold} ${styles.tableText}`}>
+                        {m.productCode || "-"}
+                        </div>
+                        <div className={styles.tableText}>
+                        {m.size === "U" ? "Único" : m.size || "-"}
+                        </div>
+                        <div className={styles.tableText}>{formatDelta(m.qtyDelta)}</div>
+                        <div className={styles.tableText}>
+                        {Number.isFinite(Number(m.stockBefore)) &&
+                        Number.isFinite(Number(m.stockAfter))
                             ? `${m.stockBefore} → ${m.stockAfter}`
                             : "-"}
                         </div>
@@ -275,35 +296,37 @@ export default function AdminStockMovements() {
                 </div>
                 </Card>
 
-                {/* Mobile/tablet cards */}
                 <div className={styles.cards}>
                 {items.map((m) => (
-                    <Card key={m.id} className="p-4">
+                    <Card key={m.id} className={styles.mobileCard}>
                     <div className={styles.cardRow}>
                         <div>
                         <div className={styles.muted}>{toDateString(m.createdAt)}</div>
-                        <div className="font-bold text-ui-text mt-1">
-                            Producto {m.productCode || "-"} · {m.size === "U" ? "Único" : m.size || "-"}
+                        <div className={styles.cardTitle}>
+                            Producto {m.productCode || "-"} ·{" "}
+                            {m.size === "U" ? "Único" : m.size || "-"}
                         </div>
                         </div>
-                        <div className={`${styles.delta} text-brand-orange`}>{formatDelta(m.qtyDelta)}</div>
+
+                        <div className={styles.delta}>{formatDelta(m.qtyDelta)}</div>
                     </div>
 
-                    <div className="text-sm text-ui-text mt-2">
+                    <div className={styles.mobileText}>
                         Stock:{" "}
-                        {Number.isFinite(Number(m.stockBefore)) && Number.isFinite(Number(m.stockAfter))
+                        {Number.isFinite(Number(m.stockBefore)) &&
+                        Number.isFinite(Number(m.stockAfter))
                         ? `${m.stockBefore} → ${m.stockAfter}`
                         : "-"}
                     </div>
 
-                    <div className={`${styles.muted} mt-2`}>
+                    <div className={styles.muted}>
                         {m.type || "-"}
                         {m.orderId ? ` · order: ${m.orderId}` : ""}
                         {m.actor ? ` · por: ${m.actor}` : ""}
                     </div>
 
                     {m.reason ? (
-                        <div className={`${styles.muted} mt-2`}>Motivo: {m.reason}</div>
+                        <div className={styles.muted}>Motivo: {m.reason}</div>
                     ) : null}
                     </Card>
                 ))}

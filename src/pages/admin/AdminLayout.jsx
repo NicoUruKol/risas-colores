@@ -7,11 +7,14 @@ import styles from "./AdminLayout.module.css";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 import useInactivityLogout from "../../components/hooks/useInactivityLogout";
 
+/* ==============================
+Nav item
+============================== */
 const NavItem = ({ to, children }) => (
     <NavLink
         to={to}
         className={({ isActive }) =>
-            `${styles.navItem} ${isActive ? styles.navItemActive : ""}`
+        `${styles.navItem} ${isActive ? styles.navItemActive : ""}`
         }
         end
     >
@@ -19,6 +22,9 @@ const NavItem = ({ to, children }) => (
     </NavLink>
 );
 
+/* ==============================
+Helpers
+============================== */
 const getRoleFromToken = (token) => {
     try {
         if (!token) return "";
@@ -32,6 +38,9 @@ const getRoleFromToken = (token) => {
     }
 };
 
+/* ==============================
+AdminLayout
+============================== */
 export default function AdminLayout() {
     const { logout, token } = useAdminAuth();
     const navigate = useNavigate();
@@ -52,12 +61,12 @@ export default function AdminLayout() {
         timeoutMs: 15 * 60 * 1000,
         warningMs: 60 * 1000,
         onWarning: () => {
-            setShowWarning(true);
+        setShowWarning(true);
         },
         onTimeout: () => {
-            setShowWarning(false);
-            logout();
-            navigate("/admin/login", { replace: true });
+        setShowWarning(false);
+        logout();
+        navigate("/admin/login", { replace: true });
         },
     });
 
@@ -65,7 +74,7 @@ export default function AdminLayout() {
         if (!showWarning) return;
 
         const hide = setTimeout(() => {
-            setShowWarning(false);
+        setShowWarning(false);
         }, 55 * 1000);
 
         return () => clearTimeout(hide);
@@ -73,44 +82,46 @@ export default function AdminLayout() {
 
     return (
         <main className="py-10">
-            <Container className="grid gap-6">
-                <header className={styles.head}>
-                    <div>
-                        <Badge variant="lavender">Admin</Badge>
-                        <h1 className={styles.title}>Panel de administración</h1>
-                        <p className={styles.sub}>Productos y contenido (Hero / Galería).</p>
-                    </div>
+        <Container className="grid gap-6">
+            <header className={styles.head}>
+            <div className={styles.headContent}>
+                <Badge variant="lavender">Admin</Badge>
+                <h1 className={styles.title}>Panel de administración</h1>
+                <p className={styles.sub}>Productos y contenido (Hero / Galería).</p>
+            </div>
 
-                    <Button variant="ghost" size="sm" onClick={handleLogout}>
-                        Cerrar sesión
-                    </Button>
-                </header>
+            <div className={styles.headActions}>
+                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                Cerrar sesión
+                </Button>
+            </div>
+            </header>
 
-                {showWarning ? (
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                        Tu sesión se cerrará por inactividad en menos de 1 minuto.
-                    </div>
-                ) : null}
+            {showWarning ? (
+            <div className={styles.warning}>
+                Tu sesión se cerrará por inactividad en menos de 1 minuto.
+            </div>
+            ) : null}
 
-                <div className={styles.shell}>
-                    <aside className={styles.sidebar}>
-                        <nav className={styles.nav}>
-                            <NavItem to="/admin/productos">Productos</NavItem>
-                            <NavItem to="/admin/stock">Stock</NavItem>
-                            <NavItem to="/admin/contenido">Contenido</NavItem>
-                            <NavItem to="/admin/pedidos">Pedidos</NavItem>
+            <div className={styles.shell}>
+            <aside className={styles.sidebar}>
+                <nav className={styles.nav}>
+                <NavItem to="/admin/productos">Productos</NavItem>
+                <NavItem to="/admin/stock">Stock</NavItem>
+                <NavItem to="/admin/contenido">Contenido</NavItem>
+                <NavItem to="/admin/pedidos">Pedidos</NavItem>
 
-                            {isSuperAdmin && <NavItem to="/admin/admins">Admins</NavItem>}
+                {isSuperAdmin && <NavItem to="/admin/admins">Admins</NavItem>}
 
-                            <NavItem to="/admin/password">Contraseña</NavItem>
-                        </nav>
-                    </aside>
+                <NavItem to="/admin/password">Contraseña</NavItem>
+                </nav>
+            </aside>
 
-                    <section className={styles.main}>
-                        <Outlet />
-                    </section>
-                </div>
-            </Container>
+            <section className={styles.main}>
+                <Outlet />
+            </section>
+            </div>
+        </Container>
         </main>
     );
 }

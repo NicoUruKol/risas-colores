@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
@@ -8,8 +9,8 @@ import {
     adminListAdmins,
     adminReactivateAdmin,
 } from "../../services/adminsApi";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
+import styles from "./AdminAdmins.module.css";
 
 /* ==============================
 Helpers token
@@ -38,6 +39,9 @@ const getAdminIdFromToken = (token) => {
     }
 };
 
+/* ==============================
+AdminAdmins
+============================== */
 export default function AdminAdmins() {
     const [loading, setLoading] = useState(true);
     const [rows, setRows] = useState([]);
@@ -189,29 +193,32 @@ export default function AdminAdmins() {
     };
 
     return (
-        <div className="grid gap-6">
-        <div>
+        <section className={styles.page}>
+        <header className={styles.head}>
+            <div className={styles.badgeWrap}>
             <Badge variant="lavender">Admin</Badge>
-            <h2 className="text-2xl font-extrabold text-ui-text mt-2">
-            Administradores
-            </h2>
-            <p className="text-sm text-ui-muted mt-2">
-            Solo superadmin puede ver, crear, desactivar y reactivar administradores.
+            </div>
+
+            <div className={styles.headText}>
+            <h2 className={styles.title}>Administradores</h2>
+            <p className={styles.sub}>
+                Solo superadmin puede ver, crear, desactivar y reactivar administradores.
             </p>
-        </div>
+            </div>
+        </header>
 
         {err ? (
-            <Card className="p-4">
-            <p className="text-sm text-red-500">{err}</p>
+            <Card className={styles.errorCard}>
+            <p className={styles.errorText}>{err}</p>
             </Card>
         ) : null}
 
-        <Card className="p-5 grid gap-4">
-            <div className="font-extrabold text-ui-text">Crear nuevo admin</div>
+        <Card className={styles.card}>
+            <div className={styles.sectionTitle}>Crear nuevo admin</div>
 
-            <form className="grid gap-3 sm:grid-cols-3" onSubmit={onCreate}>
+            <form className={styles.form} onSubmit={onCreate}>
             <input
-                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)] sm:col-span-1"
+                className={styles.input}
                 placeholder="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -221,7 +228,7 @@ export default function AdminAdmins() {
 
             <input
                 type="password"
-                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)] sm:col-span-1"
+                className={styles.input}
                 placeholder="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -230,7 +237,7 @@ export default function AdminAdmins() {
             />
 
             <select
-                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none sm:col-span-1"
+                className={styles.select}
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 disabled={forbidden || creating}
@@ -239,11 +246,11 @@ export default function AdminAdmins() {
                 <option value="superadmin">superadmin</option>
             </select>
 
-            <div className="sm:col-span-3">
+            <div className={styles.formActions}>
                 <Button
                 type="submit"
                 variant="ghost"
-                className="text-black border-black w-fit px-6"
+                className={styles.primaryBtn}
                 disabled={forbidden || creating}
                 >
                 {creating ? "Creando…" : "Crear admin"}
@@ -252,12 +259,13 @@ export default function AdminAdmins() {
             </form>
         </Card>
 
-        <Card className="p-5 grid gap-3">
-            <div className="flex items-center justify-between gap-3">
-            <div className="font-extrabold text-ui-text">Lista</div>
+        <Card className={styles.card}>
+            <div className={styles.listHead}>
+            <div className={styles.sectionTitle}>Lista</div>
+
             <Button
                 variant="ghost"
-                className="text-black border-black"
+                className={styles.secondaryBtn}
                 onClick={load}
                 type="button"
                 disabled={loading}
@@ -267,26 +275,21 @@ export default function AdminAdmins() {
             </div>
 
             {loading ? (
-            <p className="text-ui-muted">Cargando…</p>
+            <p className={styles.emptyText}>Cargando…</p>
             ) : forbidden ? (
-            <p className="text-ui-muted">No disponible para este usuario.</p>
+            <p className={styles.emptyText}>No disponible para este usuario.</p>
             ) : rows.length === 0 ? (
-            <p className="text-ui-muted">No hay admins.</p>
+            <p className={styles.emptyText}>No hay admins.</p>
             ) : (
-            <div className="grid gap-2">
+            <div className={styles.list}>
                 {rows.map((a) => {
                 const isMe = a.id === myAdminId;
 
                 return (
-                    <div
-                    key={a.id}
-                    className="rounded-xl border border-ui-border bg-ui-surface p-3 flex items-center justify-between gap-3"
-                    >
-                    <div className="min-w-0">
-                        <div className="font-bold text-ui-text truncate">
-                        {a.email}
-                        </div>
-                        <div className="text-xs text-ui-muted">
+                    <article key={a.id} className={styles.row}>
+                    <div className={styles.rowInfo}>
+                        <div className={styles.email}>{a.email}</div>
+                        <div className={styles.meta}>
                         Rol: {a.role} · Estado: {a.active ? "Activo" : "Inactivo"}
                         </div>
                     </div>
@@ -296,7 +299,7 @@ export default function AdminAdmins() {
                         <Button
                             type="button"
                             variant="ghost"
-                            className="text-black border-black"
+                            className={styles.secondaryBtn}
                             disabled={workingId === a.id}
                             onClick={() => onDeactivate(a.id)}
                         >
@@ -306,7 +309,7 @@ export default function AdminAdmins() {
                         <Button
                             type="button"
                             variant="ghost"
-                            className="text-black border-black"
+                            className={styles.secondaryBtn}
                             disabled={workingId === a.id}
                             onClick={() => onReactivate(a.id)}
                         >
@@ -314,12 +317,12 @@ export default function AdminAdmins() {
                         </Button>
                         )
                     ) : null}
-                    </div>
+                    </article>
                 );
                 })}
             </div>
             )}
         </Card>
-        </div>
+        </section>
     );
 }

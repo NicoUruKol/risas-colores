@@ -9,7 +9,6 @@ import { getHomeHeroContent, saveHomeHeroContent } from "../../services/apiConte
 import styles from "./AdminHero.module.css";
 
 const API_BASE = import.meta.env.VITE_API_URL;
-
 const FOLDER = "risas-colores/web/Hero";
 const MAX_SELECT = 5;
 
@@ -28,9 +27,9 @@ const getAdminToken = () =>
 const authHeaders = () => {
     const token = getAdminToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
-    };
+};
 
-    const readJson = async (res) => {
+const readJson = async (res) => {
     const text = await res.text();
     try {
         return text ? JSON.parse(text) : null;
@@ -64,12 +63,15 @@ export default function AdminHero() {
     const [loadingMore, setLoadingMore] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [deletingPublicId, setDeletingPublicId] = useState("");
     const [err, setErr] = useState("");
 
     const [library, setLibrary] = useState([]);
     const [nextCursor, setNextCursor] = useState(null);
 
     const [selected, setSelected] = useState([]);
+    const [confirmDelete, setConfirmDelete] = useState(null);
+
     const selectedSet = useMemo(
         () => new Set(selected.map((x) => x.public_id)),
         [selected]
@@ -111,6 +113,7 @@ export default function AdminHero() {
     const loadAll = async () => {
         setErr("");
         setLoading(true);
+
         try {
         await Promise.all([fetchLibrary({ append: false }), fetchSaved()]);
         } catch (e) {
@@ -221,12 +224,23 @@ export default function AdminHero() {
         }
     };
 
-    const onDeleteCloudinary = async (publicId) => {
+    const askDeleteCloudinary = (item) => {
+        if (!item?.public_id) return;
+        setConfirmDelete(item);
+    };
+
+    const closeDeleteConfirm = () => {
+        if (deletingPublicId) return;
+        setConfirmDelete(null);
+    };
+
+    const onDeleteCloudinary = async () => {
+        const publicId = confirmDelete?.public_id;
         if (!publicId) return;
-        const ok = window.confirm("¿Eliminar esta imagen de Cloudinary? (No se puede deshacer)");
-        if (!ok) return;
 
         setErr("");
+        setDeletingPublicId(publicId);
+
         try {
         const res = await fetch(
             joinUrl(API_BASE, `/api/media/delete?public_id=${encodeURIComponent(publicId)}`),
@@ -245,10 +259,13 @@ export default function AdminHero() {
         }
 
         removeSelected(publicId);
+        setConfirmDelete(null);
         await fetchLibrary({ append: false });
         } catch (e) {
         if (e?.status === 401 || e?.status === 403) return goLogin();
         setErr(e?.message || "Error eliminando imagen");
+        } finally {
+        setDeletingPublicId("");
         }
     };
 
@@ -302,6 +319,7 @@ export default function AdminHero() {
         if (!nextCursor) return;
         setErr("");
         setLoadingMore(true);
+
         try {
         await fetchLibrary({ cursor: nextCursor, append: true });
         } catch (e) {
@@ -315,9 +333,12 @@ export default function AdminHero() {
     return (
         <main className={styles.page}>
         <div className={styles.wrap}>
-            <div className={styles.header}>
+            <header className={styles.header}>
             <div className={styles.headerLeft}>
+                <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
+                </div>
+
                 <h1 className={styles.title}>Hero</h1>
                 <p className={styles.sub}>
                 Máximo {MAX_SELECT} slides. Cada slide tiene su título y subtítulo. CTAs quedan fijos.
@@ -325,13 +346,13 @@ export default function AdminHero() {
             </div>
 
             <div className={styles.headerRight}>
-                <Link to="/admin/contenido">
-                <Button variant="ghost" className="text-black border-black">
+                <Link to="/admin/contenido" className={styles.linkReset}>
+                <Button variant="ghost" className={styles.backBtn}>
                     ← Volver
                 </Button>
                 </Link>
             </div>
-            </div>
+            </header>
 
             {err ? (
             <Card className={styles.errorCard}>
@@ -359,13 +380,13 @@ export default function AdminHero() {
                     type="file"
                     accept="image/*"
                     onChange={onPickFile}
-                    style={{ display: "none" }}
+                    className={styles.hiddenInput}
                 />
 
                 <Button
                     type="button"
                     variant="ghost"
-                    className="text-black border-black"
+                    className={styles.secondaryBtn}
                     disabled={uploading}
                     onClick={() => fileRef.current?.click()}
                 >
@@ -377,6 +398,7 @@ export default function AdminHero() {
                     variant="ghost"
                     disabled={saving || selected.length === 0}
                     onClick={onSave}
+                    className={styles.primaryBtn}
                 >
                     {saving ? "Guardando…" : "Guardar Hero"}
                 </Button>
@@ -399,7 +421,7 @@ export default function AdminHero() {
                     <div className={styles.panelTitle}>Biblioteca (Cloudinary)</div>
                     <Button
                     variant="ghost"
-                    className="text-black border-black"
+                    className={styles.secondaryBtn}
                     onClick={loadAll}
                     type="button"
                     >
@@ -441,7 +463,7 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtn}
                                 onClick={() => toggleSelect(it)}
                                 disabled={!isSel && selected.length >= MAX_SELECT}
                             >
@@ -451,8 +473,8 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
-                                onClick={() => onDeleteCloudinary(pid)}
+                                className={styles.dangerBtn}
+                                onClick={() => askDeleteCloudinary(it)}
                             >
                                 Borrar
                             </Button>
@@ -493,7 +515,7 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtnIcon}
                                 onClick={() => moveSelected(it.public_id, -1)}
                                 disabled={idx === 0}
                             >
@@ -503,7 +525,7 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtnIcon}
                                 onClick={() => moveSelected(it.public_id, +1)}
                                 disabled={idx === selected.length - 1}
                             >
@@ -513,7 +535,7 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={it.active ? styles.primaryBtnSoft : styles.secondaryBtn}
                                 onClick={() => toggleActive(it.public_id)}
                             >
                                 {it.active ? "Activa" : "Inactiva"}
@@ -522,7 +544,7 @@ export default function AdminHero() {
                             <Button
                                 type="button"
                                 variant="ghost"
-                                className="text-black border-black"
+                                className={styles.secondaryBtn}
                                 onClick={() => removeSelected(it.public_id)}
                             >
                                 Quitar
@@ -572,6 +594,62 @@ export default function AdminHero() {
                 </Card>
             </div>
             )}
+
+            {confirmDelete ? (
+            <div
+                className={styles.modalOverlay}
+                onClick={closeDeleteConfirm}
+                role="presentation"
+            >
+                <div
+                className={styles.modalCard}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-hero-image-title"
+                >
+                <div className={styles.modalBadgeWrap}>
+                    <Badge variant="orange">Confirmación</Badge>
+                </div>
+
+                <div className={styles.modalHead}>
+                    <h2 id="delete-hero-image-title" className={styles.modalTitle}>
+                    ¿Eliminar imagen de Cloudinary?
+                    </h2>
+
+                    <p className={styles.modalText}>
+                    Esta acción no se puede deshacer. Si el slide está seleccionado, también se quitará del Hero.
+                    </p>
+
+                    <p className={styles.modalText}>
+                    <b>{confirmDelete.filename || confirmDelete.public_id}</b>
+                    </p>
+                </div>
+
+                <div className={styles.modalActions}>
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalCancelBtn}
+                    onClick={closeDeleteConfirm}
+                    disabled={Boolean(deletingPublicId)}
+                    >
+                    Cancelar
+                    </Button>
+
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalDangerBtn}
+                    onClick={onDeleteCloudinary}
+                    disabled={Boolean(deletingPublicId)}
+                    >
+                    {deletingPublicId ? "Borrando…" : "Sí, borrar"}
+                    </Button>
+                </div>
+                </div>
+            </div>
+            ) : null}
         </div>
         </main>
     );

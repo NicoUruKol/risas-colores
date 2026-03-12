@@ -6,7 +6,11 @@ import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import ImageBox from "../../components/ui/ImageBox";
 import { adminDelete, adminList } from "../../services/productsApi";
+import styles from "./AdminProductos.module.css";
 
+/* ==============================
+Helpers
+============================== */
 const toImages = (p) => {
     const a = p?.avatar;
     if (typeof a === "string") {
@@ -22,9 +26,9 @@ const toImages = (p) => {
 const getSizesFromVariants = (variants) => {
     if (!Array.isArray(variants)) return [];
     return variants.map((v) => String(v?.size || "").trim()).filter(Boolean);
-    };
+};
 
-    const formatSizes = (sizes = []) => {
+const formatSizes = (sizes = []) => {
     const uniq = Array.from(new Set(sizes));
     if (!uniq.length) return "-";
     return uniq.join(" · ");
@@ -35,6 +39,7 @@ const minPriceFromVariants = (variants) => {
     const prices = variants
         .map((v) => Number(v?.price))
         .filter((n) => Number.isFinite(n) && n >= 0);
+
     if (!prices.length) return null;
     return Math.min(...prices);
 };
@@ -44,6 +49,7 @@ const totalStockFromVariants = (variants) => {
     const stocks = variants
         .map((v) => Number(v?.stock))
         .filter((n) => Number.isFinite(n) && n >= 0);
+
     if (!stocks.length) return null;
     return stocks.reduce((acc, n) => acc + n, 0);
 };
@@ -54,18 +60,31 @@ const FILTERS = [
     { value: "false", label: "Inactivos" },
 ];
 
+/* ==============================
+AdminProductos
+============================== */
 export default function AdminProductos() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    // ✅ por defecto: admin ve TODO (activos + inactivos)
     const [activeFilter, setActiveFilter] = useState("all");
+
+    const [pendingDelete, setPendingDelete] = useState(null);
+    const [deletingId, setDeletingId] = useState("");
+    const [err, setErr] = useState("");
 
     const load = async (active = activeFilter) => {
         setLoading(true);
+        setErr("");
+
+        try {
         const res = await adminList({ active });
         setItems(Array.isArray(res) ? res : []);
+        } catch (e) {
+        setItems([]);
+        setErr(e?.message || "No se pudieron cargar los productos.");
+        } finally {
         setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -78,9 +97,30 @@ export default function AdminProductos() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeFilter]);
 
-    const handleDelete = async (id) => {
-        await adminDelete(id);
-        load(activeFilter);
+    const openDeleteConfirm = (product) => {
+        setPendingDelete(product);
+    };
+
+    const closeDeleteConfirm = () => {
+        if (deletingId) return;
+        setPendingDelete(null);
+    };
+
+    const confirmDelete = async () => {
+        if (!pendingDelete?.id) return;
+
+        setDeletingId(pendingDelete.id);
+        setErr("");
+
+        try {
+        await adminDelete(pendingDelete.id);
+        setPendingDelete(null);
+        await load(activeFilter);
+        } catch (e) {
+        setErr(e?.message || "No se pudo eliminar el producto.");
+        } finally {
+        setDeletingId("");
+        }
     };
 
     const filterLabel = useMemo(
@@ -89,24 +129,24 @@ export default function AdminProductos() {
     );
 
     return (
-        <main className="py-10">
-        <Container className="grid gap-6">
-            {/* Header */}
-            <div className="grid gap-4 sm:flex sm:items-start sm:justify-between">
-            <div>
+        <main className={styles.page}>
+        <Container className={styles.wrap}>
+            <header className={styles.head}>
+            <div className={styles.headInfo}>
+                <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className="text-2xl font-extrabold text-ui-text mt-2">Productos</h1>
-                <p className="text-sm text-ui-muted mt-2">
-                Gestioná tus productos.
-                </p>
+                </div>
+
+                <h1 className={styles.title}>Productos</h1>
+                <p className={styles.sub}>Gestioná tus productos.</p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-                {/* Filtro (mobile-first) */}
-                <div className="flex items-center gap-2">
-                <span className="text-xs text-ui-muted">Mostrar:</span>
+            <div className={styles.headActions}>
+                <div className={styles.filterBox}>
+                <span className={styles.filterLabel}>Mostrar:</span>
+
                 <select
-                    className="h-10 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                    className={styles.select}
                     value={activeFilter}
                     onChange={(e) => setActiveFilter(e.target.value)}
                     aria-label="Filtro de productos"
@@ -119,27 +159,34 @@ export default function AdminProductos() {
                 </select>
                 </div>
 
-                <Link to="/admin/productos/nuevo">
-                <Button variant="ghost" size="sm" className="text-black border-black">Nuevo producto</Button>
+                <Link to="/admin/productos/nuevo" className={styles.linkReset}>
+                <Button variant="ghost" size="sm" className={styles.primaryBtn}>
+                    Nuevo producto
+                </Button>
                 </Link>
             </div>
-            </div>
+            </header>
 
-            {/* Estado filtro */}
-            <div className="text-xs text-ui-muted">
+            <div className={styles.filterState}>
             Filtro actual: <b>{filterLabel}</b>
             </div>
 
+            {err ? (
+            <Card className={styles.errorCard}>
+                <p className={styles.errorText}>{err}</p>
+            </Card>
+            ) : null}
+
             {loading ? (
-            <Card className="p-5">
-                <p className="text-ui-muted">Cargando…</p>
+            <Card className={styles.stateCard}>
+                <p className={styles.stateText}>Cargando…</p>
             </Card>
             ) : items.length === 0 ? (
-            <Card className="p-5">
-                <p className="text-ui-muted">No hay productos para este filtro.</p>
+            <Card className={styles.stateCard}>
+                <p className={styles.stateText}>No hay productos para este filtro.</p>
             </Card>
             ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <section className={styles.grid}>
                 {items.map((p) => {
                 const images = toImages(p);
                 const cover = images[0] || "";
@@ -149,47 +196,51 @@ export default function AdminProductos() {
                 const stockTotal = totalStockFromVariants(p?.variants);
 
                 return (
-                    <Card key={p.id} className="p-4">
-                    <ImageBox src={cover} alt={p.name} />
+                    <Card key={p.id} className={styles.card}>
+                    <div className={styles.imageWrap}>
+                        <ImageBox src={cover} alt={p.name} />
+                    </div>
 
-                    <div className="mt-3 flex items-start justify-between gap-3">
-                        <div>
-                        <div className="font-bold text-ui-text">{p.name}</div>
+                    <div className={styles.cardTop}>
+                        <div className={styles.info}>
+                        <div className={styles.name}>{p.name}</div>
 
-                        <div className="text-xs text-ui-muted mt-1">
+                        <div className={styles.meta}>
                             Talles: {formatSizes(sizes)}
                         </div>
 
-                        <div className="text-xs text-ui-muted mt-1">
+                        <div className={styles.meta}>
                             Stock: {stockTotal === null ? "-" : String(stockTotal)}
                             {" · "}
                             Estado: {p.active === false ? "Inactivo" : "Activo"}
                         </div>
 
-                        <div className="text-xs text-ui-muted mt-1">
+                        <div className={styles.meta}>
                             Imágenes: {images.length}
                         </div>
                         </div>
 
-                        <div className="font-extrabold text-brand-orange">
-                        {priceFrom === null ? "-" : `Desde $${priceFrom.toLocaleString("es-AR")}`}
+                        <div className={styles.price}>
+                        {priceFrom === null
+                            ? "-"
+                            : `Desde $${priceFrom.toLocaleString("es-AR")}`}
                         </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                        <Link to={`/admin/productos/${p.id}/editar`}>
-                        <Button
-                            variant="ghost"
-                            className="w-full !text-black !border-black"
+                    <div className={styles.actions}>
+                        <Link
+                        to={`/admin/productos/${p.id}/editar`}
+                        className={styles.linkReset}
                         >
+                        <Button variant="ghost" className={styles.actionBtn}>
                             Editar
                         </Button>
                         </Link>
 
                         <Button
                         variant="ghost"
-                        className="w-full !text-black !border-black"
-                        onClick={() => handleDelete(p.id)}
+                        className={styles.actionBtnDanger}
+                        onClick={() => openDeleteConfirm(p)}
                         >
                         Eliminar
                         </Button>
@@ -197,8 +248,62 @@ export default function AdminProductos() {
                     </Card>
                 );
                 })}
-            </div>
+            </section>
             )}
+
+            {pendingDelete ? (
+            <div
+                className={styles.modalOverlay}
+                onClick={closeDeleteConfirm}
+                role="presentation"
+            >
+                <div
+                className={styles.modalCard}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="delete-product-title"
+                >
+                <div className={styles.modalBadgeWrap}>
+                    <Badge variant="orange">Confirmación</Badge>
+                </div>
+
+                <div className={styles.modalHead}>
+                    <h2 id="delete-product-title" className={styles.modalTitle}>
+                    ¿Eliminar producto?
+                    </h2>
+
+                    <p className={styles.modalText}>
+                    Vas a eliminar{" "}
+                    <strong>{pendingDelete.name || "este producto"}</strong>.
+                    Esta acción puede ser irreversible.
+                    </p>
+                </div>
+
+                <div className={styles.modalActions}>
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalCancelBtn}
+                    onClick={closeDeleteConfirm}
+                    disabled={Boolean(deletingId)}
+                    >
+                    Cancelar
+                    </Button>
+
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalDeleteBtn}
+                    onClick={confirmDelete}
+                    disabled={Boolean(deletingId)}
+                    >
+                    {deletingId ? "Eliminando…" : "Sí, eliminar"}
+                    </Button>
+                </div>
+                </div>
+            </div>
+            ) : null}
         </Container>
         </main>
     );

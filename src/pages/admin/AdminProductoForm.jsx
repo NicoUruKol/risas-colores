@@ -13,6 +13,7 @@ import {
     adminAdjustStock,
 } from "../../services/productsApi";
 import { mediaUploadOne } from "../../services/apiMedia";
+import styles from "./AdminProductoForm.module.css";
 
 const TALLES = ["1", "2", "3", "4", "5"];
 const UNICO = "U";
@@ -58,8 +59,10 @@ const buildVariantsForSizes = (sizes, fromVariants = []) => {
 
         return {
         size,
-        price: price === "" || price === null || price === undefined ? "" : String(price),
-        stock: stock === "" || stock === null || stock === undefined ? "" : String(stock),
+        price:
+            price === "" || price === null || price === undefined ? "" : String(price),
+        stock:
+            stock === "" || stock === null || stock === undefined ? "" : String(stock),
         };
     });
 };
@@ -74,13 +77,12 @@ export default function AdminProductoForm() {
     const [uploading, setUploading] = useState(false);
     const [errors, setErrors] = useState({});
 
-    // ajustes de stock por talle (solo edición)
-    const [stockDelta, setStockDelta] = useState({}); // { [size]: string }
+    const [stockDelta, setStockDelta] = useState({});
     const [stockReason, setStockReason] = useState("");
     const [stockApplying, setStockApplying] = useState(false);
     const [stockErr, setStockErr] = useState("");
+    const [pendingStockAdjust, setPendingStockAdjust] = useState(null);
 
-    // modo talles: "numeric" (1-5) o "unico"
     const [sizeMode, setSizeMode] = useState("numeric");
     const sizes = useMemo(() => (sizeMode === "unico" ? [UNICO] : TALLES), [sizeMode]);
 
@@ -143,7 +145,6 @@ export default function AdminProductoForm() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editing, id]);
 
-    // si cambia el modo (solo relevante al crear), re-armo variants preservando lo que se pueda
     useEffect(() => {
         if (editing) return;
         setForm((prev) => ({
@@ -160,7 +161,9 @@ export default function AdminProductoForm() {
     const setVariantField = (size, field, value) => {
         setForm((prev) => ({
         ...prev,
-        variants: prev.variants.map((v) => (v.size === size ? { ...v, [field]: value } : v)),
+        variants: prev.variants.map((v) =>
+            v.size === size ? { ...v, [field]: value } : v
+        ),
         }));
     };
 
@@ -184,8 +187,6 @@ export default function AdminProductoForm() {
             vErrors.push(`Precio inválido en talle ${size === "U" ? "Único" : size}`);
         }
 
-        // ✅ Crear: pedimos stock inicial válido
-        // ✅ Editar: stock se mantiene (solo lectura), pero igual validamos por seguridad.
         if (stock === "" || stock === null || stock === undefined) {
             vErrors.push(`Stock obligatorio en talle ${size === "U" ? "Único" : size}`);
         } else if (Number.isNaN(Number(stock))) {
@@ -254,9 +255,9 @@ export default function AdminProductoForm() {
         variants: sizes.map((size) => {
             const row = form.variants.find((v) => v.size === size) || {};
             return {
-            size, // U o 1..5
+            size,
             price: Number(row.price),
-            stock: Number(row.stock), // ✅ en edición va “igual” (solo lectura), no se pisa
+            stock: Number(row.stock),
             };
         }),
         };
@@ -270,36 +271,52 @@ export default function AdminProductoForm() {
         }
     };
 
-    const applyStockDelta = async (size) => {
+    const openStockAdjustConfirm = (size) => {
         if (!editing) return;
 
         setStockErr("");
         const raw = String(stockDelta[size] ?? "").trim();
-
-        // permitir "+5", "-2", "5"
         const n = Number(raw);
+
         if (!Number.isFinite(n) || !Number.isInteger(n) || n === 0) {
         setStockErr("El ajuste debe ser un entero distinto de 0 (ej: +5 o -2).");
         return;
         }
 
+        setPendingStockAdjust({
+        size,
+        delta: n,
+        labelSize: size === "U" ? "Único" : size,
+        });
+    };
+
+    const closeStockAdjustConfirm = () => {
+        if (stockApplying) return;
+        setPendingStockAdjust(null);
+    };
+
+    const confirmStockAdjust = async () => {
+        if (!editing || !pendingStockAdjust) return;
+
         try {
         setStockApplying(true);
         await adminAdjustStock(id, {
-            size,
-            delta: n,
+            size: pendingStockAdjust.size,
+            delta: pendingStockAdjust.delta,
             reason: stockReason,
         });
 
-        // ✅ refrescar el producto para traer stock actualizado y evitar “pisadas” luego
         await loadProduct();
 
-        setStockDelta((p) => ({ ...p, [size]: "" }));
+        setStockDelta((p) => ({ ...p, [pendingStockAdjust.size]: "" }));
         setStockReason("");
+        setPendingStockAdjust(null);
         } catch (err) {
-        // si te llega token vencido y tu http no lo maneja todavía:
         if (err?.status === 401 || err?.status === 403) {
-            navigate("/admin/login", { replace: true, state: { from: `/admin/productos/${id}/editar` } });
+            navigate("/admin/login", {
+            replace: true,
+            state: { from: `/admin/productos/${id}/editar` },
+            });
             return;
         }
         setStockErr(err?.message || "Error aplicando ajuste de stock");
@@ -309,120 +326,130 @@ export default function AdminProductoForm() {
     };
 
     return (
-        <main className="py-10">
-        <Container className="grid gap-6 max-w-[980px]">
-            {/* Header */}
-            <div className="flex items-center justify-between gap-4">
-            <div>
+        <main className={styles.page}>
+        <Container className={styles.wrap}>
+            <header className={styles.head}>
+            <div className={styles.headInfo}>
+                <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className="text-2xl font-extrabold text-ui-text mt-2">
+                </div>
+
+                <h1 className={styles.title}>
                 {editing ? "Editar producto" : "Nuevo producto"}
                 </h1>
             </div>
 
-            <Link to="/admin/productos">
-                <Button variant="ghost" size="sm" className="text-black border-black">
+            <Link to="/admin/productos" className={styles.linkReset}>
+                <Button variant="ghost" size="sm" className={styles.backBtn}>
                 ← Volver
                 </Button>
             </Link>
-            </div>
+            </header>
 
             {loading ? (
-            <Card className="p-5">
-                <p className="text-ui-muted">Cargando…</p>
+            <Card className={styles.stateCard}>
+                <p className={styles.stateText}>Cargando…</p>
             </Card>
             ) : (
-            <Card className="p-5">
-                <form className="grid gap-5" onSubmit={handleSubmit}>
-                {/* Nombre */}
-                <div className="grid gap-2">
-                    <label className="text-sm text-ui-muted">Nombre</label>
+            <Card className={styles.card}>
+                <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.field}>
+                    <label className={styles.label}>Nombre</label>
                     <input
-                    className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                    className={styles.input}
                     value={form.name}
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     />
-                    {errors.name && <div className="text-xs text-red-500">{errors.name}</div>}
+                    {errors.name && <div className={styles.error}>{errors.name}</div>}
                 </div>
 
-                {/* Descripción */}
-                <div className="grid gap-2">
-                    <label className="text-sm text-ui-muted">Descripción</label>
+                <div className={styles.field}>
+                    <label className={styles.label}>Descripción</label>
                     <textarea
-                    className="min-h-[96px] p-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                    className={styles.textarea}
                     value={form.description}
-                    onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                    onChange={(e) =>
+                        setForm((p) => ({ ...p, description: e.target.value }))
+                    }
                     />
                 </div>
 
-                {/* Modo talles (solo al crear) */}
                 {!editing && (
-                    <div className="flex items-center gap-3">
-                    <label className="flex items-center gap-2 text-sm text-ui-text">
+                    <div className={styles.inlineRow}>
+                    <label className={styles.checkRow}>
                         <input
                         type="checkbox"
+                        className={styles.check}
                         checked={sizeMode === "unico"}
-                        onChange={(e) => setSizeMode(e.target.checked ? "unico" : "numeric")}
+                        onChange={(e) =>
+                            setSizeMode(e.target.checked ? "unico" : "numeric")
+                        }
                         />
                         Único (Mochila)
                     </label>
                     </div>
                 )}
 
-                {/* Imágenes */}
-                <div className="grid gap-3">
-                    <div className="flex items-center justify-between gap-3">
+                <div className={styles.block}>
+                    <div className={styles.blockHead}>
                     <div>
-                        <div className="text-sm text-ui-muted">Imágenes (máx {MAX_IMAGES})</div>
-                        <div className="text-xs text-ui-muted">
+                        <div className={styles.label}>Imágenes (máx {MAX_IMAGES})</div>
+                        <div className={styles.helper}>
                         Se guardan como URLs en <b>avatar[]</b>.
                         </div>
                     </div>
 
-                    <label className="inline-flex items-center gap-2">
+                    <label className={styles.hiddenInputWrap}>
                         <input
                         type="file"
                         accept="image/*"
                         onChange={onPickFile}
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
-                        style={{ display: "none" }}
+                        className={styles.hiddenInput}
                         id="admin-product-upload"
                         />
+
                         <Button
                         type="button"
                         variant="ghost"
-                        className="text-black border-black"
+                        className={styles.secondaryBtn}
                         disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
-                        onClick={() => document.getElementById("admin-product-upload")?.click()}
+                        onClick={() =>
+                            document.getElementById("admin-product-upload")?.click()
+                        }
                         >
                         {uploading ? "Subiendo…" : "Subir imagen"}
                         </Button>
                     </label>
                     </div>
 
-                    {errors.avatar && <div className="text-xs text-red-500">{errors.avatar}</div>}
+                    {errors.avatar && <div className={styles.error}>{errors.avatar}</div>}
 
                     {cover ? (
-                    <div className="grid gap-3 md:grid-cols-[240px_1fr]">
+                    <div className={styles.imagesLayout}>
                         <div>
                         <ImageBox src={cover} alt={form.name || "Producto"} />
-                        <div className="text-xs text-ui-muted mt-2">Portada = primera imagen</div>
+                        <div className={styles.helperTop}>Portada = primera imagen</div>
                         </div>
 
-                        <div className="grid gap-3">
-                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className={styles.imagesSide}>
+                        <div className={styles.imagesGrid}>
                             {(form.avatar || []).map((url, idx) => (
-                            <div key={url + idx} className="rounded-md border border-ui-border p-2 bg-ui-surface">
-                                <div className="rounded-md overflow-hidden">
-                                <img src={url} alt={`img-${idx + 1}`} className="w-full h-32 object-cover" />
+                            <div key={url + idx} className={styles.thumbCard}>
+                                <div className={styles.thumbMedia}>
+                                <img
+                                    src={url}
+                                    alt={`img-${idx + 1}`}
+                                    className={styles.thumbImg}
+                                />
                                 </div>
 
-                                <div className="mt-2 flex items-center justify-between gap-2">
-                                <div className="text-xs text-ui-muted truncate">#{idx + 1}</div>
+                                <div className={styles.thumbFoot}>
+                                <div className={styles.thumbIndex}>#{idx + 1}</div>
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    className="text-black border-black"
+                                    className={styles.secondaryBtn}
                                     onClick={() => removeAvatarAt(idx)}
                                 >
                                     Quitar
@@ -432,25 +459,28 @@ export default function AdminProductoForm() {
                             ))}
                         </div>
 
-                        <div className="text-xs text-ui-muted">Podés quitar la imagen y volver a subirla.</div>
+                        <div className={styles.helper}>
+                            Podés quitar la imagen y volver a subirla.
+                        </div>
                         </div>
                     </div>
                     ) : (
-                    <div className="text-sm text-ui-muted">Todavía no hay imágenes cargadas.</div>
+                    <div className={styles.emptyText}>
+                        Todavía no hay imágenes cargadas.
+                    </div>
                     )}
                 </div>
 
-                {/* Variants */}
-                <div className="grid gap-2">
-                    <div className="text-sm text-ui-muted">
-                    Editá precio y stock por talle {sizeMode === "unico" ? "(Único)" : "(1–5)"}
+                <div className={styles.block}>
+                    <div className={styles.label}>
+                    Editá precio y stock por talle{" "}
+                    {sizeMode === "unico" ? "(Único)" : "(1–5)"}
                     </div>
 
-                    {errors.variants && <div className="text-xs text-red-500">{errors.variants}</div>}
+                    {errors.variants && <div className={styles.error}>{errors.variants}</div>}
 
-                    <div className="rounded-md border border-ui-border overflow-hidden">
-                    {/* header (solo desktop) */}
-                    <div className="hidden md:grid md:grid-cols-[90px_1fr_1fr_1fr_auto] bg-ui-surface p-3 text-xs text-ui-muted">
+                    <div className={styles.variantsBox}>
+                    <div className={styles.variantsHead}>
                         <div>Talle</div>
                         <div>Precio</div>
                         <div>Stock</div>
@@ -458,45 +488,45 @@ export default function AdminProductoForm() {
                         <div></div>
                     </div>
 
-                    <div className="divide-y divide-ui-border">
+                    <div className={styles.variantsList}>
                         {sizes.map((size) => {
-                        const row = form.variants.find((v) => v.size === size) || { price: "", stock: "" };
+                        const row = form.variants.find((v) => v.size === size) || {
+                            price: "",
+                            stock: "",
+                        };
                         const labelSize = size === "U" ? "Único" : size;
 
                         return (
-                            <div
-                            key={size}
-                            className="p-3 bg-white/50 md:grid md:grid-cols-[90px_1fr_1fr_1fr_auto] md:gap-3 md:items-center"
-                            >
-                            {/* talle */}
-                            <div className="font-bold text-ui-text">{labelSize}</div>
+                            <div key={size} className={styles.variantRow}>
+                            <div className={styles.variantTitle}>{labelSize}</div>
 
-                            {/* precio */}
-                            <div className="mt-2 md:mt-0">
-                                <div className="text-xs text-ui-muted md:hidden mb-1">Precio</div>
+                            <div className={styles.variantCell}>
+                                <div className={styles.mobileLabel}>Precio</div>
                                 <input
-                                className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                className={styles.input}
                                 value={row.price}
-                                onChange={(e) => setVariantField(size, "price", e.target.value)}
+                                onChange={(e) =>
+                                    setVariantField(size, "price", e.target.value)
+                                }
                                 placeholder="8500"
                                 />
                             </div>
 
-                            {/* stock */}
-                            <div className="mt-3 md:mt-0">
-                                <div className="text-xs text-ui-muted md:hidden mb-1">Stock</div>
+                            <div className={styles.variantCell}>
+                                <div className={styles.mobileLabel}>Stock</div>
 
-                                {/* Crear: editable (stock inicial) */}
                                 {!editing ? (
                                 <input
-                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    className={styles.input}
                                     value={row.stock}
-                                    onChange={(e) => setVariantField(size, "stock", e.target.value)}
+                                    onChange={(e) =>
+                                    setVariantField(size, "stock", e.target.value)
+                                    }
                                     placeholder="10"
                                 />
                                 ) : (
                                 <input
-                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text opacity-80"
+                                    className={styles.inputReadOnly}
                                     value={row.stock}
                                     readOnly
                                     tabIndex={-1}
@@ -504,35 +534,36 @@ export default function AdminProductoForm() {
                                 )}
                             </div>
 
-                            {/* ajuste */}
-                            <div className="mt-3 md:mt-0">
-                                <div className="text-xs text-ui-muted md:hidden mb-1">Ajuste (+/-)</div>
+                            <div className={styles.variantCell}>
+                                <div className={styles.mobileLabel}>Ajuste (+/-)</div>
 
                                 {editing ? (
                                 <input
-                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    className={styles.input}
                                     value={stockDelta[size] ?? ""}
                                     onChange={(e) =>
-                                    setStockDelta((p) => ({ ...p, [size]: e.target.value }))
+                                    setStockDelta((p) => ({
+                                        ...p,
+                                        [size]: e.target.value,
+                                    }))
                                     }
                                     placeholder="+5 o -2"
                                 />
                                 ) : (
-                                <div className="text-xs text-ui-muted md:text-sm">
+                                <div className={styles.inlineMuted}>
                                     (Disponible al editar)
                                 </div>
                                 )}
                             </div>
 
-                            {/* aplicar */}
-                            <div className="mt-3 md:mt-0">
+                            <div className={styles.variantAction}>
                                 {editing ? (
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    className="text-black border-black w-full md:w-auto"
+                                    className={styles.secondaryBtnWide}
                                     disabled={stockApplying}
-                                    onClick={() => applyStockDelta(size)}
+                                    onClick={() => openStockAdjustConfirm(size)}
                                 >
                                     {stockApplying ? "Aplicando…" : "Aplicar"}
                                 </Button>
@@ -541,14 +572,13 @@ export default function AdminProductoForm() {
                                 )}
                             </div>
 
-                            {/* motivo (solo una vez abajo, en mobile queda mejor acá) */}
                             {editing ? (
-                                <div className="mt-3 md:col-span-5">
-                                <div className="text-xs text-ui-muted mb-1">
+                                <div className={styles.reasonWrap}>
+                                <div className={styles.mobileLabel}>
                                     Motivo (opcional)
                                 </div>
                                 <input
-                                    className="h-11 w-full px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                                    className={styles.input}
                                     value={stockReason}
                                     onChange={(e) => setStockReason(e.target.value)}
                                     placeholder="Ej: reposición, ajuste inventario, etc."
@@ -561,37 +591,110 @@ export default function AdminProductoForm() {
                     </div>
 
                     {editing ? (
-                        <div className="text-xs text-ui-muted p-3">
+                        <div className={styles.variantsFoot}>
                         <b>Ajuste</b> de <b>STOCK</b> queda registrado en el historial.
                         </div>
                     ) : (
-                        <div className="text-xs text-ui-muted p-3">
-                        En la creación cargás el <b>stock inicial</b>. Luego se ajusta por movimientos.
+                        <div className={styles.variantsFoot}>
+                        En la creación cargás el <b>stock inicial</b>. Luego se ajusta por
+                        movimientos.
                         </div>
                     )}
                     </div>
 
-                    {stockErr ? <div className="text-xs text-red-500">{stockErr}</div> : null}
+                    {stockErr ? <div className={styles.error}>{stockErr}</div> : null}
                 </div>
 
-                {/* Activo + Guardar */}
-                <div className="flex items-center justify-between gap-4">
-                    <label className="flex items-center gap-2 text-sm text-ui-text">
+                <div className={styles.footerActions}>
+                    <label className={styles.checkRow}>
                     <input
                         type="checkbox"
+                        className={styles.check}
                         checked={form.active}
-                        onChange={(e) => setForm((p) => ({ ...p, active: e.target.checked }))}
+                        onChange={(e) =>
+                        setForm((p) => ({ ...p, active: e.target.checked }))
+                        }
                     />
                     Activo
                     </label>
 
-                    <Button type="submit" variant="ghost" className="text-black border-black" disabled={saving}>
+                    <Button
+                    type="submit"
+                    variant="ghost"
+                    className={styles.primaryBtn}
+                    disabled={saving}
+                    >
                     {saving ? "Guardando…" : "Guardar"}
                     </Button>
                 </div>
                 </form>
             </Card>
             )}
+
+            {pendingStockAdjust ? (
+            <div
+                className={styles.modalOverlay}
+                onClick={closeStockAdjustConfirm}
+                role="presentation"
+            >
+                <div
+                className={styles.modalCard}
+                onClick={(e) => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="stock-adjust-title"
+                >
+                <div className={styles.modalBadgeWrap}>
+                    <Badge variant="orange">Confirmación</Badge>
+                </div>
+
+                <div className={styles.modalHead}>
+                    <h2 id="stock-adjust-title" className={styles.modalTitle}>
+                    ¿Aplicar ajuste de stock?
+                    </h2>
+
+                    <p className={styles.modalText}>
+                    Vas a aplicar un ajuste de{" "}
+                    <strong>
+                        {pendingStockAdjust.delta > 0 ? "+" : ""}
+                        {pendingStockAdjust.delta}
+                    </strong>{" "}
+                    en el talle <strong>{pendingStockAdjust.labelSize}</strong>.
+                    </p>
+
+                    {stockReason ? (
+                    <p className={styles.modalNote}>
+                        Motivo: <strong>{stockReason}</strong>
+                    </p>
+                    ) : (
+                    <p className={styles.modalNote}>No agregaste motivo.</p>
+                    )}
+                </div>
+
+                <div className={styles.modalActions}>
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalCancelBtn}
+                    onClick={closeStockAdjustConfirm}
+                    disabled={stockApplying}
+                    >
+                    Cancelar
+                    </Button>
+
+                    <Button
+                    type="button"
+                    variant="ghost"
+                    className={styles.modalConfirmBtn}
+                    onClick={confirmStockAdjust}
+                    disabled={stockApplying}
+                    >
+                    {stockApplying ? "Aplicando…" : "Sí, aplicar"}
+                    </Button>
+                </div>
+                </div>
+            </div>
+            ) : null}
         </Container>
         </main>
     );

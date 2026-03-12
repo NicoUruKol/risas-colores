@@ -8,6 +8,11 @@ import Badge from "../../components/ui/Badge";
 import { adminLogin } from "../../services/apiAuth";
 import { useAdminAuth } from "../../context/AdminAuthContext";
 
+import styles from "./AdminLogin.module.css";
+
+/* ==============================
+AdminLogin
+============================== */
 export default function AdminLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -38,67 +43,96 @@ export default function AdminLogin() {
     };
 
     return (
-        <main className="py-10">
-            <Container className="max-w-[520px] grid gap-6">
-                <div>
+        <main className={styles.page}>
+        <Container className={styles.wrap}>
+            <section className={styles.intro}>
+            <div className={styles.badgeWrap}>
                 <Badge variant="lavender">Admin</Badge>
-                <h1 className="text-2xl font-extrabold text-ui-text mt-2">Ingresar</h1>
-                <p className="text-sm text-ui-muted mt-2">Acceso restringido.</p>
+            </div>
+
+            <div className={styles.head}>
+                <h1 className={styles.title}>Ingresar</h1>
+                <p className={styles.sub}>
+                Acceso restringido al panel de administración.
+                </p>
+            </div>
+            </section>
+
+            <Card className={styles.card}>
+            <form className={styles.form} onSubmit={onSubmit}>
+                {/* ==============================
+                Email
+                ============================== */}
+                <div className={styles.field}>
+                <label htmlFor="admin-email" className={styles.label}>
+                    Email
+                </label>
+
+                <input
+                    id="admin-email"
+                    type="email"
+                    className={styles.input}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
+                    placeholder="admin@correo.com"
+                />
                 </div>
 
-                <Card className="p-5">
-                    <form className="grid gap-4" onSubmit={onSubmit}>
-                        <div className="grid gap-2">
-                            <label className="text-sm text-ui-muted">Email</label>
-                            <input
-                                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                autoComplete="username"
-                            />
-                        </div>
+                {/* ==============================
+                Password
+                ============================== */}
+                <div className={styles.field}>
+                <label htmlFor="admin-password" className={styles.label}>
+                    Contraseña
+                </label>
 
-                        <div className="grid gap-2">
-                            <label className="text-sm text-ui-muted">Password</label>
-                                <input
-                                    type={showPass ? "text" : "password"}
-                                    className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    autoComplete="current-password"
-                                />
+                <input
+                    id="admin-password"
+                    type={showPass ? "text" : "password"}
+                    className={styles.input}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                />
 
-                            {/* ✅ Ver contraseña */}
-                            <label className="inline-flex items-center gap-2 text-sm text-ui-text select-none">
-                                <input
-                                type="checkbox"
-                                checked={showPass}
-                                onChange={(e) => setShowPass(e.target.checked)}
-                                />
-                                Ver contraseña
-                            </label>
-                        </div>
+                <label className={styles.checkRow}>
+                    <input
+                    type="checkbox"
+                    className={styles.check}
+                    checked={showPass}
+                    onChange={(e) => setShowPass(e.target.checked)}
+                    />
+                    Ver contraseña
+                </label>
+                </div>
 
-                        {err ? <p className="text-sm text-red-500">{err}</p> : null}
+                {/* ==============================
+                Error
+                ============================== */}
+                {err ? <div className={styles.error}>{err}</div> : null}
 
-                        {/* ✅ Botón NO del mismo tamaño que inputs */}
-                        <div className="flex justify-end">
-                            <Button
-                                variant="ghost"
-                                className="h-10 px-6 rounded-md"
-                                disabled={sending}
-                                type="submit"
-                            >
-                                {sending ? "Ingresando…" : "Entrar"}
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
+                {/* ==============================
+                Actions
+                ============================== */}
+                <div className={styles.actions}>
+                <Button
+                    variant="ghost"
+                    className={styles.submitBtn}
+                    disabled={sending}
+                    type="submit"
+                >
+                    {sending ? "Ingresando…" : "Entrar"}
+                </Button>
+                </div>
+            </form>
+            </Card>
 
-                <Link to="/" className="text-sm text-ui-muted underline w-fit">
-                    ← Volver al sitio
-                </Link>
-            </Container>
+            <Link to="/" className={styles.backLink}>
+            ← Volver al sitio
+            </Link>
+        </Container>
         </main>
     );
 }

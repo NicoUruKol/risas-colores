@@ -1,43 +1,176 @@
-.page{ display:grid; gap:1rem; }
-
-.head{ display:grid; gap:0.25rem; }
-.title{ margin:0; font-size:1.25rem; font-weight:900; color:var(--ui-text); }
-.sub{ margin:0; color:var(--ui-muted); }
-
-.grid{
-  display:grid;
-  gap:0.9rem;
+/* ==============================
+Layout
+============================== */
+.page {
+  display: grid;
+  gap: 1rem;
 }
 
-@media (min-width: 768px){
-  .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.head {
+  display: grid;
+  gap: 0.25rem;
 }
 
-.linkReset{ text-decoration:none; color:inherit; }
-
-.card{
-  padding: 1.1rem;
-  border-radius: 28px;
-  border: 1px solid rgba(229,231,235,0.90);
-  background: rgba(255,255,255,0.85);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.06);
-  transition: transform 180ms ease, box-shadow 220ms ease;
-}
-
-.card:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.10);
-}
-
-.cardTitle{
-  margin-top: 0.55rem;
+.title {
+  margin: 0;
+  font-size: 1.3rem;
   font-weight: 900;
   color: var(--ui-text);
-  font-size: 1.05rem;
 }
 
-.cardText{
-  margin: 0.35rem 0 0;
+.sub {
+  margin: 0;
   color: var(--ui-muted);
   line-height: 1.45;
+}
+
+/* ==============================
+Grid
+============================== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ==============================
+Links
+============================== */
+.linkReset {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.linkReset:focus-visible {
+  outline: none;
+}
+
+/* ==============================
+Cards base
+============================== */
+.card {
+  position: relative;
+  height: 100%;
+  min-height: 168px;
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+
+  padding: 1.15rem;
+  border-radius: 28px;
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 255, 255, 0.9) 100%
+    );
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.03);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 6px;
+  border-radius: 0 0 14px 14px;
+  opacity: 0.95;
+}
+
+.linkReset:hover .card {
+  transform: translateY(-4px);
+}
+
+.linkReset:focus-visible .card {
+  transform: translateY(-2px);
+}
+
+/* ==============================
+Variantes por módulo
+============================== */
+.cardHero::before {
+  background: linear-gradient(
+    90deg,
+    rgba(246, 166, 90, 0.95),
+    rgba(246, 166, 90, 0.45)
+  );
+}
+
+.cardHero:hover,
+.linkReset:focus-visible .cardHero {
+  border-color: rgba(246, 166, 90, 0.45);
+  box-shadow:
+    0 16px 34px rgba(246, 166, 90, 0.16),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.cardGaleria::before {
+  background: linear-gradient(
+    90deg,
+    rgba(74, 144, 194, 0.95),
+    rgba(74, 144, 194, 0.45)
+  );
+}
+
+.cardGaleria:hover,
+.linkReset:focus-visible .cardGaleria {
+  border-color: rgba(74, 144, 194, 0.4);
+  box-shadow:
+    0 16px 34px rgba(74, 144, 194, 0.16),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.cardResenas::before {
+  background: linear-gradient(
+    90deg,
+    rgba(200, 182, 226, 0.98),
+    rgba(200, 182, 226, 0.5)
+  );
+}
+
+.cardResenas:hover,
+.linkReset:focus-visible .cardResenas {
+  border-color: rgba(200, 182, 226, 0.55);
+  box-shadow:
+    0 16px 34px rgba(200, 182, 226, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* ==============================
+Textos
+============================== */
+.cardTitle {
+  margin-top: 0.65rem;
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: var(--ui-text);
+}
+
+.cardText {
+  margin: 0.35rem 0 0;
+  color: var(--ui-muted);
+  line-height: 1.5;
 }

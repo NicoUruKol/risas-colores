@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import { adminChangeMyPassword } from "../../services/adminsApi";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useAdminAuth } from "../../context/AdminAuthContext";
+import styles from "./AdminPassword.module.css";
 
 export default function AdminPassword() {
     const [currentPassword, setCurrentPassword] = useState("");
@@ -29,7 +30,6 @@ export default function AdminPassword() {
 
         try {
         await adminChangeMyPassword({ currentPassword, newPassword });
-        // por seguridad: forzamos re-login
         goLogin();
         } catch (e2) {
         if (e2?.status === 401 || e2?.status === 403) return goLogin();
@@ -40,58 +40,78 @@ export default function AdminPassword() {
     };
 
     return (
-        <div className="grid gap-4 max-w-[560px]">
-        <div>
+        <section className={styles.page}>
+        <header className={styles.head}>
+            <div className={styles.badgeWrap}>
             <Badge variant="lavender">Admin</Badge>
-            <h2 className="text-2xl font-extrabold text-ui-text mt-2">Cambiar contraseña</h2>
-            <p className="text-sm text-ui-muted mt-2">
-            Luego de cambiarla vas a tener que volver a iniciar sesión.
+            </div>
+
+            <div className={styles.headText}>
+            <h2 className={styles.title}>Cambiar contraseña</h2>
+            <p className={styles.sub}>
+                Luego de cambiarla vas a tener que volver a iniciar sesión.
             </p>
-        </div>
+            </div>
+        </header>
 
         {err ? (
-            <Card className="p-4">
-            <p className="text-sm text-red-500">{err}</p>
+            <Card className={styles.errorCard}>
+            <p className={styles.errorText}>{err}</p>
             </Card>
         ) : null}
 
-        <Card className="p-5">
-            <form className="grid gap-4" onSubmit={onSubmit}>
-            <div className="grid gap-2">
-                <label className="text-sm text-ui-muted">Contraseña actual</label>
+        <Card className={styles.card}>
+            <form className={styles.form} onSubmit={onSubmit}>
+            <div className={styles.field}>
+                <label className={styles.label} htmlFor="current-password">
+                Contraseña actual
+                </label>
                 <input
+                id="current-password"
                 type={show ? "text" : "password"}
-                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                className={styles.input}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
+                autoComplete="current-password"
                 />
             </div>
 
-            <div className="grid gap-2">
-                <label className="text-sm text-ui-muted">Nueva contraseña</label>
+            <div className={styles.field}>
+                <label className={styles.label} htmlFor="new-password">
+                Nueva contraseña
+                </label>
                 <input
+                id="new-password"
                 type={show ? "text" : "password"}
-                className="h-12 px-3 rounded-md border border-ui-border bg-ui-surface text-ui-text outline-none focus:ring-4 focus:ring-[rgba(74,144,194,.25)]"
+                className={styles.input}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                autoComplete="new-password"
                 />
             </div>
 
-            <label className="flex items-center gap-2 text-sm text-ui-text">
-                <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} />
+            <label className={styles.checkRow}>
+                <input
+                type="checkbox"
+                className={styles.check}
+                checked={show}
+                onChange={(e) => setShow(e.target.checked)}
+                />
                 Ver contraseña
             </label>
 
-            <Button
+            <div className={styles.actions}>
+                <Button
                 type="submit"
                 variant="ghost"
-                className="text-black border-black w-fit px-6"
+                className={styles.submitBtn}
                 disabled={saving}
-            >
+                >
                 {saving ? "Guardando…" : "Cambiar contraseña"}
-            </Button>
+                </Button>
+            </div>
             </form>
         </Card>
-        </div>
+        </section>
     );
 }
