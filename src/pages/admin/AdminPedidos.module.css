@@ -554,3 +554,20 @@ Responsive
     width: 100%;
     }
 }
+
+/* ==============================
+Mobile detail
+============================== */
+.mobileDetailCard {
+  min-height: 60vh;
+}
+
+.mobileDetailTop {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.backBtn {
+  border-radius: 14px;
+}
