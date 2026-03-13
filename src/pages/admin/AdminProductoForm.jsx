@@ -1,725 +1,1402 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import Container from "../../components/layout/Container";
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
-import ImageBox from "../../components/ui/ImageBox";
-
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
 import {
-    adminCreate,
-    adminUpdate,
-    adminGetById,
-    adminAdjustStock,
-} from "../../services/productsApi";
-import { mediaUploadOne } from "../../services/apiMedia";
-import styles from "./AdminProductoForm.module.css";
+    adminListOrders,
+    adminGetOrderById,
+    adminUpdateOrderStatus,
+    adminUpdateOrderDeliveryStatus,
+    adminMarkOrderReadyForPickup,
+    adminCancelOrder,
+} from "../../services/adminOrdersApi";
+import styles from "./AdminPedidos.module.css";
 
-const TALLES = ["1", "2", "3", "4", "5"];
-const UNICO = "U";
-const MAX_IMAGES = 5;
-const PRODUCTS_FOLDER = "risas-colores/web/products";
-
-const normalizeSize = (s) => {
-    const raw = String(s ?? "").trim();
-    if (!raw) return "";
-    const low = raw.toLowerCase();
-    if (low === "único" || low === "unico" || raw === "U") return "U";
-    return raw;
+/* ==============================
+Helpers
+============================== */
+const getDisplayPaymentStatus = (status) => {
+    if (status === "created") return "pending_payment";
+    return status || "pending_payment";
 };
 
-const cleanUrls = (arr) =>
-    (Array.isArray(arr) ? arr : [])
-        .map((x) => String(x || "").trim())
-        .filter(Boolean)
-        .slice(0, MAX_IMAGES);
+const PAYMENT_STATUS_LABELS = {
+    pending_payment: "Pago pendiente",
+    paid: "Pagado",
+    expired: "Expirado",
+    cancelled: "Cancelado",
+};
 
-const buildVariantsForSizes = (sizes, fromVariants = []) => {
-    const map = new Map(
-        (Array.isArray(fromVariants) ? fromVariants : [])
-        .map((v) => {
-            const size = normalizeSize(v?.size);
-            if (!size) return null;
-            return [
-            size,
-            {
-                size,
-                price: v?.price ?? "",
-                stock: v?.stock ?? "",
-            },
-            ];
-        })
-        .filter(Boolean)
+const DELIVERY_STATUS_LABELS = {
+    pending_delivery: "Pendiente de entrega",
+    ready_for_pickup: "Listo para retirar",
+    delivered: "Entregado",
+};
+
+const PAYMENT_STATUS_BADGE = {
+    pending_payment: "orange",
+    paid: "blue",
+    expired: "lavender",
+    cancelled: "lavender",
+};
+
+const DELIVERY_STATUS_BADGE = {
+    pending_delivery: "orange",
+    ready_for_pickup: "lavender",
+    delivered: "blue",
+};
+
+const formatMoney = (n) => Number(n || 0).toLocaleString("es-AR");
+
+const formatDate = (value) => {
+    if (!value) return "—";
+
+    try {
+        if (typeof value?.toDate === "function") {
+            return value.toDate().toLocaleString("es-AR");
+        }
+
+        if (value?._seconds) {
+            return new Date(value._seconds * 1000).toLocaleString("es-AR");
+        }
+
+        return new Date(value).toLocaleString("es-AR");
+    } catch {
+        return "—";
+    }
+};
+
+const getDateMs = (value) => {
+    if (!value) return 0;
+
+    try {
+        if (typeof value?.toDate === "function") return value.toDate().getTime();
+        if (value?._seconds) return value._seconds * 1000;
+        return new Date(value).getTime() || 0;
+    } catch {
+        return 0;
+    }
+};
+
+const getFamilyLabel = (order) => {
+    const adult = order?.family?.adultName || order?.customer?.name || "Sin nombre";
+    const kid = order?.family?.kidName || "Sin peque";
+    return `${adult} · ${kid}`;
+};
+
+const canCancelOrder = (order) => {
+    return ["created", "pending_payment", "expired"].includes(order?.status);
+};
+
+const canMarkDelivered = (order) => {
+    return (
+        getDisplayPaymentStatus(order?.status) === "paid" &&
+        order?.deliveryStatus === "ready_for_pickup"
     );
+};
 
-    return sizes.map((size) => {
-        const v = map.get(size) || {};
-        const price = v.price;
-        const stock = v.stock;
+const canMarkPendingDelivery = (order) => {
+    return (
+        getDisplayPaymentStatus(order?.status) === "paid" &&
+        (order?.deliveryStatus === "delivered" ||
+            order?.deliveryStatus === "ready_for_pickup")
+    );
+};
+
+const canChangePaymentStatus = (order, nextStatus) => {
+    const current = order?.status;
+
+    if (!current || current === nextStatus) return false;
+    if (current === "cancelled") return false;
+
+    if (current === "created") {
+        return ["pending_payment", "paid", "cancelled"].includes(nextStatus);
+    }
+
+    if (current === "pending_payment") {
+        return ["paid", "expired", "cancelled"].includes(nextStatus);
+    }
+
+    if (current === "expired") {
+        return ["cancelled"].includes(nextStatus);
+    }
+
+    return false;
+};
+
+const normalizeText = (value) => String(value || "").trim().toLowerCase();
+
+const matchesQuickFilter = (order, quickFilter) => {
+    const paymentStatus = getDisplayPaymentStatus(order?.status);
+    const deliveryStatus = order?.deliveryStatus;
+
+    if (quickFilter === "pending_payment") {
+        return paymentStatus === "pending_payment";
+    }
+
+    if (quickFilter === "pending_delivery") {
+        return paymentStatus === "paid" && deliveryStatus === "pending_delivery";
+    }
+
+    if (quickFilter === "ready_for_pickup") {
+        return paymentStatus === "paid" && deliveryStatus === "ready_for_pickup";
+    }
+
+    if (quickFilter === "delivered") {
+        return paymentStatus === "paid" && deliveryStatus === "delivered";
+    }
+
+    if (quickFilter === "cancelled") {
+        return paymentStatus === "cancelled";
+    }
+
+    return true;
+};
+
+const getOrderPriority = (order) => {
+    const paymentStatus = getDisplayPaymentStatus(order?.status);
+    const deliveryStatus = order?.deliveryStatus;
+
+    if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") return 1;
+    if (paymentStatus === "paid" && deliveryStatus === "ready_for_pickup") return 2;
+    if (paymentStatus === "pending_payment") return 3;
+    if (paymentStatus === "paid" && deliveryStatus === "delivered") return 4;
+    if (paymentStatus === "expired") return 5;
+    if (paymentStatus === "cancelled") return 6;
+
+    return 7;
+};
+
+const getPaymentActionCopy = (nextStatus) => {
+    if (nextStatus === "pending_payment") {
+        return {
+            title: "¿Pasar a pago pendiente?",
+            message: "Vas a mover manualmente el pedido a estado de pago pendiente.",
+            confirmLabel: "Sí, pasar a pendiente",
+        };
+    }
+
+    if (nextStatus === "paid") {
+        return {
+            title: "¿Marcar como pagado?",
+            message: "Vas a marcar manualmente el pedido como pagado.",
+            confirmLabel: "Sí, marcar pagado",
+        };
+    }
+
+    if (nextStatus === "expired") {
+        return {
+            title: "¿Marcar como expirado?",
+            message: "Vas a marcar manualmente el pedido como expirado.",
+            confirmLabel: "Sí, marcar expirado",
+        };
+    }
+
+    if (nextStatus === "cancelled") {
+        return {
+            title: "¿Cancelar pedido?",
+            message: "Vas a cancelar manualmente el pedido.",
+            confirmLabel: "Sí, cancelar",
+        };
+    }
+
+    return {
+        title: "¿Confirmar cambio?",
+        message: "Se va a actualizar el estado del pedido.",
+        confirmLabel: "Confirmar",
+    };
+};
+
+/* ==============================
+Detail view
+============================== */
+function OrderDetailContent({ order }) {
+    if (!order) return null;
+
+    return (
+        <div className={styles.detailContent}>
+            <div className={styles.detailHead}>
+                <div className={styles.detailOverline}>Pedido</div>
+                <div className={styles.detailOrderId}>#{order.id}</div>
+                <div className={styles.detailMuted}>
+                    Creado: {formatDate(order.createdAt)}
+                </div>
+            </div>
+
+            <div className={styles.badgesRow}>
+                <Badge
+                    variant={
+                        PAYMENT_STATUS_BADGE[getDisplayPaymentStatus(order.status)] || "lavender"
+                    }
+                >
+                    {PAYMENT_STATUS_LABELS[getDisplayPaymentStatus(order.status)] ||
+                        getDisplayPaymentStatus(order.status)}
+                </Badge>
+
+                <Badge variant={DELIVERY_STATUS_BADGE[order.deliveryStatus] || "lavender"}>
+                    {DELIVERY_STATUS_LABELS[order.deliveryStatus] ||
+                        order.deliveryStatus ||
+                        "Sin estado"}
+                </Badge>
+            </div>
+
+            <div className={styles.detailBlock}>
+                <div className={styles.blockTitle}>Datos de la familia</div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Adulto:</b>{" "}
+                    {order?.family?.adultName || order?.customer?.name || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Peque:</b> {order?.family?.kidName || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Email:</b> {order?.customer?.email || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Teléfono:</b> {order?.customer?.phone || "—"}
+                </div>
+            </div>
+
+            <div className={styles.detailBlock}>
+                <div className={styles.blockTitle}>Productos</div>
+
+                {Array.isArray(order.items) && order.items.length > 0 ? (
+                    <div className={styles.itemsList}>
+                        {order.items.map((item, index) => (
+                            <div
+                                key={`${item.code}-${item.size}-${index}`}
+                                className={styles.itemCard}
+                            >
+                                <div className={styles.itemName}>{item.name}</div>
+                                <div className={styles.detailMuted}>Código: {item.code}</div>
+                                <div className={styles.detailMuted}>
+                                    Talle: <b className={styles.strongText}>{item.size}</b>
+                                </div>
+                                <div className={styles.detailMuted}>
+                                    Cantidad: <b className={styles.strongText}>{item.qty}</b>
+                                </div>
+                                <div className={styles.detailMuted}>
+                                    Unitario: $
+                                    <b className={styles.strongText}>
+                                        {formatMoney(item.unitPrice)}
+                                    </b>
+                                </div>
+                                <div className={styles.detailMuted}>
+                                    Subtotal: $
+                                    <b className={styles.strongText}>
+                                        {formatMoney(item.lineTotal)}
+                                    </b>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className={styles.detailMuted}>Este pedido no tiene items visibles.</p>
+                )}
+            </div>
+
+            <div className={styles.detailSummary}>
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Total:</b> ${formatMoney(order.total)}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Preference ID:</b>{" "}
+                    {order?.mp?.preferenceId || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Payment ID:</b> {order?.mp?.paymentId || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Estado MP:</b> {order?.mp?.status || "—"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Webhook:</b>{" "}
+                    {formatDate(order?.mp?.lastWebhookAt)}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Pago acreditado:</b>{" "}
+                    {formatDate(order?.mp?.paidAt)}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Listo para retirar:</b>{" "}
+                    {formatDate(order?.readyForPickupAt)}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Mail listo para retirar:</b>{" "}
+                    {order?.notifications?.readyForPickupEmailSent ? "Enviado" : "No enviado"}
+                </div>
+
+                <div className={styles.detailMuted}>
+                    <b className={styles.strongText}>Entregado:</b>{" "}
+                    {formatDate(order?.deliveredAt)}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ==============================
+Component
+============================== */
+export default function AdminPedidos() {
+    /* ==============================
+    State
+    ============================== */
+    const [orders, setOrders] = useState([]);
+    const [selectedId, setSelectedId] = useState("");
+    const [selectedOrder, setSelectedOrder] = useState(null);
+
+    const [loading, setLoading] = useState(true);
+    const [loadingDetail, setLoadingDetail] = useState(false);
+    const [workingId, setWorkingId] = useState("");
+    const [error, setError] = useState("");
+
+    const [search, setSearch] = useState("");
+    const [quickFilter, setQuickFilter] = useState("pending_delivery");
+
+    const [confirmState, setConfirmState] = useState(null);
+
+    /* ==============================
+    Derived
+    ============================== */
+    const counters = useMemo(() => {
+        let pendingPayment = 0;
+        let pendingDelivery = 0;
+        let readyForPickup = 0;
+        let delivered = 0;
+        let cancelled = 0;
+
+        for (const order of orders) {
+            const paymentStatus = getDisplayPaymentStatus(order?.status);
+            const deliveryStatus = order?.deliveryStatus;
+
+            if (paymentStatus === "pending_payment") pendingPayment += 1;
+            if (paymentStatus === "paid" && deliveryStatus === "pending_delivery") pendingDelivery += 1;
+            if (paymentStatus === "paid" && deliveryStatus === "ready_for_pickup") readyForPickup += 1;
+            if (paymentStatus === "paid" && deliveryStatus === "delivered") delivered += 1;
+            if (paymentStatus === "cancelled") cancelled += 1;
+        }
 
         return {
-        size,
-        price:
-            price === "" || price === null || price === undefined ? "" : String(price),
-        stock:
-            stock === "" || stock === null || stock === undefined ? "" : String(stock),
+            pendingPayment,
+            pendingDelivery,
+            readyForPickup,
+            delivered,
+            cancelled,
+            total: orders.length,
         };
-    });
-};
+    }, [orders]);
 
-export default function AdminProductoForm() {
-    const { id } = useParams();
-    const editing = Boolean(id);
-    const navigate = useNavigate();
+    const filteredOrders = useMemo(() => {
+        const q = normalizeText(search);
 
-    const [loading, setLoading] = useState(editing);
-    const [saving, setSaving] = useState(false);
-    const [uploading, setUploading] = useState(false);
-    const [errors, setErrors] = useState({});
+        const result = orders.filter((order) => {
+            const matchesSearch =
+                !q ||
+                normalizeText(order.id).includes(q) ||
+                normalizeText(order?.family?.adultName).includes(q) ||
+                normalizeText(order?.family?.kidName).includes(q) ||
+                normalizeText(order?.customer?.name).includes(q) ||
+                normalizeText(order?.customer?.email).includes(q) ||
+                normalizeText(order?.customer?.phone).includes(q);
 
-    const [stockDelta, setStockDelta] = useState({});
-    const [stockReason, setStockReason] = useState("");
-    const [stockApplying, setStockApplying] = useState(false);
-    const [stockErr, setStockErr] = useState("");
-    const [pendingStockAdjust, setPendingStockAdjust] = useState(null);
+            if (!matchesSearch) return false;
 
-    const [sizeMode, setSizeMode] = useState("numeric");
-    const sizes = useMemo(() => (sizeMode === "unico" ? [UNICO] : TALLES), [sizeMode]);
-
-    const [form, setForm] = useState({
-        id: "",
-        name: "",
-        description: "",
-        active: true,
-        avatar: [],
-        variants: buildVariantsForSizes(TALLES),
-    });
-
-    const loadProduct = async () => {
-        if (!editing) return null;
-        const found = await adminGetById(id);
-        if (!found) return null;
-
-        const avatarArr = cleanUrls(found.avatar);
-
-        const foundSizes = Array.from(
-        new Set(
-            (Array.isArray(found.variants) ? found.variants : [])
-            .map((v) => normalizeSize(v?.size))
-            .filter(Boolean)
-        )
-        );
-
-        const isUnico = foundSizes.includes(UNICO);
-        const nextMode = isUnico ? "unico" : "numeric";
-        const nextSizes = isUnico ? [UNICO] : TALLES;
-
-        setSizeMode(nextMode);
-
-        setForm({
-        id: found.id ?? "",
-        name: found.name ?? "",
-        description: found.description ?? "",
-        active: found.active !== false,
-        avatar: avatarArr,
-        variants: buildVariantsForSizes(nextSizes, found.variants),
+            return matchesQuickFilter(order, quickFilter);
         });
 
-        return found;
-    };
+        return [...result].sort((a, b) => {
+            const priorityDiff = getOrderPriority(a) - getOrderPriority(b);
+            if (priorityDiff !== 0) return priorityDiff;
 
-    useEffect(() => {
-        if (!editing) return;
+            return getDateMs(b?.createdAt) - getDateMs(a?.createdAt);
+        });
+    }, [orders, search, quickFilter]);
 
-        let alive = true;
+    /* ==============================
+    Data load
+    ============================== */
+    const loadOrders = async ({ preserveSelected = true } = {}) => {
         setLoading(true);
+        setError("");
 
-        loadProduct()
-        .catch(() => {})
-        .finally(() => {
-            if (!alive) return;
+        try {
+            const data = await adminListOrders();
+            setOrders(data);
+
+            if (!preserveSelected) {
+                setSelectedId("");
+                setSelectedOrder(null);
+                return;
+            }
+
+            if (selectedId) {
+                const stillExists = data.some((order) => order.id === selectedId);
+                if (!stillExists) {
+                    setSelectedId("");
+                    setSelectedOrder(null);
+                }
+            }
+        } catch (err) {
+            setError(err?.data?.message || err?.message || "No se pudieron cargar los pedidos.");
+        } finally {
             setLoading(false);
-        });
+        }
+    };
 
-        return () => {
-        alive = false;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editing, id]);
+    const loadOrderDetail = async (id) => {
+        if (!id) {
+            setSelectedId("");
+            setSelectedOrder(null);
+            return;
+        }
+
+        setSelectedId(id);
+        setLoadingDetail(true);
+        setError("");
+
+        try {
+            const data = await adminGetOrderById(id);
+            setSelectedOrder(data);
+        } catch (err) {
+            setError(err?.data?.message || err?.message || "No se pudo cargar el detalle del pedido.");
+        } finally {
+            setLoadingDetail(false);
+        }
+    };
 
     useEffect(() => {
-        if (editing) return;
-        setForm((prev) => ({
-        ...prev,
-        variants: buildVariantsForSizes(sizes, prev.variants),
-        }));
-    }, [sizes, editing]);
+        loadOrders({ preserveSelected: true });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-    const cover = useMemo(() => {
-        const a = Array.isArray(form.avatar) ? form.avatar : [];
-        return a[0] || "";
-    }, [form.avatar]);
+    useEffect(() => {
+        if (!selectedId) return;
 
-    const setVariantField = (size, field, value) => {
-        setForm((prev) => ({
-        ...prev,
-        variants: prev.variants.map((v) =>
-            v.size === size ? { ...v, [field]: value } : v
-        ),
-        }));
+        const stillVisible = filteredOrders.some((order) => order.id === selectedId);
+
+        if (!stillVisible) {
+            setSelectedId("");
+            setSelectedOrder(null);
+        }
+    }, [filteredOrders, selectedId]);
+
+    /* ==============================
+    Actions
+    ============================== */
+    const refreshAfterAction = async (idToReload) => {
+        await loadOrders({ preserveSelected: true });
+
+        if (idToReload) {
+            await loadOrderDetail(idToReload);
+        }
     };
 
-    const validate = () => {
-        const e = {};
+    const handlePaymentStatus = async (order, nextStatus) => {
+        if (!order?.id) return;
+        if (!canChangePaymentStatus(order, nextStatus)) return;
 
-        if (!editing && !String(form.id).trim()) {
-        e.id = "Obligatorio";
-        }
-
-        if (!String(form.name).trim()) e.name = "Obligatorio";
-
-        const avatars = cleanUrls(form.avatar);
-        if (avatars.length === 0) e.avatar = "Subí al menos 1 imagen";
-        if (avatars.length > MAX_IMAGES) e.avatar = `Máximo ${MAX_IMAGES} imágenes`;
-
-        const vErrors = [];
-        sizes.forEach((size) => {
-        const row = form.variants.find((v) => v.size === size);
-        const price = row?.price;
-        const stock = row?.stock;
-
-        if (price === "" || price === null || price === undefined) {
-            vErrors.push(`Precio obligatorio en talle ${size === "U" ? "Único" : size}`);
-        } else if (Number.isNaN(Number(price))) {
-            vErrors.push(`Precio inválido en talle ${size === "U" ? "Único" : size}`);
-        }
-
-        if (stock === "" || stock === null || stock === undefined) {
-            vErrors.push(`Stock obligatorio en talle ${size === "U" ? "Único" : size}`);
-        } else if (Number.isNaN(Number(stock))) {
-            vErrors.push(`Stock inválido en talle ${size === "U" ? "Único" : size}`);
-        }
-        });
-
-        if (vErrors.length) e.variants = vErrors[0];
-        return e;
-    };
-
-    const onPickFile = async (ev) => {
-        const file = ev.target.files?.[0];
-        ev.target.value = "";
-        if (!file) return;
-
-        if ((form.avatar?.length || 0) >= MAX_IMAGES) {
-        setErrors((p) => ({ ...p, avatar: `Máximo ${MAX_IMAGES} imágenes` }));
-        return;
-        }
+        setWorkingId(order.id);
+        setError("");
 
         try {
-        setUploading(true);
-        const uploaded = await mediaUploadOne(PRODUCTS_FOLDER, file);
-        const url = uploaded?.url ? String(uploaded.url).trim() : "";
-        if (!url) throw new Error("No llegó url desde Cloudinary");
-
-        setForm((prev) => ({
-            ...prev,
-            avatar: [...cleanUrls(prev.avatar), url].slice(0, MAX_IMAGES),
-        }));
-
-        setErrors((p) => ({ ...p, avatar: undefined }));
+            await adminUpdateOrderStatus(order.id, nextStatus);
+            await refreshAfterAction(order.id);
         } catch (err) {
-        setErrors((p) => ({
-            ...p,
-            avatar: err?.message || "Error subiendo imagen",
-        }));
+            setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de pago.");
         } finally {
-        setUploading(false);
+            setWorkingId("");
         }
     };
 
-    const removeAvatarAt = (idx) => {
-        setForm((prev) => ({
-        ...prev,
-        avatar: (prev.avatar || []).filter((_, i) => i !== idx),
-        }));
-    };
+    const handleDeliveryStatus = async (order, nextDeliveryStatus) => {
+        if (!order?.id) return;
 
-    const handleSubmit = async (ev) => {
-        ev.preventDefault();
-
-        const e = validate();
-        setErrors(e);
-        if (Object.keys(e).length) return;
-
-        setSaving(true);
-
-        const payload = {
-        ...(editing ? {} : { id: String(form.id).trim() }),
-        category: "prenda",
-        name: String(form.name).trim(),
-        description: String(form.description || "").trim(),
-        active: Boolean(form.active),
-        avatar: cleanUrls(form.avatar),
-        variants: sizes.map((size) => {
-            const row = form.variants.find((v) => v.size === size) || {};
-            return {
-            size,
-            price: Number(row.price),
-            stock: Number(row.stock),
-            };
-        }),
-        };
+        setWorkingId(order.id);
+        setError("");
 
         try {
-        if (editing) await adminUpdate(id, payload);
-        else await adminCreate(payload);
-        navigate("/admin/productos");
-        } finally {
-        setSaving(false);
-        }
-    };
-
-    const openStockAdjustConfirm = (size) => {
-        if (!editing) return;
-
-        setStockErr("");
-        const raw = String(stockDelta[size] ?? "").trim();
-        const n = Number(raw);
-
-        if (!Number.isFinite(n) || !Number.isInteger(n) || n === 0) {
-        setStockErr("El ajuste debe ser un entero distinto de 0 (ej: +5 o -2).");
-        return;
-        }
-
-        setPendingStockAdjust({
-        size,
-        delta: n,
-        labelSize: size === "U" ? "Único" : size,
-        });
-    };
-
-    const closeStockAdjustConfirm = () => {
-        if (stockApplying) return;
-        setPendingStockAdjust(null);
-    };
-
-    const confirmStockAdjust = async () => {
-        if (!editing || !pendingStockAdjust) return;
-
-        try {
-        setStockApplying(true);
-        await adminAdjustStock(id, {
-            size: pendingStockAdjust.size,
-            delta: pendingStockAdjust.delta,
-            reason: stockReason,
-        });
-
-        await loadProduct();
-
-        setStockDelta((p) => ({ ...p, [pendingStockAdjust.size]: "" }));
-        setStockReason("");
-        setPendingStockAdjust(null);
+            await adminUpdateOrderDeliveryStatus(order.id, nextDeliveryStatus);
+            await refreshAfterAction(order.id);
         } catch (err) {
-        if (err?.status === 401 || err?.status === 403) {
-            navigate("/admin/login", {
-            replace: true,
-            state: { from: `/admin/productos/${id}/editar` },
+            setError(err?.data?.message || err?.message || "No se pudo actualizar el estado de entrega.");
+        } finally {
+            setWorkingId("");
+        }
+    };
+
+    const handleReadyForPickup = async (order) => {
+        if (!order?.id) return;
+
+        setWorkingId(order.id);
+        setError("");
+
+        try {
+            await adminMarkOrderReadyForPickup(order.id);
+            await refreshAfterAction(order.id);
+        } catch (err) {
+            setError(err?.data?.message || err?.message || "No se pudo marcar como listo para retirar.");
+        } finally {
+            setWorkingId("");
+        }
+    };
+
+    const handleCancel = async (order) => {
+        if (!order?.id || !canCancelOrder(order)) return;
+
+        setWorkingId(order.id);
+        setError("");
+
+        try {
+            await adminCancelOrder(order.id);
+            await refreshAfterAction(order.id);
+        } catch (err) {
+            setError(err?.data?.message || err?.message || "No se pudo cancelar el pedido.");
+        } finally {
+            setWorkingId("");
+        }
+    };
+
+    const openConfirm = (config) => {
+        setConfirmState(config);
+    };
+
+    const closeConfirm = () => {
+        if (workingId) return;
+        setConfirmState(null);
+    };
+
+    const onConfirmAction = async () => {
+        if (!confirmState?.order) return;
+
+        const { order, kind, nextStatus, nextDeliveryStatus } = confirmState;
+
+        try {
+            if (kind === "cancel") {
+                await handleCancel(order);
+            }
+
+            if (kind === "ready_for_pickup") {
+                await handleReadyForPickup(order);
+            }
+
+            if (kind === "delivery_status") {
+                await handleDeliveryStatus(order, nextDeliveryStatus);
+            }
+
+            if (kind === "payment_status") {
+                await handlePaymentStatus(order, nextStatus);
+            }
+        } finally {
+            setConfirmState(null);
+        }
+    };
+
+    const askCancelOrder = (order) => {
+        openConfirm({
+            kind: "cancel",
+            order,
+            title: `¿Cancelar pedido #${order.id}?`,
+            message: "Esta acción puede devolver stock y dejar el pedido como cancelado.",
+            confirmLabel: "Sí, cancelar",
+            tone: "danger",
+        });
+    };
+
+    const askReadyForPickup = (order) => {
+        openConfirm({
+            kind: "ready_for_pickup",
+            order,
+            title: `¿Marcar pedido #${order.id} como listo para retirar?`,
+            message: "Además de cambiar el estado, se puede disparar el aviso correspondiente.",
+            confirmLabel: "Sí, marcar listo",
+            tone: "primary",
+        });
+    };
+
+    const askDeliveryStatus = (order, nextDeliveryStatus) => {
+        if (nextDeliveryStatus === "delivered") {
+            openConfirm({
+                kind: "delivery_status",
+                order,
+                nextDeliveryStatus,
+                title: `¿Marcar pedido #${order.id} como entregado?`,
+                message: "Se va a registrar el pedido como entregado.",
+                confirmLabel: "Sí, marcar entregado",
+                tone: "primary",
             });
             return;
         }
-        setStockErr(err?.message || "Error aplicando ajuste de stock");
-        } finally {
-        setStockApplying(false);
+
+        if (nextDeliveryStatus === "pending_delivery") {
+            openConfirm({
+                kind: "delivery_status",
+                order,
+                nextDeliveryStatus,
+                title: `¿Volver pedido #${order.id} a pendiente de entrega?`,
+                message: "Se va a revertir el estado de entrega actual.",
+                confirmLabel: "Sí, volver a pendiente",
+                tone: "secondary",
+            });
         }
     };
 
+    const askPaymentStatus = (order, nextStatus) => {
+        const copy = getPaymentActionCopy(nextStatus);
+
+        openConfirm({
+            kind: "payment_status",
+            order,
+            nextStatus,
+            title: `${copy.title} #${order.id}?`,
+            message: copy.message,
+            confirmLabel: copy.confirmLabel,
+            tone: nextStatus === "expired" ? "secondary" : "primary",
+        });
+    };
+
+    const clearFilters = () => {
+        setSearch("");
+        setQuickFilter("pending_delivery");
+    };
+
+    const closeMobileDetail = () => {
+        setSelectedId("");
+        setSelectedOrder(null);
+    };
+
+    /* ==============================
+    Render flags
+    ============================== */
+    const showMobileList = !selectedId;
+    const showMobileDetail = Boolean(selectedId);
+
+    /* ==============================
+    Render
+    ============================== */
     return (
-        <main className={styles.page}>
-        <Container className={styles.wrap}>
+        <section className={styles.page}>
             <header className={styles.head}>
-            <div className={styles.headInfo}>
-                <div className={styles.badgeWrap}>
-                <Badge variant="lavender">Admin</Badge>
+                <div className={styles.headInfo}>
+                    <div className={styles.badgeWrap}>
+                        <Badge variant="lavender">Admin</Badge>
+                    </div>
+
+                    <h2 className={styles.title}>Pedidos</h2>
+                    <p className={styles.sub}>Primero ves lo importante para trabajar hoy.</p>
                 </div>
 
-                <h1 className={styles.title}>
-                {editing ? "Editar producto" : "Nuevo producto"}
-                </h1>
-            </div>
-
-            <Link to="/admin/productos" className={styles.linkReset}>
-                <Button variant="ghost" size="sm" className={styles.backBtn}>
-                ← Volver
+                <Button
+                    variant="secondary"
+                    onClick={() => loadOrders({ preserveSelected: true })}
+                    disabled={loading}
+                    className={styles.reloadBtn}
+                >
+                    Recargar
                 </Button>
-            </Link>
             </header>
 
-            {loading ? (
-            <Card className={styles.stateCard}>
-                <p className={styles.stateText}>Cargando…</p>
-            </Card>
-            ) : (
-            <Card className={styles.card}>
-                <form className={styles.form} onSubmit={handleSubmit}>
-                {!editing && (
-                    <div className={styles.field}>
-                    <label className={styles.label}>Código / ID</label>
-                    <input
-                        className={styles.input}
-                        value={form.id}
-                        onChange={(e) => setForm((p) => ({ ...p, id: e.target.value }))}
-                        placeholder="Ej: 010"
-                    />
-                    <div className={styles.helper}>
-                        Este código se usa como identificador del producto en Firestore.
-                    </div>
-                    {errors.id && <div className={styles.error}>{errors.id}</div>}
-                    </div>
-                )}
+            {error ? (
+                <Card className={styles.errorCard}>
+                    <p className={styles.errorText}>{error}</p>
+                </Card>
+            ) : null}
 
-                <div className={styles.field}>
-                    <label className={styles.label}>Nombre</label>
-                    <input
-                    className={styles.input}
-                    value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                    />
-                    {errors.name && <div className={styles.error}>{errors.name}</div>}
+            <div className={styles.mobileOnly}>
+                {showMobileList ? (
+                    <>
+                        <div className={styles.dashboard}>
+                            <Card
+                                className={`${styles.metricCard} ${
+                                    quickFilter === "pending_payment" ? styles.metricCardActive : ""
+                                }`}
+                                onClick={() => setQuickFilter("pending_payment")}
+                            >
+                                <div className={styles.metricLabel}>Pendientes de pago</div>
+                                <div className={styles.metricValue}>{counters.pendingPayment}</div>
+                            </Card>
+
+                            <Card
+                                className={`${styles.metricCard} ${
+                                    quickFilter === "pending_delivery" ? styles.metricCardActive : ""
+                                }`}
+                                onClick={() => setQuickFilter("pending_delivery")}
+                            >
+                                <div className={styles.metricLabel}>Pendientes de entrega</div>
+                                <div className={styles.metricValue}>{counters.pendingDelivery}</div>
+                            </Card>
+
+                            <Card
+                                className={`${styles.metricCard} ${
+                                    quickFilter === "ready_for_pickup" ? styles.metricCardActive : ""
+                                }`}
+                                onClick={() => setQuickFilter("ready_for_pickup")}
+                            >
+                                <div className={styles.metricLabel}>Listos para retirar</div>
+                                <div className={styles.metricValue}>{counters.readyForPickup}</div>
+                            </Card>
+
+                            <Card
+                                className={`${styles.metricCard} ${
+                                    quickFilter === "delivered" ? styles.metricCardActive : ""
+                                }`}
+                                onClick={() => setQuickFilter("delivered")}
+                            >
+                                <div className={styles.metricLabel}>Entregados</div>
+                                <div className={styles.metricValue}>{counters.delivered}</div>
+                            </Card>
+
+                            <Card
+                                className={`${styles.metricCard} ${
+                                    quickFilter === "cancelled" ? styles.metricCardActive : ""
+                                }`}
+                                onClick={() => setQuickFilter("cancelled")}
+                            >
+                                <div className={styles.metricLabel}>Cancelados</div>
+                                <div className={styles.metricValue}>{counters.cancelled}</div>
+                            </Card>
+                        </div>
+
+                        <Card className={styles.filtersCard}>
+                            <div className={styles.filtersGrid}>
+                                <div className={styles.filterButtons}>
+                                    <Button
+                                        variant={quickFilter === "pending_payment" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("pending_payment")}
+                                    >
+                                        Pendientes de pago
+                                    </Button>
+
+                                    <Button
+                                        variant={quickFilter === "pending_delivery" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("pending_delivery")}
+                                    >
+                                        Pendientes de entrega
+                                    </Button>
+
+                                    <Button
+                                        variant={quickFilter === "ready_for_pickup" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("ready_for_pickup")}
+                                    >
+                                        Listos para retirar
+                                    </Button>
+
+                                    <Button
+                                        variant={quickFilter === "delivered" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("delivered")}
+                                    >
+                                        Entregados
+                                    </Button>
+
+                                    <Button
+                                        variant={quickFilter === "cancelled" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("cancelled")}
+                                    >
+                                        Cancelados
+                                    </Button>
+
+                                    <Button
+                                        variant={quickFilter === "all" ? "primary" : "ghost"}
+                                        onClick={() => setQuickFilter("all")}
+                                    >
+                                        Todos
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className={styles.searchWrap}>
+                                <Input
+                                    label="Buscar"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Pedido, email o tel"
+                                />
+                            </div>
+
+                            <div className={styles.filtersFooter}>
+                                <div className={styles.filtersSummary}>
+                                    Mostrando <b className={styles.strongText}>{filteredOrders.length}</b> de{" "}
+                                    <b className={styles.strongText}>{orders.length}</b> pedido(s)
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    onClick={clearFilters}
+                                    className={styles.clearBtn}
+                                >
+                                    Limpiar
+                                </Button>
+                            </div>
+                        </Card>
+
+                        {loading ? (
+                            <Card className={styles.stateCard}>
+                                <p className={styles.stateText}>Cargando pedidos...</p>
+                            </Card>
+                        ) : filteredOrders.length === 0 ? (
+                            <Card className={styles.stateCard}>
+                                <p className={styles.stateText}>
+                                    No hay pedidos que coincidan con la vista actual.
+                                </p>
+                            </Card>
+                        ) : (
+                            <div className={styles.ordersList}>
+                                {filteredOrders.map((order) => {
+                                    const isSelected = selectedId === order.id;
+                                    const isWorking = workingId === order.id;
+                                    const displayPaymentStatus = getDisplayPaymentStatus(order.status);
+
+                                    return (
+                                        <Card
+                                            key={order.id}
+                                            className={`${styles.orderCard} ${
+                                                isSelected ? styles.orderCardSelected : ""
+                                            }`}
+                                        >
+                                            <div className={styles.orderTop}>
+                                                <div className={styles.orderTopInfo}>
+                                                    <div className={styles.orderCode}>
+                                                        Pedido <b className={styles.strongText}>#{order.id}</b>
+                                                    </div>
+                                                    <div className={styles.orderFamily}>
+                                                        {getFamilyLabel(order)}
+                                                    </div>
+                                                    <div className={styles.orderDate}>
+                                                        {formatDate(order.createdAt)}
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.orderTotalBox}>
+                                                    <div className={styles.orderTotalLabel}>Total</div>
+                                                    <div className={styles.orderTotal}>
+                                                        ${formatMoney(order.total)}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.badgesRow}>
+                                                <Badge
+                                                    variant={
+                                                        PAYMENT_STATUS_BADGE[displayPaymentStatus] || "lavender"
+                                                    }
+                                                >
+                                                    {PAYMENT_STATUS_LABELS[displayPaymentStatus] ||
+                                                        displayPaymentStatus}
+                                                </Badge>
+
+                                                <Badge
+                                                    variant={
+                                                        DELIVERY_STATUS_BADGE[order.deliveryStatus] || "lavender"
+                                                    }
+                                                >
+                                                    {DELIVERY_STATUS_LABELS[order.deliveryStatus] ||
+                                                        order.deliveryStatus ||
+                                                        "Sin estado"}
+                                                </Badge>
+                                            </div>
+
+                                            <div className={styles.itemsCount}>
+                                                {Array.isArray(order.items) ? order.items.length : 0} producto(s)
+                                            </div>
+
+                                            <div className={styles.actionsRow}>
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => loadOrderDetail(order.id)}
+                                                    disabled={loadingDetail && isSelected}
+                                                >
+                                                    Ver detalle
+                                                </Button>
+
+                                                {getDisplayPaymentStatus(order?.status) === "paid" &&
+                                                order?.deliveryStatus === "pending_delivery" ? (
+                                                    <Button
+                                                        variant="primary"
+                                                        onClick={() => askReadyForPickup(order)}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Listo para retirar y avisar
+                                                    </Button>
+                                                ) : null}
+
+                                                {canMarkDelivered(order) ? (
+                                                    <Button
+                                                        variant="primary"
+                                                        onClick={() => askDeliveryStatus(order, "delivered")}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Marcar entregado
+                                                    </Button>
+                                                ) : null}
+
+                                                {canMarkPendingDelivery(order) ? (
+                                                    <Button
+                                                        variant="secondary"
+                                                        onClick={() => askDeliveryStatus(order, "pending_delivery")}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Volver a pendiente
+                                                    </Button>
+                                                ) : null}
+
+                                                {canCancelOrder(order) ? (
+                                                    <Button
+                                                        variant="ghost"
+                                                        onClick={() => askCancelOrder(order)}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Cancelar
+                                                    </Button>
+                                                ) : null}
+                                            </div>
+
+                                            <div className={styles.paymentActions}>
+                                                {canChangePaymentStatus(order, "pending_payment") ? (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => askPaymentStatus(order, "pending_payment")}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Pasar a pendiente
+                                                    </Button>
+                                                ) : null}
+
+                                                {canChangePaymentStatus(order, "paid") ? (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => askPaymentStatus(order, "paid")}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Marcar pagado
+                                                    </Button>
+                                                ) : null}
+
+                                                {canChangePaymentStatus(order, "expired") ? (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => askPaymentStatus(order, "expired")}
+                                                        disabled={isWorking}
+                                                    >
+                                                        Marcar expirado
+                                                    </Button>
+                                                ) : null}
+                                            </div>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <Card className={`${styles.detailCard} ${styles.mobileDetailCard}`}>
+                        <div className={styles.mobileDetailTop}>
+                            <Button
+                                variant="ghost"
+                                onClick={closeMobileDetail}
+                                className={styles.backBtn}
+                            >
+                                ← Volver al listado
+                            </Button>
+                        </div>
+
+                        {loadingDetail ? (
+                            <p className={styles.detailMuted}>Cargando detalle...</p>
+                        ) : !selectedOrder ? (
+                            <p className={styles.detailMuted}>No se pudo cargar el detalle del pedido.</p>
+                        ) : (
+                            <OrderDetailContent order={selectedOrder} />
+                        )}
+                    </Card>
+                )}
+            </div>
+
+            <div className={styles.desktopOnly}>
+                <div className={styles.dashboard}>
+                    <Card
+                        className={`${styles.metricCard} ${
+                            quickFilter === "pending_payment" ? styles.metricCardActive : ""
+                        }`}
+                        onClick={() => setQuickFilter("pending_payment")}
+                    >
+                        <div className={styles.metricLabel}>Pendientes de pago</div>
+                        <div className={styles.metricValue}>{counters.pendingPayment}</div>
+                    </Card>
+
+                    <Card
+                        className={`${styles.metricCard} ${
+                            quickFilter === "pending_delivery" ? styles.metricCardActive : ""
+                        }`}
+                        onClick={() => setQuickFilter("pending_delivery")}
+                    >
+                        <div className={styles.metricLabel}>Pendientes de entrega</div>
+                        <div className={styles.metricValue}>{counters.pendingDelivery}</div>
+                    </Card>
+
+                    <Card
+                        className={`${styles.metricCard} ${
+                            quickFilter === "ready_for_pickup" ? styles.metricCardActive : ""
+                        }`}
+                        onClick={() => setQuickFilter("ready_for_pickup")}
+                    >
+                        <div className={styles.metricLabel}>Listos para retirar</div>
+                        <div className={styles.metricValue}>{counters.readyForPickup}</div>
+                    </Card>
+
+                    <Card
+                        className={`${styles.metricCard} ${
+                            quickFilter === "delivered" ? styles.metricCardActive : ""
+                        }`}
+                        onClick={() => setQuickFilter("delivered")}
+                    >
+                        <div className={styles.metricLabel}>Entregados</div>
+                        <div className={styles.metricValue}>{counters.delivered}</div>
+                    </Card>
+
+                    <Card
+                        className={`${styles.metricCard} ${
+                            quickFilter === "cancelled" ? styles.metricCardActive : ""
+                        }`}
+                        onClick={() => setQuickFilter("cancelled")}
+                    >
+                        <div className={styles.metricLabel}>Cancelados</div>
+                        <div className={styles.metricValue}>{counters.cancelled}</div>
+                    </Card>
                 </div>
 
-                <div className={styles.field}>
-                    <label className={styles.label}>Descripción</label>
-                    <textarea
-                    className={styles.textarea}
-                    value={form.description}
-                    onChange={(e) =>
-                        setForm((p) => ({ ...p, description: e.target.value }))
-                    }
-                    />
-                </div>
+                <Card className={styles.filtersCard}>
+                    <div className={styles.filtersGrid}>
+                        <div className={styles.filterButtons}>
+                            <Button
+                                variant={quickFilter === "pending_payment" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("pending_payment")}
+                            >
+                                Pendientes de pago
+                            </Button>
 
-                {!editing && (
-                    <div className={styles.inlineRow}>
-                    <label className={styles.checkRow}>
-                        <input
-                        type="checkbox"
-                        className={styles.check}
-                        checked={sizeMode === "unico"}
-                        onChange={(e) =>
-                            setSizeMode(e.target.checked ? "unico" : "numeric")
-                        }
-                        />
-                        Único (Mochila)
-                    </label>
-                    </div>
-                )}
+                            <Button
+                                variant={quickFilter === "pending_delivery" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("pending_delivery")}
+                            >
+                                Pendientes de entrega
+                            </Button>
 
-                <div className={styles.block}>
-                    <div className={styles.blockHead}>
-                    <div>
-                        <div className={styles.label}>Imágenes (máx {MAX_IMAGES})</div>
-                        <div className={styles.helper}>
-                        Se guardan como URLs en <b>avatar[]</b>.
+                            <Button
+                                variant={quickFilter === "ready_for_pickup" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("ready_for_pickup")}
+                            >
+                                Listos para retirar
+                            </Button>
+
+                            <Button
+                                variant={quickFilter === "delivered" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("delivered")}
+                            >
+                                Entregados
+                            </Button>
+
+                            <Button
+                                variant={quickFilter === "cancelled" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("cancelled")}
+                            >
+                                Cancelados
+                            </Button>
+
+                            <Button
+                                variant={quickFilter === "all" ? "primary" : "ghost"}
+                                onClick={() => setQuickFilter("all")}
+                            >
+                                Todos
+                            </Button>
                         </div>
                     </div>
 
-                    <label className={styles.hiddenInputWrap}>
-                        <input
-                        type="file"
-                        accept="image/*"
-                        onChange={onPickFile}
-                        disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
-                        className={styles.hiddenInput}
-                        id="admin-product-upload"
+                    <div className={styles.searchWrap}>
+                        <Input
+                            label="Buscar"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Pedido, email o tel"
                         />
+                    </div>
+
+                    <div className={styles.filtersFooter}>
+                        <div className={styles.filtersSummary}>
+                            Mostrando <b className={styles.strongText}>{filteredOrders.length}</b> de{" "}
+                            <b className={styles.strongText}>{orders.length}</b> pedido(s)
+                        </div>
 
                         <Button
-                        type="button"
-                        variant="ghost"
-                        className={styles.secondaryBtn}
-                        disabled={uploading || (form.avatar?.length || 0) >= MAX_IMAGES}
-                        onClick={() =>
-                            document.getElementById("admin-product-upload")?.click()
-                        }
+                            variant="ghost"
+                            onClick={clearFilters}
+                            className={styles.clearBtn}
                         >
-                        {uploading ? "Subiendo…" : "Subir imagen"}
+                            Limpiar
                         </Button>
-                    </label>
                     </div>
+                </Card>
 
-                    {errors.avatar && <div className={styles.error}>{errors.avatar}</div>}
+                {loading ? (
+                    <Card className={styles.stateCard}>
+                        <p className={styles.stateText}>Cargando pedidos...</p>
+                    </Card>
+                ) : filteredOrders.length === 0 ? (
+                    <Card className={styles.stateCard}>
+                        <p className={styles.stateText}>
+                            No hay pedidos que coincidan con la vista actual.
+                        </p>
+                    </Card>
+                ) : (
+                    <div className={styles.contentGrid}>
+                        <div className={styles.ordersList}>
+                            {filteredOrders.map((order) => {
+                                const isSelected = selectedId === order.id;
+                                const isWorking = workingId === order.id;
+                                const displayPaymentStatus = getDisplayPaymentStatus(order.status);
 
-                    {cover ? (
-                    <div className={styles.imagesLayout}>
-                        <div>
-                        <ImageBox src={cover} alt={form.name || "Producto"} />
-                        <div className={styles.helperTop}>Portada = primera imagen</div>
+                                return (
+                                    <Card
+                                        key={order.id}
+                                        className={`${styles.orderCard} ${
+                                            isSelected ? styles.orderCardSelected : ""
+                                        }`}
+                                    >
+                                        <div className={styles.orderTop}>
+                                            <div className={styles.orderTopInfo}>
+                                                <div className={styles.orderCode}>
+                                                    Pedido <b className={styles.strongText}>#{order.id}</b>
+                                                </div>
+                                                <div className={styles.orderFamily}>
+                                                    {getFamilyLabel(order)}
+                                                </div>
+                                                <div className={styles.orderDate}>
+                                                    {formatDate(order.createdAt)}
+                                                </div>
+                                            </div>
+
+                                            <div className={styles.orderTotalBox}>
+                                                <div className={styles.orderTotalLabel}>Total</div>
+                                                <div className={styles.orderTotal}>
+                                                    ${formatMoney(order.total)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.badgesRow}>
+                                            <Badge
+                                                variant={
+                                                    PAYMENT_STATUS_BADGE[displayPaymentStatus] || "lavender"
+                                                }
+                                            >
+                                                {PAYMENT_STATUS_LABELS[displayPaymentStatus] ||
+                                                    displayPaymentStatus}
+                                            </Badge>
+
+                                            <Badge
+                                                variant={
+                                                    DELIVERY_STATUS_BADGE[order.deliveryStatus] || "lavender"
+                                                }
+                                            >
+                                                {DELIVERY_STATUS_LABELS[order.deliveryStatus] ||
+                                                    order.deliveryStatus ||
+                                                    "Sin estado"}
+                                            </Badge>
+                                        </div>
+
+                                        <div className={styles.itemsCount}>
+                                            {Array.isArray(order.items) ? order.items.length : 0} producto(s)
+                                        </div>
+
+                                        <div className={styles.actionsRow}>
+                                            <Button
+                                                variant={isSelected ? "secondary" : "ghost"}
+                                                onClick={() =>
+                                                    isSelected
+                                                        ? loadOrderDetail("")
+                                                        : loadOrderDetail(order.id)
+                                                }
+                                                disabled={loadingDetail && isSelected}
+                                            >
+                                                {isSelected ? "Ocultar detalle" : "Ver detalle"}
+                                            </Button>
+
+                                            {getDisplayPaymentStatus(order?.status) === "paid" &&
+                                            order?.deliveryStatus === "pending_delivery" ? (
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => askReadyForPickup(order)}
+                                                    disabled={isWorking}
+                                                >
+                                                    Listo para retirar y avisar
+                                                </Button>
+                                            ) : null}
+
+                                            {canMarkDelivered(order) ? (
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => askDeliveryStatus(order, "delivered")}
+                                                    disabled={isWorking}
+                                                >
+                                                    Marcar entregado
+                                                </Button>
+                                            ) : null}
+
+                                            {canMarkPendingDelivery(order) ? (
+                                                <Button
+                                                    variant="secondary"
+                                                    onClick={() => askDeliveryStatus(order, "pending_delivery")}
+                                                    disabled={isWorking}
+                                                >
+                                                    Volver a pendiente
+                                                </Button>
+                                            ) : null}
+
+                                            {canCancelOrder(order) ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    onClick={() => askCancelOrder(order)}
+                                                    disabled={isWorking}
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                            ) : null}
+                                        </div>
+
+                                        <div className={styles.paymentActions}>
+                                            {canChangePaymentStatus(order, "pending_payment") ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => askPaymentStatus(order, "pending_payment")}
+                                                    disabled={isWorking}
+                                                >
+                                                    Pasar a pendiente
+                                                </Button>
+                                            ) : null}
+
+                                            {canChangePaymentStatus(order, "paid") ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => askPaymentStatus(order, "paid")}
+                                                    disabled={isWorking}
+                                                >
+                                                    Marcar pagado
+                                                </Button>
+                                            ) : null}
+
+                                            {canChangePaymentStatus(order, "expired") ? (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => askPaymentStatus(order, "expired")}
+                                                    disabled={isWorking}
+                                                >
+                                                    Marcar expirado
+                                                </Button>
+                                            ) : null}
+                                        </div>
+                                    </Card>
+                                );
+                            })}
                         </div>
 
-                        <div className={styles.imagesSide}>
-                        <div className={styles.imagesGrid}>
-                            {(form.avatar || []).map((url, idx) => (
-                            <div key={url + idx} className={styles.thumbCard}>
-                                <div className={styles.thumbMedia}>
-                                <img
-                                    src={url}
-                                    alt={`img-${idx + 1}`}
-                                    className={styles.thumbImg}
-                                />
+                        <Card className={styles.detailCard}>
+                            {!selectedId ? (
+                                <div className={styles.emptyDetail}>
+                                    <div className={styles.detailTitle}>Detalle del pedido</div>
+                                    <p className={styles.detailMuted}>
+                                        Seleccioná un pedido para ver la información completa.
+                                    </p>
                                 </div>
-
-                                <div className={styles.thumbFoot}>
-                                <div className={styles.thumbIndex}>#{idx + 1}</div>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    className={styles.secondaryBtn}
-                                    onClick={() => removeAvatarAt(idx)}
-                                >
-                                    Quitar
-                                </Button>
-                                </div>
-                            </div>
-                            ))}
-                        </div>
-
-                        <div className={styles.helper}>
-                            Podés quitar la imagen y volver a subirla.
-                        </div>
-                        </div>
+                            ) : loadingDetail ? (
+                                <p className={styles.detailMuted}>Cargando detalle...</p>
+                            ) : !selectedOrder ? (
+                                <p className={styles.detailMuted}>
+                                    No se pudo cargar el detalle del pedido.
+                                </p>
+                            ) : (
+                                <OrderDetailContent order={selectedOrder} />
+                            )}
+                        </Card>
                     </div>
-                    ) : (
-                    <div className={styles.emptyText}>
-                        Todavía no hay imágenes cargadas.
-                    </div>
-                    )}
-                </div>
-
-                <div className={styles.block}>
-                    <div className={styles.label}>
-                    Editá precio y stock por talle{" "}
-                    {sizeMode === "unico" ? "(Único)" : "(1–5)"}
-                    </div>
-
-                    {errors.variants && <div className={styles.error}>{errors.variants}</div>}
-
-                    <div className={styles.variantsBox}>
-                    <div className={styles.variantsHead}>
-                        <div>Talle</div>
-                        <div>Precio</div>
-                        <div>Stock</div>
-                        <div>Ajuste (+/-)</div>
-                        <div></div>
-                    </div>
-
-                    <div className={styles.variantsList}>
-                        {sizes.map((size) => {
-                        const row = form.variants.find((v) => v.size === size) || {
-                            price: "",
-                            stock: "",
-                        };
-                        const labelSize = size === "U" ? "Único" : size;
-
-                        return (
-                            <div key={size} className={styles.variantRow}>
-                            <div className={styles.variantTitle}>{labelSize}</div>
-
-                            <div className={styles.variantCell}>
-                                <div className={styles.mobileLabel}>Precio</div>
-                                <input
-                                className={styles.input}
-                                value={row.price}
-                                onChange={(e) =>
-                                    setVariantField(size, "price", e.target.value)
-                                }
-                                placeholder="8500"
-                                />
-                            </div>
-
-                            <div className={styles.variantCell}>
-                                <div className={styles.mobileLabel}>Stock</div>
-
-                                {!editing ? (
-                                <input
-                                    className={styles.input}
-                                    value={row.stock}
-                                    onChange={(e) =>
-                                    setVariantField(size, "stock", e.target.value)
-                                    }
-                                    placeholder="10"
-                                />
-                                ) : (
-                                <input
-                                    className={styles.inputReadOnly}
-                                    value={row.stock}
-                                    readOnly
-                                    tabIndex={-1}
-                                />
-                                )}
-                            </div>
-
-                            <div className={styles.variantCell}>
-                                <div className={styles.mobileLabel}>Ajuste (+/-)</div>
-
-                                {editing ? (
-                                <input
-                                    className={styles.input}
-                                    value={stockDelta[size] ?? ""}
-                                    onChange={(e) =>
-                                    setStockDelta((p) => ({
-                                        ...p,
-                                        [size]: e.target.value,
-                                    }))
-                                    }
-                                    placeholder="+5 o -2"
-                                />
-                                ) : (
-                                <div className={styles.inlineMuted}>
-                                    (Disponible al editar)
-                                </div>
-                                )}
-                            </div>
-
-                            <div className={styles.variantAction}>
-                                {editing ? (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    className={styles.secondaryBtnWide}
-                                    disabled={stockApplying}
-                                    onClick={() => openStockAdjustConfirm(size)}
-                                >
-                                    {stockApplying ? "Aplicando…" : "Aplicar"}
-                                </Button>
-                                ) : (
-                                <div />
-                                )}
-                            </div>
-
-                            {editing ? (
-                                <div className={styles.reasonWrap}>
-                                <div className={styles.mobileLabel}>
-                                    Motivo (opcional)
-                                </div>
-                                <input
-                                    className={styles.input}
-                                    value={stockReason}
-                                    onChange={(e) => setStockReason(e.target.value)}
-                                    placeholder="Ej: reposición, ajuste inventario, etc."
-                                />
-                                </div>
-                            ) : null}
-                            </div>
-                        );
-                        })}
-                    </div>
-
-                    {editing ? (
-                        <div className={styles.variantsFoot}>
-                        <b>Ajuste</b> de <b>STOCK</b> queda registrado en el historial.
-                        </div>
-                    ) : (
-                        <div className={styles.variantsFoot}>
-                        En la creación cargás el <b>stock inicial</b>. Luego se ajusta por
-                        movimientos.
-                        </div>
-                    )}
-                    </div>
-
-                    {stockErr ? <div className={styles.error}>{stockErr}</div> : null}
-                </div>
-
-                <div className={styles.footerActions}>
-                    <label className={styles.checkRow}>
-                    <input
-                        type="checkbox"
-                        className={styles.check}
-                        checked={form.active}
-                        onChange={(e) =>
-                        setForm((p) => ({ ...p, active: e.target.checked }))
-                        }
-                    />
-                    Activo
-                    </label>
-
-                    <Button
-                    type="submit"
-                    variant="ghost"
-                    className={styles.primaryBtn}
-                    disabled={saving}
-                    >
-                    {saving ? "Guardando…" : "Guardar"}
-                    </Button>
-                </div>
-                </form>
-            </Card>
-            )}
-
-            {pendingStockAdjust ? (
-            <div
-                className={styles.modalOverlay}
-                onClick={closeStockAdjustConfirm}
-                role="presentation"
-            >
-                <div
-                className={styles.modalCard}
-                onClick={(e) => e.stopPropagation()}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="stock-adjust-title"
-                >
-                <div className={styles.modalBadgeWrap}>
-                    <Badge variant="orange">Confirmación</Badge>
-                </div>
-
-                <div className={styles.modalHead}>
-                    <h2 id="stock-adjust-title" className={styles.modalTitle}>
-                    ¿Aplicar ajuste de stock?
-                    </h2>
-
-                    <p className={styles.modalText}>
-                    Vas a aplicar un ajuste de{" "}
-                    <strong>
-                        {pendingStockAdjust.delta > 0 ? "+" : ""}
-                        {pendingStockAdjust.delta}
-                    </strong>{" "}
-                    en el talle <strong>{pendingStockAdjust.labelSize}</strong>.
-                    </p>
-
-                    {stockReason ? (
-                    <p className={styles.modalNote}>
-                        Motivo: <strong>{stockReason}</strong>
-                    </p>
-                    ) : (
-                    <p className={styles.modalNote}>No agregaste motivo.</p>
-                    )}
-                </div>
-
-                <div className={styles.modalActions}>
-                    <Button
-                    type="button"
-                    variant="ghost"
-                    className={styles.modalCancelBtn}
-                    onClick={closeStockAdjustConfirm}
-                    disabled={stockApplying}
-                    >
-                    Cancelar
-                    </Button>
-
-                    <Button
-                    type="button"
-                    variant="ghost"
-                    className={styles.modalConfirmBtn}
-                    onClick={confirmStockAdjust}
-                    disabled={stockApplying}
-                    >
-                    {stockApplying ? "Aplicando…" : "Sí, aplicar"}
-                    </Button>
-                </div>
-                </div>
+                )}
             </div>
+
+            {confirmState ? (
+                <div
+                    className={styles.modalOverlay}
+                    onClick={closeConfirm}
+                    role="presentation"
+                >
+                    <div
+                        className={styles.modalCard}
+                        onClick={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="confirm-order-action-title"
+                    >
+                        <div className={styles.modalBadgeWrap}>
+                            <Badge variant={confirmState.tone === "danger" ? "orange" : "lavender"}>
+                                Confirmación
+                            </Badge>
+                        </div>
+
+                        <div className={styles.modalHead}>
+                            <h3 id="confirm-order-action-title" className={styles.modalTitle}>
+                                {confirmState.title}
+                            </h3>
+
+                            <p className={styles.modalText}>{confirmState.message}</p>
+
+                            <p className={styles.modalText}>
+                                Familia:{" "}
+                                <b className={styles.strongText}>
+                                    {getFamilyLabel(confirmState.order)}
+                                </b>
+                            </p>
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <Button
+                                variant="ghost"
+                                onClick={closeConfirm}
+                                disabled={Boolean(workingId)}
+                                className={styles.modalCancelBtn}
+                            >
+                                Cancelar
+                            </Button>
+
+                            <Button
+                                variant={confirmState.tone === "danger" ? "ghost" : "primary"}
+                                onClick={onConfirmAction}
+                                disabled={Boolean(workingId)}
+                                className={
+                                    confirmState.tone === "danger"
+                                        ? styles.modalDangerBtn
+                                        : styles.modalConfirmBtn
+                                }
+                            >
+                                {workingId ? "Procesando..." : confirmState.confirmLabel}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             ) : null}
-        </Container>
-        </main>
+        </section>
     );
 }
