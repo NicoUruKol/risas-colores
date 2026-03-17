@@ -1,88 +1,236 @@
 ﻿@import "tailwindcss";
 
-:root{
-    --brand-primary:#f6a65a;
-    --brand-secondary:#4a90c2;
-    --brand-accent:#c8b6e2;
-
-    --ui-bg:#fafafa;
-    --ui-tint-secondary: rgba(74, 144, 194, 0.14);
-    --ui-tint-accent: rgba(200, 182, 226, 0.18);
-    overflow-anchor: none;
-    --bgTempo: 18s;        /* tempo general */
-    --bgEase: ease-in-out; /* suavidad */
-}
-
 /* =====================================================
-    🎨 DESIGN TOKENS – RISAS Y COLORES
-    (Paleta amigable, infantil, institucional)
+   🎨 DESIGN TOKENS – RISAS Y COLORES (PRUEBA CLIENTE)
+   Tipografías:
+   - Sans/UI: Helvetica World + fallbacks
+   - Serif/Títulos: Tex Gyre Termes + fallbacks
 ===================================================== */
 
 :root {
-/* =====================
-    BRAND COLORS
-===================== */
-  --brand-primary: #f6a65a;   /* 🧡 naranja cálido */
-  --brand-secondary: #4a90c2; /* 💙 azul confiable */
-  --brand-accent: #c8b6e2;    /* 💜 lavanda suave */
+  /* =====================
+     BRAND COLORS
+  ===================== */
+  --brand-primary: #ec8920;      /* naranja principal */
+  --brand-primary-strong: #e1563c;
+  --brand-secondary: #145ce4;    /* azul activo */
+  --brand-secondary-strong: #390db7;
+  --brand-accent: #9375ad;       /* lila base */
+  --brand-accent-strong: #4e3387;
+  --brand-accent-bright: #ab44d9;
+  --brand-yellow: #f1e810;
 
-/* =====================
-    UI COLORS
-===================== */
-    --ui-bg: #fafafa;
-    --ui-surface: #ffffff;
+  /* =====================
+     UI COLORS
+  ===================== */
+  --ui-bg: #fffae4;
+  --ui-surface: #fffdf3;
 
-    --ui-text: #3a3a3a;
-    --ui-muted: #6b7280;
+  --ui-text: #2f2a3a;
+  --ui-text-strong: #1f1733;
+  --ui-muted: #6f6683;
 
-    --ui-border: #e5e7eb;
+  --ui-border: rgba(78, 51, 135, 0.16);
+  --ui-shadow: rgba(57, 13, 183, 0.12);
 
-/* =====================
-    SOFT TINTS (fondos suaves)
-===================== */
-    --ui-tint-primary: rgba(246, 166, 90, 0.18);
-    --ui-tint-secondary: rgba(74, 144, 194, 0.14);
-    --ui-tint-accent: rgba(200, 182, 226, 0.18);
+  /* =====================
+     SOFT TINTS
+  ===================== */
+  --ui-tint-primary: rgba(236, 137, 32, 0.16);
+  --ui-tint-primary-strong: rgba(225, 86, 60, 0.14);
 
-/* =====================
-    STATES
-===================== */
-    --state-success: #22c55e;
-    --state-error: #ef4444;
+  --ui-tint-secondary: rgba(20, 92, 228, 0.12);
+  --ui-tint-secondary-strong: rgba(57, 13, 183, 0.12);
+
+  --ui-tint-accent: rgba(147, 117, 173, 0.16);
+  --ui-tint-accent-strong: rgba(171, 68, 217, 0.12);
+
+  --ui-tint-yellow: rgba(241, 232, 16, 0.18);
+
+  /* =====================
+     STATES
+  ===================== */
+  --state-success: #22c55e;
+  --state-error: #ef4444;
+
+  /* =====================
+     TYPOGRAPHY
+  ===================== */
+  --font-sans: "Helvetica World", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-serif: "TeX Gyre Termes", "Times New Roman", Georgia, serif;
+
+  /* =====================
+     MOTION / BG
+  ===================== */
+  --bgTempo: 18s;
+  --bgEase: ease-in-out;
+
+  overflow-anchor: none;
 }
 
 /* =====================================================
-    🌍 BASE GLOBAL STYLES
+   🌍 BASE GLOBAL STYLES
 ===================================================== */
 
 html {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-        "Open Sans", "Helvetica Neue", sans-serif;
-    overflow-anchor: none;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
+  font-family: var(--font-sans);
+  overflow-anchor: none;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
-    background-color: var(--ui-bg);
-    color: var(--ui-text);
-    overflow-anchor: none;
-    overflow-x: hidden;
+  background-color: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--font-sans);
+  overflow-anchor: none;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
 }
 
-.bgDecorLayer{
-    position: fixed;
-    left: 0;
-    right: 0;
+/* =====================================================
+   ✍️ HEADINGS / TEXTO
+===================================================== */
 
-  /* margen para que no se corte el recorrido */
-    top: -25vh;
-    height: 150vh;
+h1,
+h2,
+h3,
+.display-serif,
+.title-serif {
+  font-family: var(--font-serif);
+  color: var(--brand-secondary-strong);
+  letter-spacing: -0.02em;
+}
 
-    z-index: -10;
-    pointer-events: none;
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  color: var(--brand-secondary-strong);
+}
 
-    /* NO recortes acá */
-    overflow: visible;
+p,
+span,
+li,
+a,
+button,
+input,
+textarea,
+select,
+label {
+  font-family: var(--font-sans);
+}
+
+strong,
+b {
+  color: var(--ui-text-strong);
+}
+
+/* =====================================================
+   🔗 LINKS
+===================================================== */
+
+a {
+  color: var(--brand-secondary-strong);
+  transition: color 180ms ease;
+}
+
+a:hover {
+  color: var(--brand-secondary);
+}
+
+/* =====================================================
+   🧱 SURFACES / BORDERS GENERALES
+===================================================== */
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--ui-border);
+}
+
+::selection {
+  background: rgba(20, 92, 228, 0.18);
+  color: var(--ui-text-strong);
+}
+
+/* =====================================================
+   🧩 FORM ELEMENTS
+===================================================== */
+
+input,
+textarea,
+select {
+  background: var(--ui-surface);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-border);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--brand-secondary);
+  box-shadow: 0 0 0 3px rgba(20, 92, 228, 0.14);
+}
+
+/* =====================================================
+   🎠 BACKGROUND DECOR LAYER
+===================================================== */
+
+.bgDecorLayer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: -25vh;
+  height: 150vh;
+  z-index: -10;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* =====================================================
+   🎯 UTILS GLOBALES DE APOYO
+   (por si querés empezar a usar tokens nuevos
+   sin tocar mucho componente)
+===================================================== */
+
+.text-brand-primary {
+  color: var(--brand-primary);
+}
+
+.text-brand-secondary {
+  color: var(--brand-secondary);
+}
+
+.text-brand-secondary-strong {
+  color: var(--brand-secondary-strong);
+}
+
+.text-brand-accent {
+  color: var(--brand-accent);
+}
+
+.text-brand-accent-strong {
+  color: var(--brand-accent-strong);
+}
+
+.bg-brand-primary-soft {
+  background-color: var(--ui-tint-primary);
+}
+
+.bg-brand-secondary-soft {
+  background-color: var(--ui-tint-secondary);
+}
+
+.bg-brand-accent-soft {
+  background-color: var(--ui-tint-accent);
+}
+
+.bg-brand-yellow-soft {
+  background-color: var(--ui-tint-yellow);
 }
