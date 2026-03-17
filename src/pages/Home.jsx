@@ -49,16 +49,16 @@ export default function Home() {
             {
             url: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero1_gslohl.webp",
             title:
-                "Aprender jugando, explorando y descubriendo el mundo a su propio ritmo.",
-            subtitle: "Una propuesta cálida y respetuosa para acompañar cada etapa.",
+                "Crecer jugando, descubriendo y a su propio ritmo.",
+            subtitle: "Un recorrido que estimula la curiosidad, el vínculo y el desarrollo en cada etapa.",
             active: true,
             order: 1,
             public_id: "fallback-1",
             },
             {
             url: "https://res.cloudinary.com/dbwrmebbo/image/upload/v1770669220/Hero2_dfy8uh.webp",
-            title: "Un espacio seguro para crecer con confianza.",
-            subtitle: "Acompañamiento cercano y actividades pensadas para cada edad.",
+            title: "Elegir con tranquilidad, confiar desde el primer día.",
+            subtitle: "Un espacio que contiene, acompaña y brinda calma desde el primer día.",
             active: true,
             order: 2,
             public_id: "fallback-2",
