@@ -172,7 +172,7 @@ Hero buttons
 }
 
 .heroActions button[data-variant="secondary"] {
-  background-color: rgba(255,255,255,0.85);
+  background-color: rgba(249, 244, 238,0.85);
   border: 1px solid rgba(0,0,0,0.08);
   color: #3a3a3a;
 }
@@ -183,7 +183,7 @@ Hero buttons
   transition: transform 160ms ease;
 }
 
-.heroBtn:hover .heroArrow { transform: translateX(3px); }
+.heroBtn:hover .heroArrow { transform: translateX(1px); }
 
 .heroBtn {
   border-radius: 16px;
@@ -204,8 +204,8 @@ Hero buttons
 
 .heroBtnPrimary:hover {
   box-shadow:
-    0 18px 38px rgba(246,166,90,0.45),
-    0 16px 32px rgba(0,0,0,0.14);
+    0 12px 15px rgba(246,166,90,0.45),
+    0 12px 15px rgba(0,0,0,0.14);
 }
 
 @media (max-width: 640px) {
@@ -286,7 +286,7 @@ FAQ (shell + temas + preguntas)
   }
 
   .faqShell:hover {
-    background-color: rgba(255,255,255,0.88);
+    background-color: rgba(249, 244, 238,0.88);
     transform: translateY(-2px);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
     border-color: rgba(229,231,235,0.90);
@@ -330,7 +330,7 @@ FAQ (shell + temas + preguntas)
 
 .faqTopic {
   border-radius: 22px;
-  background: rgba(255,255,255,0.55);
+  background: rgba(249, 244, 238,0.55);
   border: 1px solid rgba(229,231,235,0.85);
   box-shadow: 0 10px 22px rgba(0,0,0,0.05);
   overflow: hidden;
@@ -413,7 +413,7 @@ FAQ (shell + temas + preguntas)
 .faqQItem {
   border-radius: 18px;
   border: 1px solid rgba(229,231,235,0.85);
-  background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(74,144,194,0.06));
+  background: linear-gradient(180deg, rgba(249, 244, 238,0.66), rgba(74,144,194,0.06));
   overflow: hidden;
 }
 
@@ -616,7 +616,7 @@ FAQ – tema activo (highlight)
     linear-gradient(
       180deg,
       rgba(246,166,90,0.14),
-      rgba(255,255,255,0.85)
+      rgba(249, 244, 238,0.85)
     );
   border-color: rgba(246,166,90,0.45);
   box-shadow:

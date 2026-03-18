@@ -96,7 +96,7 @@ Cards base
   padding: 1.05rem 1.1rem;
 
   border-radius: 28px 26px 30px 24px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(74,144,194,0.10));
+  background: linear-gradient(180deg, rgba(249, 244, 238,0.62), rgba(74,144,194,0.10));
   border: 1px solid rgba(229,231,235,0.85);
   backdrop-filter: blur(1px);
   box-shadow: 0 12px 26px rgba(0,0,0,0.06);
@@ -117,7 +117,7 @@ Cards base
 }
 
 .softCard:hover{
-  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(246,166,90,0.12));
+  background: linear-gradient(180deg, rgba(249, 244, 238,0.86), rgba(246,166,90,0.12));
   box-shadow: 0 14px 30px rgba(0,0,0,0.08);
 }
 
@@ -149,7 +149,7 @@ Top row
   color: #2b2b2b;
 
   border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.75);
+  background: rgba(249, 244, 238,0.75);
   overflow: hidden;
   flex: 0 0 auto;
 }
@@ -201,7 +201,7 @@ Top row
   padding: 0.35rem 0.55rem;
   border-radius: 999px;
   border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.72);
+  background: rgba(249, 244, 238,0.72);
   flex: 0 0 auto;
 }
 
@@ -314,7 +314,7 @@ Ocupa el lugar de la card y se expande al costado
       radial-gradient(340px 240px at 18% 18%, rgba(246,166,90,0.18), transparent 60%),
       radial-gradient(360px 260px at 82% 26%, rgba(74,144,194,0.14), transparent 60%),
       radial-gradient(420px 320px at 60% 85%, rgba(200,182,226,0.18), transparent 65%),
-      rgba(255,255,255,0.92);
+      rgba(249, 244, 238,0.92);
     border-color: rgba(229,231,235,0.92);
     box-shadow: 0 22px 64px rgba(0,0,0,0.18);
     backdrop-filter: blur(2px);
