@@ -7,7 +7,7 @@
   background: linear-gradient(
     180deg,
     rgba(246,166,90,0.14) 0%,
-    rgba(255,255,255,0.92) 60%
+    rgba(249, 244, 238,0.92) 60%
   );
   backdrop-filter: blur(10px);
 }
@@ -39,7 +39,7 @@
   height: 44px;
   border-radius: 16px;
   border: 1px solid rgba(0,0,0,0.10);
-  background: rgba(255,255,255,0.55);
+  background: rgba(249, 244, 238,0.55);
   backdrop-filter: blur(6px);
   box-shadow: 0 8px 18px rgba(0,0,0,0.10);
   cursor: pointer;
@@ -166,7 +166,7 @@
   left: 0;
   height: 100vh;
   width: min(380px, 88vw);
-  background: rgba(255,255,255,0.94);
+  background: rgba(249, 244, 238,0.94);
   border-right: 1px solid rgba(0,0,0,0.10);
   box-shadow: 20px 0 60px rgba(0,0,0,0.20);
   transform: translateX(-16px);
@@ -198,7 +198,7 @@
   height: 38px;
   border-radius: 16px;
   border: 1px solid rgba(0,0,0,0.10);
-  background: rgba(255,255,255,0.7);
+  background: rgba(249, 244, 238,0.7);
   cursor: pointer;
 }
 
@@ -270,7 +270,7 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(249, 244, 238,0.9);
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 8px 18px rgba(0,0,0,0.10);
   text-decoration: none;
