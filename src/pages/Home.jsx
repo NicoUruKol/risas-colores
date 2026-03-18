@@ -247,7 +247,8 @@ export default function Home() {
                     aria-label="Preguntas frecuentes"
                     >
                     <div className={styles.faqHead}>
-                        <h2 className={styles.faqTitle}>Preguntas frecuentes</h2>
+                        <h2 className={styles.faqTitle}>
+                            Preguntas frecuentes</h2>
                         <p className={styles.faqSub}>
                         Resolvemos dudas rápidas antes de coordinar una visita.
                         </p>
