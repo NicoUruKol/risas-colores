@@ -113,46 +113,36 @@ export default function Home() {
         const faqs = useMemo(
         () => [
         {
-            topic: "Ingreso y contacto",
+            topic: "Contacto",
             items: [
             {
-                q: "¿Cómo coordino una entrevista o visita?",
-                a: "Podés escribirnos por WhatsApp. Coordinamos una entrevista personalizada para que conozcas el jardín y podamos responder todas tus dudas.",
-            },
-            {
-                q: "¿Cómo puedo pedir información?",
-                a: "A través de WhatsApp o redes. Siempre respondemos de manera directa y personalizada.",
+                q: "¿Cómo coordino una entrevista?",
+                a: "Podes contactarnos a través del botón de whatsapp solicitando información o directamente coordinar una visita para conocer el jardin.",
             },
             ],
         },
         {
-            topic: "Propuesta y metodología",
+            topic: "Propuesta pedagógica",
             items: [
             {
-                q: "¿Qué metodología utiliza el jardín?",
-                a: "Trabajamos con una propuesta pedagógica basada en el juego, el vínculo afectivo y el respeto por los tiempos de cada niño y niña.",
-            },
-            {
-                q: "¿En qué línea educativa se basa la propuesta?",
-                a: "Nuestra mirada está centrada en la primera infancia, priorizando el desarrollo emocional, social y cognitivo en un entorno cuidado y estimulante.",
-            },
+                q: "¿Qué propuesta pedagógica ofrece el jardín?",
+                a: [
+                    "Nuestra propuesta se basa en el Diseño Curricular vigente del Nivel Inicial.",
+                    "Trabajamos a través de escenarios pedagógicos, donde el equipo docente acompaña y observa los procesos individuales.",
+                    "Además, incluimos áreas como expresión artística, movimiento y juego corporal, generando experiencias acordes a cada etapa del desarrollo.",
+            ]},
             ],
         },
         {
             topic: "Seguridad y emergencias",
             items: [
             {
-                q: "¿Qué pasa si un niño o niña se lastima?",
-                a: "Ante cualquier situación, se actúa de forma inmediata siguiendo los protocolos del jardín y se avisa a la familia de manera directa.",
-            },
-            {
                 q: "¿El jardín cuenta con protocolos de emergencia?",
-                a: "Sí. Contamos con protocolos de seguridad y emergencia establecidos para garantizar el cuidado de todos los niños y niñas.",
-            },
-            {
-                q: "¿Qué nivel de seguridad tiene el jardín?",
-                a: "El espacio está preparado especialmente para la primera infancia, con medidas de seguridad acordes a cada etapa.",
-            },
+                a: [
+                    "Sí. La institución cuenta con protocolos de cuidado y actuación ante situaciones de emergencia, priorizando siempre el bienestar y la seguridad de los niños y niñas.",
+                    "El equipo docente está preparado para acompañar estas situaciones y actuar de manera responsable, informando a las familias cuando sea necesario.",
+                    "El cuidado, la prevención y la comunicación con las familias forman parte del funcionamiento cotidiano del jardín",
+            ]},
             ],
         },
         {
@@ -160,15 +150,11 @@ export default function Home() {
             items: [
             {
                 q: "¿El jardín está habilitado?",
-                a: "Sí, el jardín cuenta con la habilitación correspondiente para funcionar como jardín maternal.",
+                a: "Sí, Risas y Colores es una institución educativa habilitada que recibe niños y niñas desde los 45 días hasta los 2 años.",
             },
             {
-                q: "¿Está incorporado a la enseñanza oficial?",
-                a: "El jardín maternal no funciona como escuela formal. Su objetivo es acompañar la primera infancia desde el cuidado, el juego y el desarrollo integral.",
-            },
-            {
-                q: "¿Cuál es la diferencia entre jardín maternal y guardería?",
-                a: "Un jardín maternal no solo cuida, sino que acompaña el desarrollo infantil a través de una propuesta pedagógica pensada para cada etapa.",
+                q: "¿Por qué no está incorporado a la enseñanza oficial?",
+                a: "No forma parte de la enseñanza oficial, ya que pertenece al ámbito de la educación materno infantil.",
             },
             ],
         },
@@ -235,20 +221,20 @@ export default function Home() {
                         </p>
 
                         <div className={`flex flex-col sm:flex-row gap-3 ${styles.heroActions}`}>
-                        <Link to={cta1.to} className="w-full sm:w-auto">
-                            <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
-                            {cta1.label} <span className={styles.heroArrow}>→</span>
-                            </Button>
-                        </Link>
+                            <Link to={cta1.to} className="w-full sm:w-auto">
+                                <Button variant="secondary" className={`w-full sm:w-auto ${styles.heroBtn}`}>
+                                {cta1.label} <span className={styles.heroArrow}>→</span>
+                                </Button>
+                            </Link>
 
-                        <Link to={cta2.to} className="w-full sm:w-auto">
-                            <Button
-                            variant="primary"
-                            className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}
-                            >
-                            {cta2.label} <span className={styles.heroArrow}>→</span>
-                            </Button>
-                        </Link>
+                            <Link to={cta2.to} className="w-full sm:w-auto">
+                                <Button
+                                variant="primary"
+                                className={`w-full sm:w-auto ${styles.heroBtn} ${styles.heroBtnPrimary}`}
+                                >
+                                {cta2.label} <span className={styles.heroArrow}>→</span>
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </section>
@@ -309,7 +295,17 @@ export default function Home() {
                                         </button>
 
                                         <div className={styles.faqA} hidden={!qOpen}>
-                                        <p className={styles.cardText}>{item.a}</p>
+                                            <div className={styles.faqA} hidden={!qOpen}>
+                                                {Array.isArray(item.a) ? (
+                                                    item.a.map((parrafo, i) => (
+                                                    <p key={i} className={styles.cardText}>
+                                                        {parrafo}
+                                                    </p>
+                                                    ))
+                                                ) : (
+                                                    <p className={styles.cardText}>{item.a}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                     );

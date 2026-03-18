@@ -68,7 +68,7 @@ Shells (Hero / FAQ / Familias)
   .heroCard:focus-within,
   .familiasShell:active,
   .familiasShell:focus-within {
-    background-color: rgba(255,255,255,0.88);
+    background-color: rgba(249, 244, 238,0.88);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
   }
 }
@@ -85,7 +85,7 @@ Shells (Hero / FAQ / Familias)
 
   .heroCard:hover,
   .familiasShell:hover {
-    background-color: rgba(255,255,255,0.88);
+    background-color: rgba(249, 244, 238,0.88);
     transform: translateY(-2px);
     box-shadow: 0 18px 42px rgba(0,0,0,0.10);
     border-color: rgba(229,231,235,0.90);
