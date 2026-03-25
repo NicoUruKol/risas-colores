@@ -18,6 +18,8 @@ export const createOrder = async (payload) => {
 
     const data = await readJson(res);
 
+    console.log("CREATE ORDER raw response =>", data);
+
     if (!res.ok) {
         const err = new Error(data?.message || `Error HTTP ${res.status}`);
         err.status = res.status;
@@ -25,5 +27,5 @@ export const createOrder = async (payload) => {
         throw err;
     }
 
-    return data.data; // { id, status, total, init_point }
+    return data.data;
 };

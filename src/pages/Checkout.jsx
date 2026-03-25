@@ -98,6 +98,8 @@ export default function Checkout() {
         };
 
         const created = await createOrder(payload);
+        console.log("CHECKOUT order response =>", created);
+        console.log("INIT POINT =>", created?.init_point);
 
         // Guardamos contexto para mostrar el “Gracias Pepa… Pepito…” al volver de MP
         localStorage.setItem(
