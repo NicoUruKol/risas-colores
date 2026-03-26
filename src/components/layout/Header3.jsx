@@ -70,7 +70,7 @@ export default function Header3() {
             <img src={logo} alt="Risas y Colores" className={styles.logoImg} />
             <div className={styles.brandText}>
                 <div className={styles.brandLine1}>
-                <span className={styles.blue}>Risas</span> y <span className={styles.orange}>Colores</span>
+                <span className={styles.orange}>Risas y Colores</span>
                 </div>
                 <div className={styles.brandLine2}>Jardín materno infantil</div>
             </div>

@@ -57,6 +57,7 @@ Header
   letter-spacing: -0.02em;
   font-weight: 900;
   color: var(--ui-text);
+  font-family: "Poppins", sans-serif; 
 }
 
 .sub {
