@@ -231,6 +231,7 @@ export default function AdminProductos() {
                         <Link
                         to={`/admin/productos/${p.id}/editar`}
                         className={styles.linkReset}
+                        
                         >
                         <Button variant="ghost" className={styles.actionBtn}>
                             Editar
