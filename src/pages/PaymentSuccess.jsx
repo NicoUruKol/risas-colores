@@ -46,7 +46,7 @@ export default function PaymentSuccess() {
     }, [status, navigate]);
 
     const adultName = ctx?.adultName || "Familia";
-    const kidName = ctx?.kidName || "tu peque";
+    const kidName = ctx?.kidName || "mi peque";
 
     return (
         <main className={`${styles.stage} py-10`}>
@@ -88,11 +88,11 @@ export default function PaymentSuccess() {
                 variant="primary"
                 onClick={() => {
                     const msg =
-                    `Hola 🌈\n` +
+                    `Hola Risas y Colores 🌈\n` +
                     `Soy ${adultName}. Confirmé el pago del uniforme de ${kidName}.\n` +
                     (externalRef ? `Referencia: #${externalRef}\n` : "") +
                     `¡Gracias!`;
-                    const url = `https://wa.me/5491152499974?text=${encodeURIComponent(msg)}`;
+                    const url = `https://wa.me/5491156971231?text=${encodeURIComponent(msg)}`;
                     window.open(url, "_blank", "noopener,noreferrer");
                 }}
                 >
