@@ -406,7 +406,7 @@ FAQ (shell + temas + preguntas)
 
 .faqQText {
   font-weight: 900;
-  color: var(--ui-text);
+  color: var(--brand-secondary);
   font-size: 0.98rem;
   line-height: 1.25;
 }
