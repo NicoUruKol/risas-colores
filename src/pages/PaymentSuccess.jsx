@@ -38,10 +38,18 @@ export default function PaymentSuccess() {
     }, []);
 
     useEffect(() => {
-        // Si no está aprobado, no mostramos “Gracias, ya tenés…”
-        if (status && status !== "approved") {
-        if (status === "pending" || status === "in_process") navigate("/payment-pending", { replace: true });
-        else navigate("/payment-failure", { replace: true });
+        // Si no hay status, lo tratamos como fallo
+        if (!status) {
+            navigate("/payment-failure", { replace: true });
+            return;
+        }
+
+        if (status !== "approved") {
+            if (status === "pending" || status === "in_process") {
+                navigate("/payment-pending", { replace: true });
+            } else {
+                navigate("/payment-failure", { replace: true });
+            }
         }
     }, [status, navigate]);
 
