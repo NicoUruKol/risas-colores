@@ -91,13 +91,14 @@ export default function UniformesEntry() {
         <div className={styles.bg} />
         <Container className="grid gap-6">
             <section className={`${styles.headerShell} grid gap-3 text-center p-5`}>
-            <div className="grid justify-center">
-                <Badge variant="blue">Tienda</Badge>
-            </div>
-            <h1 className="text-3xl font-extrabold text-ui-text">Uniformes del jardín</h1>
-            <p className="text-ui-muted">
-                Elegí un producto y después seleccioná el talle disponible en el detalle.
-            </p>
+                <div className="grid justify-center">
+                    <Badge variant="blue">Tienda</Badge>
+                </div>
+                <h1 className={`text-3xl font-extrabold text-ui-text ${styles.headerTitle}`}>
+                    Uniformes del jardín</h1>
+                <p className="text-ui-muted">
+                    Elegí un producto y después seleccioná el talle disponible en el detalle.
+                </p>
             </section>
 
             {loading ? (

@@ -15,7 +15,6 @@ Stage + Background
 }
 
 
-
 /* ==============================
 Header shell
 ============================== */
@@ -30,6 +29,7 @@ Header shell
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   transition: transform 220ms ease, box-shadow 260ms ease, background-color 260ms ease, border-color 260ms ease;
+
 }
 
 .headerShell::before {
@@ -73,6 +73,10 @@ Header shell
     -webkit-backdrop-filter: blur(2px);
   }
 
+  .headerTitle {
+  font-family: "Poppins", sans-serif;
+}
+
   .headerShell::before,
   .headerShell::after {
     opacity: 0;
@@ -82,6 +86,8 @@ Header shell
   .headerShell:hover::before { opacity: 0.9; }
   .headerShell:hover::after  { opacity: 0.35; }
 }
+
+
 
 /* ==============================
 Product cards
