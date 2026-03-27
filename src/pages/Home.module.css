@@ -501,6 +501,12 @@ Familias
   color: #2b2b2b !important;
 }
 
+.linkReset {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+}
+
 /* ==============================
 Responsive bg tuning
 ============================== */

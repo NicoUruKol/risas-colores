@@ -149,8 +149,8 @@ export default function Home() {
             topic: "Marco institucional",
             items: [
             {
-                q: "¿El jardín está habilitado?",
-                a: "Sí, Risas y Colores es una institución educativa habilitada que recibe niños y niñas desde los 45 días hasta los 2 años.",
+                q: "¿El jardín cuenta con habilitación?",
+                a: "Sí, Risas y Colores es una institución educativa habilitada que recibe niños y niñas desde los 45 días hasta los 3 años.",
             },
             {
                 q: "¿Por qué no está incorporado a la enseñanza oficial?",
@@ -347,10 +347,19 @@ export default function Home() {
                     <div className="flex flex-wrap gap-3">
                         <Link to="/uniformes">
                             <Button variant="ghost" className={styles.btnTextDark}>
-                                Ver uniformes
+                            Ver uniformes
                             </Button>
                         </Link>
-                        <Button variant="ghost">Información importante</Button>
+
+                        <a
+                            href="/PEI.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <Button variant="ghost" className={styles.btnTextDark}>
+                            Información importante
+                            </Button>
+                        </a>
                     </div>
                 </section>
             </Container>

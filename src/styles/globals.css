@@ -48,19 +48,19 @@
   --ui-tint-yellow: rgba(241, 232, 16, 0.18);
 
   /* =====================
-     STATES
+    STATES
   ===================== */
   --state-success: #22c55e;
   --state-error: #ef4444;
 
   /* =====================
-     TYPOGRAPHY
+    TYPOGRAPHY
   ===================== */
-  --font-sans: "Poppins", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: "Poppins", sans-serif;
   --font-serif: "TeX Gyre Termes", "Times New Roman", Georgia, serif;
 
   /* =====================
-     MOTION / BG
+    MOTION / BG
   ===================== */
   --bgTempo: 18s;
   --bgEase: ease-in-out;

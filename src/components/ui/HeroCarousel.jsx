@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./HeroCarousel.module.css";
 
-export default function HeroCarousel({ images = [], interval = 4500, onChange }) {
+export default function HeroCarousel({ images = [], interval = 10000, onChange }) {
     const [index, setIndex] = useState(0);
     const startX = useRef(null);
 
