@@ -49,7 +49,7 @@ export default function AppShell() {
             <div ref={pageRef} className="relative min-h-screen overflow-x-hidden">
                 {showDecor && (
                 <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
-                    {/*{mobile ? <MobileDecor /> : <BackgroundDecor2 />}*/}
+                    {mobile ? <MobileDecor /> : <BackgroundDecor2 />}
                 </div>
                 )}
 

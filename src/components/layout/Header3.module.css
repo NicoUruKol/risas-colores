@@ -73,11 +73,12 @@
   display: block;
 }
 
-.brandText{
+.brandText {
   display: flex;
   flex-direction: column;
   line-height: 1.03;
   min-width: 0;
+  font-family: "Poppins", sans-serif;
 }
 
 .brandLine1{
@@ -313,7 +314,6 @@
 
   .brandText{
     overflow: hidden;
-    font-family: "Poppins", sans-serif;
   }
 
   .brandLine1,
