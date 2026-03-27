@@ -125,17 +125,27 @@ export default function Header3() {
 
             <nav className={styles.drawerNav}>
                 <NavLink to="/el-jardin" className={navLinkClass} onClick={() => setOpen(false)}>
-                El Jardín
+                    El Jardín
                 </NavLink>
 
                 <NavLink to="/uniformes" className={navLinkClass} onClick={() => setOpen(false)}>
-                Uniformes
+                    Uniformes
                 </NavLink>
 
+                <a
+                    href="/PEI.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.navLink}
+                    onClick={() => setOpen(false)}
+                >
+                    P.E.I.
+                </a>
+
                 {hasItems && (
-                <NavLink to="/carrito" className={navLinkClass} onClick={() => setOpen(false)}>
+                    <NavLink to="/carrito" className={navLinkClass} onClick={() => setOpen(false)}>
                     Carrito <span className={styles.drawerCount}>({count})</span>
-                </NavLink>
+                    </NavLink>
                 )}
             </nav>
 

@@ -205,9 +205,9 @@ export default function ElJardin() {
 
                     <div className={styles.stat}>
                         <div className={styles.statNumber}>
-                        <CountUp end={31} duration={1.2} enableScrollSpy scrollSpyOnce />
+                        <CountUp end={35} duration={1.2} enableScrollSpy scrollSpyOnce />
                         </div>
-                        <div className={styles.statLabel}>años acompañando a las familias</div>
+                        <div className={styles.statLabel}>años riendo y coloreando junto a las familias</div>
                     </div>
                     </div>
                 </div>
