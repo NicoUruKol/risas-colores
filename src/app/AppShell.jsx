@@ -42,14 +42,15 @@ export default function AppShell() {
     }, []);
 
     const showDecor = pathname === "/";
-    const mobile = isMobile();
+    //const mobile = isMobile();
 
     return (
         <CartProvider>
             <div ref={pageRef} className="relative min-h-screen overflow-x-hidden">
                 {showDecor && (
                 <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
-                    {mobile ? <MobileDecor /> : <BackgroundDecor2 />}
+                    {/*{mobile ? <MobileDecor /> : <BackgroundDecor2 />}*/}
+                    {<MobileDecor />}
                 </div>
                 )}
 
