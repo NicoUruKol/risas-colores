@@ -522,8 +522,88 @@ Responsive bg tuning
 }
 
 /* ==============================
-FAQ (modo lectura) FIX: hidden manda
+FAQ (estable, sin saltos)
 ============================== */
+
+.faqTopic {
+  border-radius: 22px;
+  background: rgba(249, 244, 238, 0.55);
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition:
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    transform 180ms ease;
+}
+
+.faqTopicOpen {
+  background: rgba(255, 255, 255, 0.78);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .faqTopic:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.07);
+  }
+}
+
+.faqTopicBtn,
+.faqQBtn {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.faqTopicBtn {
+  padding: 1rem 1.05rem;
+}
+
+.faqQBtn {
+  padding: 0.85rem 0.95rem;
+}
+
+.faqTopicBtn:focus-visible,
+.faqQBtn:focus-visible {
+  outline: 2px solid rgba(74, 144, 194, 0.45);
+  outline-offset: 3px;
+  border-radius: 16px;
+}
+
+.faqTopicTitle {
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.faqQText {
+  font-weight: 900;
+  color: var(--brand-secondary);
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.faqPlus,
+.faqChevron {
+  display: inline-block;
+  font-weight: 900;
+  color: var(--ui-muted);
+  line-height: 1;
+  transition: transform 140ms ease;
+}
+
+.faqTopicBtn[aria-expanded="true"] .faqPlus,
+.faqQBtn[aria-expanded="true"] .faqChevron {
+  transform: rotate(45deg);
+}
 
 .faqTopicPanel,
 .faqA {
@@ -539,90 +619,46 @@ FAQ (modo lectura) FIX: hidden manda
   display: none;
 }
 
-/* micro feedback solo en el icono */
-.faqPlus,
-.faqChevron {
-  transition: transform 140ms ease;
+.faqInner {
+  padding: 0 1.05rem 1.05rem;
+  display: grid;
+  gap: 0.55rem;
+  border-top: 0;
 }
 
-.faqTopicBtn[aria-expanded="true"] .faqPlus,
-.faqQBtn[aria-expanded="true"] .faqChevron {
-  transform: rotate(45deg);
+.faqQItem {
+  border-radius: 18px;
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  background: linear-gradient(
+    180deg,
+    rgba(249, 244, 238, 0.66),
+    rgba(74, 144, 194, 0.06)
+  );
+  overflow: hidden;
 }
 
-/* opcional: micro fade al aparecer (sin reflow animado)
-   si igual te molesta movimiento, borrá este bloque */
-.faqTopicPanel:not([hidden]),
-.faqA:not([hidden]) {
-  animation: faqFade 90ms ease both;
+.faqA p {
+  margin: 0;
+  padding: 0 0.95rem 0.95rem;
 }
 
-@keyframes faqFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@media (max-width: 640px) {
+  .faqTopicBtn {
+    padding: 0.9rem 0.95rem;
+  }
+
+  .faqInner {
+    padding: 0 0.95rem 0.95rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .faqTopicPanel:not([hidden]),
-  .faqA:not([hidden]) {
-    animation: none !important;
-  }
   .faqPlus,
   .faqChevron {
     transition: none !important;
   }
 }
-/* ==============================
-FAQ – tema activo (highlight)
-============================== */
 
-.faqTopic {
-  transition:
-    background-color 220ms ease,
-    box-shadow 220ms ease,
-    border-color 220ms ease;
-}
-
-/* Estado activo */
-.faqTopicActive {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(246,166,90,0.14),
-      rgba(249, 244, 238,0.85)
-    );
-  border-color: rgba(246,166,90,0.45);
-  box-shadow:
-    0 14px 28px rgba(246,166,90,0.25),
-    0 10px 22px rgba(0,0,0,0.06);
-}
-
-/* Título más presente cuando está activo */
-.faqTopicActive[data-tone="0"] {
-  --faq-accent: rgba(246,166,90,0.45); /* naranja */
-}
-
-.faqTopicActive[data-tone="1"] {
-  --faq-accent: rgba(74,144,194,0.45); /* azul */
-}
-
-.faqTopicActive[data-tone="2"] {
-  --faq-accent: rgba(177,132,240,0.45); /* violeta */
-}
-
-.faqTopicActive {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--faq-accent) 30%, white),
-      rgba(255,255,255,0.9)
-    );
-  border-color: var(--faq-accent);
-  box-shadow:
-    0 14px 28px color-mix(in srgb, var(--faq-accent) 55%, transparent),
-    0 10px 22px rgba(0,0,0,0.06);
-}
-
-.faqTopicActive .faqPlus {
-  color: var(--faq-accent);
+.reviewsSlot {
+  min-height: 420px;
 }

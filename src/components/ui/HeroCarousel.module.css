@@ -6,13 +6,12 @@ Carousel
   position: relative;
   width: 100%;
   height: 220px;
+  aspect-ratio: 16 / 9;
   border-radius: 22px;
   overflow: hidden;
-
-  /* + estabilidad visual cuando cambian imágenes */
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(229,231,235,0.85);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(229, 231, 235, 0.85);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06);
 }
 
 @media (min-width: 768px) {
@@ -28,19 +27,12 @@ Slides
 .slide {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-
   opacity: 0;
-
-  /* ✅ cambio clave: sacamos translateX (eso marea y puede disparar repaint feo) */
-  transform: none;
-
-  /* ✅ más corto y estable: crossfade */
   transition: opacity 220ms ease;
-  will-change: opacity;
-
   pointer-events: none;
   user-select: none;
 }
@@ -50,7 +42,7 @@ Slides
 }
 
 /* ==============================
-Indicadores (se quedan como estaban)
+Indicadores
 ============================== */
 
 .dots {
@@ -58,19 +50,17 @@ Indicadores (se quedan como estaban)
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
   display: flex;
   gap: 8px;
-
-  /* para que siempre se vean sobre la imagen */
-  z-index: 2;
 }
 
 .dot {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.6);
   border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
   cursor: pointer;
 }
 
