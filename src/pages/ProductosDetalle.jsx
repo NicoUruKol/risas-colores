@@ -146,20 +146,33 @@ export default function ProductoDetalle() {
 
         <Container className={`grid gap-6 ${styles.detailContainer}`}>
             <div className={styles.topBar}>
-            <Link to="/uniformes">
-                <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
-                <span className={styles.ctaIcon}>←</span>
-                Volver
-                </Button>
-            </Link>
+                <Link to="/uniformes">
+                    <Button variant="secondary" className={`${styles.ctaReadable} ${styles.ctaBtn}`}>
+                    <span className={styles.ctaIcon}>←</span>
+                    Volver
+                    </Button>
+                </Link>
 
-            {!loading && item ? <Badge variant="blue">Producto</Badge> : null}
+                {!loading && item ? <Badge variant="blue">Producto</Badge> : null}
             </div>
 
             {loading ? (
-            <Card className={`p-5 ${styles.shell}`}>
-                <p className="text-ui-muted">Cargando…</p>
-            </Card>
+                <Card className={`${styles.shell} ${styles.detailCard}`}>
+                    <div className={styles.detailGrid}>
+                    <div className={styles.galleryCol}>
+                        <div className={styles.imageSkeleton} />
+                    </div>
+
+                    <div className={styles.infoCol}>
+                        <div className={styles.textSkeletonLg} />
+                        <div className={styles.textSkeletonMd} />
+                        <div className={styles.textSkeletonSm} />
+                        <div className={styles.boxSkeleton} />
+                        <div className={styles.controlsSkeleton} />
+                        <div className={styles.buttonSkeleton} />
+                    </div>
+                    </div>
+                </Card>
             ) : !item ? (
             <Card className={`p-5 ${styles.shell}`}>
                 <p className="text-ui-muted">No encontramos este producto.</p>
