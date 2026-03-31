@@ -11,7 +11,7 @@ import styles from "./AdminStockMovements.module.css";
 const TYPE_OPTIONS = [
     { value: "", label: "Todos" },
     { value: "admin_adjust", label: "Ajuste admin" },
-    { value: "order_sale", label: "Venta (orden)" },
+    { value: "order_create", label: "Venta (orden)" },
     { value: "order_cancel", label: "Cancelación (orden)" },
 ];
 
