@@ -12,7 +12,7 @@ import SceneInteractiva from "../components/scene/SceneInteractiva";
 import { getElJardinGalleryContent } from "../services/apiContent";
 import HorariosSalas from "../components/sections/HorariosSalas";
 
-import intro from "../assets/intro.webp";
+import intro2 from "../assets/intro2.webp";
 
 export default function ElJardin() {
     const nextSectionRef = useRef(null);
@@ -213,7 +213,7 @@ export default function ElJardin() {
                 </div>
 
                 <div className={styles.mediaMock}>
-                    <img src={intro} alt="Jardín Risas y Colores" className={styles.mediaImg} />
+                    <img src={intro2} alt="Jardín Risas y Colores" className={styles.mediaImg} />
                 </div>
                 </div>
             </section>
@@ -310,7 +310,7 @@ export default function ElJardin() {
                 <div className={styles.sectionHead}>
                 <div>
                     <h2 className={styles.h3}>Conocé el espacio</h2>
-                    <p className={styles.smallMuted}>Imágenes del jardín.</p>
+                    <p className={styles.smallMuted}> El ayer, el hoy y la evolucion y el cambio de nuestro jardín</p>
                 </div>
                 <Badge variant="orange">Galería</Badge>
                 </div>
