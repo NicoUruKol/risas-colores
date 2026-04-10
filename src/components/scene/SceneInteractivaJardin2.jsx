@@ -160,47 +160,131 @@ export default function SceneInteractivaJardin2({
     const sceneRef = useRef(null);
 
     useEffect(() => {
-        const setHeaderH = () => {
+    let resizeObserver;
+
+    const setHeaderH = () => {
         const headerEl = document.querySelector("header");
         const h = headerEl?.getBoundingClientRect?.().height ?? 88;
         sceneWrapRef.current?.style.setProperty("--header-h", `${Math.round(h)}px`);
-        };
+    };
 
-        setHeaderH();
-        window.addEventListener("resize", setHeaderH);
-        return () => window.removeEventListener("resize", setHeaderH);
-    }, []);
+    setHeaderH();
+
+    window.addEventListener("resize", setHeaderH);
+    window.addEventListener("load", setHeaderH);
+
+    if (document.fonts?.ready) {
+        document.fonts.ready.then(() => {
+            setHeaderH();
+        });
+    }
+
+    const headerEl = document.querySelector("header");
+    if (typeof ResizeObserver !== "undefined" && headerEl) {
+        resizeObserver = new ResizeObserver(() => {
+            setHeaderH();
+        });
+        resizeObserver.observe(headerEl);
+    }
+
+    return () => {
+        window.removeEventListener("resize", setHeaderH);
+        window.removeEventListener("load", setHeaderH);
+
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+        }
+    };
+}, []);
 
     useEffect(() => {
-        const updateFit = () => {
+    let raf1 = 0;
+    let raf2 = 0;
+    let timeoutId = 0;
+    let resizeObserver;
+
+    const updateFit = () => {
         const el = sceneRef.current;
         if (!el) return;
 
         const cw = el.clientWidth;
         const ch = el.clientHeight;
 
+        if (!cw || !ch) return;
+
         const scale = Math.min(cw / IMG_W, ch / IMG_H);
         const w = IMG_W * scale;
         const h = IMG_H * scale;
 
-        setFit({
-            w,
-            h,
-            x: (cw - w) / 2,
-            y: (ch - h) / 2,
+        setFit((prev) => {
+            const next = {
+                w,
+                h,
+                x: (cw - w) / 2,
+                y: (ch - h) / 2,
+            };
+
+            const same =
+                Math.abs(prev.w - next.w) < 0.5 &&
+                Math.abs(prev.h - next.h) < 0.5 &&
+                Math.abs(prev.x - next.x) < 0.5 &&
+                Math.abs(prev.y - next.y) < 0.5;
+
+            return same ? prev : next;
         });
-        };
+    };
 
-        updateFit();
+    const scheduleUpdateFit = () => {
+        cancelAnimationFrame(raf1);
+        cancelAnimationFrame(raf2);
+        clearTimeout(timeoutId);
 
-        window.addEventListener("resize", updateFit);
-        window.addEventListener("orientationchange", updateFit);
+        raf1 = requestAnimationFrame(() => {
+            updateFit();
 
-        return () => {
-        window.removeEventListener("resize", updateFit);
-        window.removeEventListener("orientationchange", updateFit);
-        };
-    }, []);
+            raf2 = requestAnimationFrame(() => {
+                updateFit();
+            });
+        });
+
+        timeoutId = window.setTimeout(() => {
+            updateFit();
+        }, 180);
+    };
+
+    scheduleUpdateFit();
+
+    window.addEventListener("resize", scheduleUpdateFit);
+    window.addEventListener("orientationchange", scheduleUpdateFit);
+    window.addEventListener("load", scheduleUpdateFit);
+
+    if (typeof ResizeObserver !== "undefined" && sceneRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+            scheduleUpdateFit();
+        });
+        resizeObserver.observe(sceneRef.current);
+    }
+
+    if (document.fonts?.ready) {
+        document.fonts.ready.then(() => {
+            scheduleUpdateFit();
+        });
+    }
+
+    return () => {
+        cancelAnimationFrame(raf1);
+        cancelAnimationFrame(raf2);
+        clearTimeout(timeoutId);
+
+        window.removeEventListener("resize", scheduleUpdateFit);
+        window.removeEventListener("orientationchange", scheduleUpdateFit);
+        window.removeEventListener("load", scheduleUpdateFit);
+
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+        }
+    };
+}, []);
 
     const hasFiredUnlockRef = useRef(false);
 
