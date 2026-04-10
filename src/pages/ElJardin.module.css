@@ -237,8 +237,12 @@ Side
 Scene
 ============================== */
 
-.sceneShell {
-  padding: 0.75rem;
+.sceneShell > * {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-radius: 22px;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -250,6 +254,7 @@ Scene
   z-index: 1;
   width: 100%;
 }
+
 
 /* ==============================
 Resto (bloqueo + entrada)
@@ -357,7 +362,8 @@ Intro
   z-index: 1;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 18px;
+  overflow: hidden;
+  border-radius: 24px 22px 26px 22px;
   background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(74,144,194,0.10));
   border: 1px solid rgba(229,231,235,0.90);
   box-shadow: 0 12px 26px rgba(0,0,0,0.06);
@@ -370,7 +376,6 @@ Intro
   border-radius: inherit;
   object-fit: cover;
 }
-
 @media (min-width: 768px) {
   .mediaMock { aspect-ratio: 1 / 1; }
 }

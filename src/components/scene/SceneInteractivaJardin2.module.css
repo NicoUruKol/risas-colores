@@ -1,0 +1,545 @@
+/* ==============================
+Escena
+============================== */
+.sceneWrap {
+  --header-h: 88px;
+  display: grid;
+  gap: 10px;
+}
+
+.scene {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  background: transparent;
+
+  aspect-ratio: 2048 / 1447;
+  height: auto;
+  max-height: calc(100vh - var(--header-h) - 28px - 28px);
+
+}
+
+@media (min-width: 900px) {
+  .scene {
+    height: min(700px, calc(100vh - var(--header-h) - 28px));
+  }
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  object-position: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ==============================
+Hotspots
+============================== */
+.hotspot {
+  position: absolute;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 16px;
+  outline: none;
+  touch-action: manipulation;
+}
+
+.hotspot:focus-visible {
+  outline: 2px solid rgba(74, 144, 194, 0.55);
+  outline-offset: 2px;
+}
+
+/* ==============================
+Tip + progreso
+============================== */
+.tipBar {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.tipLabel {
+  display: none;
+}
+
+.tipText {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.progressLine {
+  text-align: center;
+  color: var(--ui-muted);
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+  .tipBar {
+    margin-top: 4px;
+    transform: translateY(-8px);
+  }
+}
+
+/* ==============================
+Capas animables
+============================== */
+.sun,
+.clouds,
+.cat,
+.tree,
+.people,
+.dog,
+.buildingMaskUp {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sun {
+  z-index: 10;
+}
+
+.clouds {
+  z-index: 11;
+}
+
+.cat {
+  z-index: 12;
+}
+
+.tree {
+  z-index: 13;
+}
+
+.people {
+  z-index: 14;
+}
+
+.dog {
+  z-index: 15;
+}
+
+/* Máscara superior única por encima de sol + nubes */
+.buildingMaskUp {
+  z-index: 16;
+}
+
+/* ==============================
+Sol
+============================== */
+.sunRays {
+  transform-origin: var(--sun-cx) var(--sun-cy);
+}
+
+.sun.play .sunRays {
+  animation: sunSpinClick 1400ms ease-in-out 1;
+}
+
+@keyframes sunSpinClick {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==============================
+Nubes
+============================== */
+.cloudsMain {
+  will-change: transform;
+}
+
+.clouds.play .cloudsMain {
+  animation: cloudDrift 1200ms ease-in-out 1;
+}
+
+@keyframes cloudDrift {
+  0% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(24px);
+  }
+  70% {
+    transform: translateX(-24px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* ==============================
+Gato
+============================== */
+.catTail {
+  transform-origin: var(--cat-tail-x) var(--cat-tail-y);
+  will-change: transform;
+}
+
+.cat.play .catTail {
+  animation: catTailSwing 1800ms ease-in-out 1;
+}
+
+@keyframes catTailSwing {
+  0% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(40deg);
+  }
+  40% {
+    transform: rotate(-15deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+  80% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* ==============================
+Árbol
+============================== */
+.treeLeaves {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  will-change: transform, opacity;
+}
+
+.tree.play .treeLeaves {
+  animation: leavesDriftFall 1200ms ease-in-out 1 forwards;
+}
+
+@keyframes leavesDriftFall {
+  0% {
+    transform: translate3d(0px, 0px, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: translate3d(10px, 8px, 0);
+    opacity: 1;
+  }
+  45% {
+    transform: translate3d(-10px, 16px, 0);
+    opacity: 0.95;
+  }
+  70% {
+    transform: translate3d(8px, 24px, 0);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(0px, 34px, 0);
+    opacity: 0;
+  }
+}
+
+/* ==============================
+Gente - anclajes
+============================== */
+.teacherArm {
+  transform-origin: var(--teacher-arm-x) var(--teacher-arm-y);
+}
+
+.boyArm {
+  transform-origin: var(--boy-arm-x) var(--boy-arm-y);
+}
+
+.girlRightArm {
+  transform-origin: var(--girl-right-arm-x) var(--girl-right-arm-y);
+}
+
+.girlLeftArmA {
+  transform-origin: var(--girl-left-arm-a-x) var(--girl-left-arm-a-y);
+}
+
+.girlLeftArmB {
+  transform-origin: var(--girl-left-arm-b-x) var(--girl-left-arm-b-y);
+}
+
+.girlLeftArmC {
+  transform-origin: var(--girl-left-arm-c-x) var(--girl-left-arm-c-y);
+}
+
+/* ==============================
+Gente - saludos separados
+============================== */
+.people.play .teacherArm {
+  animation: waveTeacher 1200ms ease-in-out 1;
+}
+
+.people.play .boyArm {
+  animation: waveBoy 900ms ease-in-out 1;
+}
+
+.people.play .girlRightArm {
+  animation: waveGirlRight 1100ms ease-in-out 1;
+}
+
+.people.play .girlLeftArmA {
+  animation: waveGirlLeftA 1000ms ease-in-out 1;
+}
+
+/*.people.play .girlLeftArmB {
+  animation: waveGirlLeftB 1150ms ease-in-out 1;
+}*/
+
+.people.play .girlLeftArmC {
+  animation: waveGirlLeftC 950ms ease-in-out 1;
+}
+
+@keyframes waveTeacher {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-18deg); }
+  40% { transform: rotate(6deg); }
+  60% { transform: rotate(-14deg); }
+  80% { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes waveBoy {
+  0% { transform: rotate(0deg); }
+  18% { transform: rotate(-26deg); }
+  36% { transform: rotate(8deg); }
+  54% { transform: rotate(-22deg); }
+  72% { transform: rotate(6deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes waveGirlRight {
+  0% { transform: rotate(0deg); }
+  22% { transform: rotate(16deg); }
+  44% { transform: rotate(-12deg); }
+  66% { transform: rotate(10deg); }
+  84% { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes waveGirlLeftA {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-14deg); }
+  45% { transform: rotate(10deg); }
+  70% { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes waveGirlLeftB {
+  0% { transform: rotate(0deg); }
+  16% { transform: rotate(12deg); }
+  34% { transform: rotate(-10deg); }
+  58% { transform: rotate(8deg); }
+  82% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes waveGirlLeftC {
+  0% { transform: rotate(0deg); }
+  /*24% { transform: rotate(-10deg); }*/
+  46% { transform: rotate(12deg); }
+  /*68% { transform: rotate(-7deg); }*/
+  /*100% { transform: rotate(0deg); }*/
+}
+
+/* ==============================
+Perro
+Orden correcto:
+lengua -> mochila -> tapa boca
+============================== */
+.dogTongue {
+  z-index: 1;
+  opacity: 0;
+  transform-origin: var(--dog-mouth-x) var(--dog-mouth-y);
+  transform: translateY(-10px) scaleY(0.72); /* más arriba al iniciar */
+  will-change: transform, opacity;
+}
+
+.dogBag {
+  z-index: 2;
+  transform-origin: var(--dog-mouth-x) var(--dog-mouth-y);
+  transform: translate(0, 0) rotate(0deg); /* visible desde el arranque */
+  will-change: transform;
+}
+
+.dogMouthMask {
+  z-index: 3;
+}
+
+/* Mochila: arranca visible en la boca y cae desde ahí */
+.dog.play .dogBag {
+  animation: dogBagDrop 1500ms cubic-bezier(.24, .82, .28, 1) 1 forwards;
+}
+
+/* Lengua: aparece después de que empieza a caer la mochila */
+.dog.play .dogTongue {
+  animation: dogTonguePant 1500ms ease-in-out 180ms 1 forwards;
+}
+
+@keyframes dogBagDrop {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  /* cae al piso */
+  58% {
+    transform: translate(0px, 28px) rotate(0deg);
+  }
+
+  /* pequeño rebote / freno */
+  72% {
+    transform: translate(0px, 28px) rotate(0deg);
+  }
+
+  /* cae hacia un costado */
+  99% {
+    transform: translate(-7px, 31px) rotate(-15deg);
+  }
+
+  /* vuelve a posicion inical */
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes dogTonguePant {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scaleY(0.72);
+  }
+
+  10% {
+    opacity: 1;
+    transform: translateY(-2px) scaleY(1);
+  }
+
+  24% {
+    opacity: 1;
+    transform: translateY(-8px) scaleY(0.76);
+  }
+
+  38% {
+    opacity: 1;
+    transform: translateY(-1px) scaleY(1);
+  }
+
+  52% {
+    opacity: 1;
+    transform: translateY(-7px) scaleY(0.8);
+  }
+
+  68% {
+    opacity: 1;
+    transform: translateY(0px) scaleY(1);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translateY(-6px) scaleY(0.82);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(-2px) scaleY(0.95);
+  }
+}
+
+/* ==============================
+Modal desbloqueo
+============================== */
+.unlockOverlay {
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  animation: unlockFadeIn 300ms ease-out;
+}
+
+@keyframes unlockFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.unlockCard {
+  position: relative;
+  width: min(360px, 92%);
+  padding: 16px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.14);
+  display: grid;
+  gap: 10px;
+  text-align: center;
+  z-index: 1;
+}
+
+.unlockTitle {
+  font-weight: 900;
+  color: var(--ui-text);
+  font-size: 18px;
+}
+
+.unlockSubtitle {
+  color: rgba(15, 23, 42, 0.72);
+  font-size: 14px;
+  margin-top: -6px;
+}
+
+.unlockClose {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.7;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.unlockClose:hover {
+  opacity: 1;
+}
+
+.unlockCard :global(button) {
+  background: var(--ui-primary, #4a90c2);
+  color: #fff;
+  border: 0;
+  opacity: 1;
+}
+
+.unlockCard :global(button):hover {
+  filter: brightness(0.95);
+}
+
+.unlockCard :global(button):active {
+  transform: translateY(1px);
+}
+
+.unlockCard :global(a) {
+  color: inherit;
+  text-decoration: none;
+}
+

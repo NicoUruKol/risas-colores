@@ -8,7 +8,8 @@ import Badge from "../components/ui/Badge";
 import SEO from "../components/seo/SEO";
 
 import styles from "./ElJardin.module.css";
-import SceneInteractiva from "../components/scene/SceneInteractiva";
+//import SceneInteractiva from "../components/scene/SceneInteractiva";
+import SceneInteractivaJardin2 from "../components/scene/SceneInteractivaJardin2";
 import { getElJardinGalleryContent } from "../services/apiContent";
 import HorariosSalas from "../components/sections/HorariosSalas";
 
@@ -163,7 +164,7 @@ export default function ElJardin() {
             </aside>
 
             <div className={styles.sceneShell}>
-                <SceneInteractiva
+                <SceneInteractivaJardin2
                 minUnlock={3}
                 unlockedExternal={unlocked}
                 onUnlocked={() => setUnlocked(true)}
