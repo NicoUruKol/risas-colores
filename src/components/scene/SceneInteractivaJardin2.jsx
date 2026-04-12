@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Button from "../ui/Button";
 import styles from "./SceneInteractivaJardin2.module.css";
 
+const DEBUG = true; // 👈 apagar cuando termines
+
 /* ==============================
 Imágenes
 ============================== */
@@ -34,94 +36,20 @@ import maskDogMouth from "../../assets/animacion2/mask_dog_mouth.png";
 Hotspots
 ============================== */
 const SCENE_HOTSPOTS = [
-    {
-        id: "cloud1",
-        label: "Nube",
-        tip: "La imaginación también se mueve ☁️",
-        rect: { x: 0, y: 3, w: 15, h: 15 },
-        z: 40,
-        animKey: "clouds",
-    },
-    {
-        id: "cloud2",
-        label: "Nube",
-        tip: "La imaginación también se mueve ☁️",
-        rect: { x: 32, y: 1, w: 18, h: 12 },
-        z: 40,
-        animKey: "clouds",
-    },
-    {
-        id: "cloud3",
-        label: "Nube",
-        tip: "La imaginación también se mueve ☁️",
-        rect: { x: 59, y: 0, w: 15, h: 13 },
-        z: 40,
-        animKey: "clouds",
-    },
-    {
-        id: "cloud4",
-        label: "Nube",
-        tip: "La imaginación también se mueve ☁️",
-        rect: { x: 87, y: 34, w: 8, h: 14 },
-        z: 40,
-        animKey: "clouds",
-    },
-    {
-        id: "cloud5",
-        label: "Nube",
-        tip: "La imaginación también se mueve ☁️",
-        rect: { x: 4, y: 34, w: 8, h: 14 },
-        z: 40,
-        animKey: "clouds",
-    },
-    {
-        id: "sun",
-        label: "Sol",
-        tip: "Un ambiente cálido y amable ☀️",
-        rect: { x: 77, y: 2, w: 22, h: 29 },
-        z: 50,
-        animKey: "sun",
-    },
-    {
-        id: "cat",
-        label: "Gato",
-        tip: "Siempre hay ternura en los pequeños detalles 🐱",
-        rect: { x: 17, y: 3, w: 13, h: 10 },
-        z: 50,
-        animKey: "cat",
-    },
-    {
-        id: "tree",
-        label: "Árbol",
-        tip: "Naturaleza, juego y aire libre 🌿",
-        rect: { x: 0, y: 50, w: 13, h: 46 },
-        z: 35,
-        animKey: "tree",
-    },
-    {
-        id: "people1",
-        label: "Ventanas",
-        tip: "Jugamos, aprendemos y nos saludamos con alegría 🤍",
-        rect: { x: 29, y: 67, w: 19, h: 17 },
-        z: 45,
-        animKey: "people",
-    },
-    {
-        id: "people2",
-        label: "Ventanas",
-        tip: "Jugamos, aprendemos y nos saludamos con alegría 🤍",
-        rect: { x: 65, y: 67, w: 19, h: 17 },
-        z: 45,
-        animKey: "people",
-    },
-    {
-        id: "dog",
-        label: "Ofelia",
-        tip: "Nuestra amiga también tiene su sorpresa 🎒",
-        rect: { x: 42, y: 85, w: 9, h: 14 },
-        z: 45,
-        animKey: "dog",
-    },
+    { id: "cloud1", label: "Nube", tip: "La imaginación también se mueve ☁️", rect: { x: 0, y: 3, w: 15, h: 15 }, z: 40, animKey: "clouds" },
+    { id: "cloud2", label: "Nube", tip: "La imaginación también se mueve ☁️", rect: { x: 32, y: 1, w: 18, h: 12 }, z: 40, animKey: "clouds" },
+    { id: "cloud3", label: "Nube", tip: "La imaginación también se mueve ☁️", rect: { x: 59, y: 0, w: 15, h: 13 }, z: 40, animKey: "clouds" },
+    { id: "cloud4", label: "Nube", tip: "La imaginación también se mueve ☁️", rect: { x: 87, y: 34, w: 8, h: 14 }, z: 40, animKey: "clouds" },
+    { id: "cloud5", label: "Nube", tip: "La imaginación también se mueve ☁️", rect: { x: 4, y: 34, w: 8, h: 14 }, z: 40, animKey: "clouds" },
+
+    { id: "sun", label: "Sol", tip: "Un ambiente cálido y amable ☀️", rect: { x: 77, y: 2, w: 22, h: 29 }, z: 50, animKey: "sun" },
+    { id: "cat", label: "Gato", tip: "Siempre hay ternura en los pequeños detalles 🐱", rect: { x: 17, y: 3, w: 13, h: 10 }, z: 50, animKey: "cat" },
+    { id: "tree", label: "Árbol", tip: "Naturaleza, juego y aire libre 🌿", rect: { x: 0, y: 50, w: 13, h: 46 }, z: 35, animKey: "tree" },
+
+    { id: "people1", label: "Ventanas", tip: "Jugamos, aprendemos y nos saludamos con alegría 🤍", rect: { x: 29, y: 67, w: 19, h: 17 }, z: 45, animKey: "people" },
+    { id: "people2", label: "Ventanas", tip: "Jugamos, aprendemos y nos saludamos con alegría 🤍", rect: { x: 65, y: 67, w: 19, h: 17 }, z: 45, animKey: "people" },
+
+    { id: "dog", label: "Ofelia", tip: "Nuestra amiga también tiene su sorpresa 🎒", rect: { x: 42, y: 85, w: 9, h: 14 }, z: 45, animKey: "dog" },
 ];
 
 /* ==============================
@@ -153,139 +81,65 @@ export default function SceneInteractivaJardin2({
         dog: 0,
     });
 
-    const [showUnlockModal, setShowUnlockModal] = useState(false);
-    const [fit, setFit] = useState({ x: 0, y: 0, w: 0, h: 0 });
-
     const sceneWrapRef = useRef(null);
     const sceneRef = useRef(null);
 
-    useEffect(() => {
-    let resizeObserver;
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
+    const [fit, setFit] = useState({ x: 0, y: 0, w: 0, h: 0 });
 
-    const setHeaderH = () => {
+    /* ==============================
+    Header height
+    ============================== */
+    useEffect(() => {
+        const setHeaderH = () => {
         const headerEl = document.querySelector("header");
         const h = headerEl?.getBoundingClientRect?.().height ?? 88;
         sceneWrapRef.current?.style.setProperty("--header-h", `${Math.round(h)}px`);
-    };
+        };
 
-    setHeaderH();
+        setHeaderH();
+        window.addEventListener("resize", setHeaderH);
 
-    window.addEventListener("resize", setHeaderH);
-    window.addEventListener("load", setHeaderH);
+        return () => window.removeEventListener("resize", setHeaderH);
+    }, []);
 
-    if (document.fonts?.ready) {
-        document.fonts.ready.then(() => {
-            setHeaderH();
-        });
-    }
-
-    const headerEl = document.querySelector("header");
-    if (typeof ResizeObserver !== "undefined" && headerEl) {
-        resizeObserver = new ResizeObserver(() => {
-            setHeaderH();
-        });
-        resizeObserver.observe(headerEl);
-    }
-
-    return () => {
-        window.removeEventListener("resize", setHeaderH);
-        window.removeEventListener("load", setHeaderH);
-
-        if (resizeObserver) {
-            resizeObserver.disconnect();
-        }
-    };
-}, []);
-
+    /* ==============================
+    Fit contain real
+    ============================== */
     useEffect(() => {
-    let raf1 = 0;
-    let raf2 = 0;
-    let timeoutId = 0;
-    let resizeObserver;
-
-    const updateFit = () => {
+        const updateFit = () => {
         const el = sceneRef.current;
         if (!el) return;
 
         const cw = el.clientWidth;
         const ch = el.clientHeight;
 
-        if (!cw || !ch) return;
-
         const scale = Math.min(cw / IMG_W, ch / IMG_H);
         const w = IMG_W * scale;
         const h = IMG_H * scale;
 
-        setFit((prev) => {
-            const next = {
-                w,
-                h,
-                x: (cw - w) / 2,
-                y: (ch - h) / 2,
-            };
-
-            const same =
-                Math.abs(prev.w - next.w) < 0.5 &&
-                Math.abs(prev.h - next.h) < 0.5 &&
-                Math.abs(prev.x - next.x) < 0.5 &&
-                Math.abs(prev.y - next.y) < 0.5;
-
-            return same ? prev : next;
+        setFit({
+            w,
+            h,
+            x: (cw - w) / 2,
+            y: (ch - h) / 2,
         });
-    };
+        };
 
-    const scheduleUpdateFit = () => {
-        cancelAnimationFrame(raf1);
-        cancelAnimationFrame(raf2);
-        clearTimeout(timeoutId);
+        updateFit();
 
-        raf1 = requestAnimationFrame(() => {
-            updateFit();
+        window.addEventListener("resize", updateFit);
+        window.addEventListener("orientationchange", updateFit);
 
-            raf2 = requestAnimationFrame(() => {
-                updateFit();
-            });
-        });
+        return () => {
+        window.removeEventListener("resize", updateFit);
+        window.removeEventListener("orientationchange", updateFit);
+        };
+    }, []);
 
-        timeoutId = window.setTimeout(() => {
-            updateFit();
-        }, 180);
-    };
-
-    scheduleUpdateFit();
-
-    window.addEventListener("resize", scheduleUpdateFit);
-    window.addEventListener("orientationchange", scheduleUpdateFit);
-    window.addEventListener("load", scheduleUpdateFit);
-
-    if (typeof ResizeObserver !== "undefined" && sceneRef.current) {
-        resizeObserver = new ResizeObserver(() => {
-            scheduleUpdateFit();
-        });
-        resizeObserver.observe(sceneRef.current);
-    }
-
-    if (document.fonts?.ready) {
-        document.fonts.ready.then(() => {
-            scheduleUpdateFit();
-        });
-    }
-
-    return () => {
-        cancelAnimationFrame(raf1);
-        cancelAnimationFrame(raf2);
-        clearTimeout(timeoutId);
-
-        window.removeEventListener("resize", scheduleUpdateFit);
-        window.removeEventListener("orientationchange", scheduleUpdateFit);
-        window.removeEventListener("load", scheduleUpdateFit);
-
-        if (resizeObserver) {
-            resizeObserver.disconnect();
-        }
-    };
-}, []);
-
+    /* ==============================
+    Unlock
+    ============================== */
     const hasFiredUnlockRef = useRef(false);
 
     useEffect(() => {
@@ -300,6 +154,9 @@ export default function SceneInteractivaJardin2({
         return () => clearTimeout(t);
     }, [unlocked, onUnlocked]);
 
+    /* ==============================
+    Click hotspot
+    ============================== */
     const onHotspotClick = (spot) => {
         setDiscovered((prev) => {
         const next = new Set(prev);
@@ -317,42 +174,64 @@ export default function SceneInteractivaJardin2({
         onHotspotClick._t = window.setTimeout(() => setTipVisible(false), 2200);
     };
 
-    const anchors = useMemo(
-        () => ({
-        sunCx: "87.3%",
-        sunCy: "20.4%",
+    /* ==============================
+    Anclajes (convertidos a px desde el fit)
+    ============================== */
+    const sunCx = useMemo(() => fit.x + 0.873 * fit.w, [fit]);
+    const sunCy = useMemo(() => fit.y + 0.180 * fit.h, [fit]);
 
-        catTailX: "20%",
-        catTailY: "12.8%",
+    const catTailPx = useMemo(() => fit.x + 0.20 * fit.w, [fit]);
+    const catTailPy = useMemo(() => fit.y + 0.101 * fit.h, [fit]);
 
-        teacherArmX: "31.5%",
-        teacherArmY: "76%",
+    const teacherArmPx = useMemo(() => fit.x + 0.314 * fit.w, [fit]);
+    const teacherArmPy = useMemo(() => fit.y + 0.78 * fit.h, [fit]);
 
-        boyArmX: "67.5%",
-        boyArmY: "79%",
+    const boyArmPx = useMemo(() => fit.x + 0.675 * fit.w, [fit]);
+    const boyArmPy = useMemo(() => fit.y + 0.81 * fit.h, [fit]);
 
-        girlRightArmX: "80.5%",
-        girlRightArmY: "78.5%",
+    const girlRightArmPx = useMemo(() => fit.x + 0.806 * fit.w, [fit]);
+    const girlRightArmPy = useMemo(() => fit.y + 0.804 * fit.h, [fit]);
 
-        girlLeftArmAX: "44%",
-        girlLeftArmAY: "78%",
+    const girlLeftArmAPx = useMemo(() => fit.x + 0.44 * fit.w, [fit]);
+    const girlLeftArmAPy = useMemo(() => fit.y + 0.80 * fit.h, [fit]);
 
-        girlLeftArmBX: "40%",
-        girlLeftArmBY: "75%",
+    const girlLeftArmBPx = useMemo(() => fit.x + 0.405 * fit.w, [fit]);
+    const girlLeftArmBPy = useMemo(() => fit.y + 0.775 * fit.h, [fit]);
 
-        girlLeftArmCX: "39%",
-        girlLeftArmCY: "78%",
+    const girlLeftArmCPx = useMemo(() => fit.x + 0.39 * fit.w, [fit]);
+    const girlLeftArmCPy = useMemo(() => fit.y + 0.80 * fit.h, [fit]);
 
-        dogMouthX: "46.5%",
-        dogMouthY: "87%",
-        }),
-        []
-    );
+    const dogMouthPx = useMemo(() => fit.x + 0.465 * fit.w, [fit]);
+    const dogMouthPy = useMemo(() => fit.y + 0.90 * fit.h, [fit]);
+
+    /* ===== DEBUG ANCHORS START ===== */
+    const DEBUG_ANCHORS = DEBUG;
+
+    const renderDebugAnchor = (id, x, y) => {
+        if (!DEBUG_ANCHORS) return null;
+
+        return (
+        <div
+            key={id}
+            className={styles.debugAnchor}
+            style={{
+            left: `${x}px`,
+            top: `${y}px`,
+            }}
+            aria-hidden="true"
+            title={`${id}: ${Math.round(x)}, ${Math.round(y)}`}
+        >
+            <span className={styles.debugAnchorDot} />
+            <span className={styles.debugAnchorLabel}>{id}</span>
+        </div>
+        );
+    };
+    /* ===== DEBUG ANCHORS END ===== */
 
     return (
         <div ref={sceneWrapRef} className={styles.sceneWrap}>
         <div ref={sceneRef} className={styles.scene} aria-label="Escena interactiva del jardín 2">
-            {/* Fondo base */}
+            {/* Fondo */}
             <img src={bgSceneGardenBase} alt="" className={styles.layer} />
 
             {/* Sol */}
@@ -360,8 +239,8 @@ export default function SceneInteractivaJardin2({
             key={`sun-${anim.sun}`}
             className={`${styles.sun} ${anim.sun ? styles.play : ""}`}
             style={{
-                "--sun-cx": anchors.sunCx,
-                "--sun-cy": anchors.sunCy,
+                "--sun-cx": `${sunCx}px`,
+                "--sun-cy": `${sunCy}px`,
             }}
             >
             <img src={fxSunCore} alt="" className={styles.layer} />
@@ -378,8 +257,8 @@ export default function SceneInteractivaJardin2({
             key={`cat-${anim.cat}`}
             className={`${styles.cat} ${anim.cat ? styles.play : ""}`}
             style={{
-                "--cat-tail-x": anchors.catTailX,
-                "--cat-tail-y": anchors.catTailY,
+                "--cat-tail-x": `${catTailPx}px`,
+                "--cat-tail-y": `${catTailPy}px`,
             }}
             >
             <img src={fxCatTail} alt="" className={`${styles.layer} ${styles.catTail}`} />
@@ -395,18 +274,23 @@ export default function SceneInteractivaJardin2({
             key={`people-${anim.people}`}
             className={`${styles.people} ${anim.people ? styles.play : ""}`}
             style={{
-                "--teacher-arm-x": anchors.teacherArmX,
-                "--teacher-arm-y": anchors.teacherArmY,
-                "--boy-arm-x": anchors.boyArmX,
-                "--boy-arm-y": anchors.boyArmY,
-                "--girl-right-arm-x": anchors.girlRightArmX,
-                "--girl-right-arm-y": anchors.girlRightArmY,
-                "--girl-left-arm-a-x": anchors.girlLeftArmAX,
-                "--girl-left-arm-a-y": anchors.girlLeftArmAY,
-                "--girl-left-arm-b-x": anchors.girlLeftArmBX,
-                "--girl-left-arm-b-y": anchors.girlLeftArmBY,
-                "--girl-left-arm-c-x": anchors.girlLeftArmCX,
-                "--girl-left-arm-c-y": anchors.girlLeftArmCY,
+                "--teacher-arm-x": `${teacherArmPx}px`,
+                "--teacher-arm-y": `${teacherArmPy}px`,
+
+                "--boy-arm-x": `${boyArmPx}px`,
+                "--boy-arm-y": `${boyArmPy}px`,
+
+                "--girl-right-arm-x": `${girlRightArmPx}px`,
+                "--girl-right-arm-y": `${girlRightArmPy}px`,
+
+                "--girl-left-arm-a-x": `${girlLeftArmAPx}px`,
+                "--girl-left-arm-a-y": `${girlLeftArmAPy}px`,
+
+                "--girl-left-arm-b-x": `${girlLeftArmBPx}px`,
+                "--girl-left-arm-b-y": `${girlLeftArmBPy}px`,
+
+                "--girl-left-arm-c-x": `${girlLeftArmCPx}px`,
+                "--girl-left-arm-c-y": `${girlLeftArmCPy}px`,
             }}
             >
             <img src={fxTeacherArm} alt="" className={`${styles.layer} ${styles.teacherArm}`} />
@@ -422,8 +306,8 @@ export default function SceneInteractivaJardin2({
             key={`dog-${anim.dog}`}
             className={`${styles.dog} ${anim.dog ? styles.play : ""}`}
             style={{
-                "--dog-mouth-x": anchors.dogMouthX,
-                "--dog-mouth-y": anchors.dogMouthY,
+                "--dog-mouth-x": `${dogMouthPx}px`,
+                "--dog-mouth-y": `${dogMouthPy}px`,
             }}
             >
             <img src={fxDogTongue} alt="" className={`${styles.layer} ${styles.dogTongue}`} />
@@ -431,15 +315,30 @@ export default function SceneInteractivaJardin2({
             <img src={maskDogMouth} alt="" className={`${styles.layer} ${styles.dogMouthMask}`} />
             </div>
 
-            {/* Máscara superior única */}
+            {/* Máscara superior */}
             <div className={styles.buildingMaskUp}>
             <img src={maskBuildingUp} alt="" className={styles.layer} />
             </div>
 
+            {/* ===== DEBUG ANCHORS START ===== */}
+            {DEBUG_ANCHORS && (
+            <div className={styles.debugAnchorsLayer} aria-hidden="true">
+                {renderDebugAnchor("sun", sunCx, sunCy)}
+                {renderDebugAnchor("catTail", catTailPx, catTailPy)}
+                {renderDebugAnchor("teacherArm", teacherArmPx, teacherArmPy)}
+                {renderDebugAnchor("boyArm", boyArmPx, boyArmPy)}
+                {renderDebugAnchor("girlRightArm", girlRightArmPx, girlRightArmPy)}
+                {renderDebugAnchor("girlLeftArmA", girlLeftArmAPx, girlLeftArmAPy)}
+                {renderDebugAnchor("girlLeftArmB", girlLeftArmBPx, girlLeftArmBPy)}
+                {renderDebugAnchor("girlLeftArmC", girlLeftArmCPx, girlLeftArmCPy)}
+                {renderDebugAnchor("dogMouth", dogMouthPx, dogMouthPy)}
+            </div>
+            )}
+            {/* ===== DEBUG ANCHORS END ===== */}
+
             {/* Hotspots */}
             {SCENE_HOTSPOTS.map((spot) => {
             const { x, y, w, h } = spot.rect;
-
             return (
                 <button
                 key={spot.id}
@@ -457,8 +356,40 @@ export default function SceneInteractivaJardin2({
                 />
             );
             })}
+
+            {/* Modal desbloqueo */}
+            {showUnlockModal && unlocked && (
+            <div className={styles.unlockOverlay} role="dialog" aria-modal="true">
+                <div className={styles.unlockCard}>
+                <div className={styles.unlockTitle}>¡Felicidades! 🌈</div>
+                <div className={styles.unlockSubtitle}>Desbloqueaste el jardín.</div>
+
+                <Button
+                    variant="primary"
+                    onClick={() => {
+                    setShowUnlockModal(false);
+                    requestAnimationFrame(() => {
+                        onGoToNext?.();
+                    });
+                    }}
+                >
+                    Seguir descubriendo ↓
+                </Button>
+
+                <button
+                    type="button"
+                    className={styles.unlockClose}
+                    onClick={() => setShowUnlockModal(false)}
+                    aria-label="Cerrar"
+                >
+                    ✕
+                </button>
+                </div>
+            </div>
+            )}
         </div>
 
+        {/* Tip */}
         {activeTip && tipVisible && (
             <div className={styles.tipBar} role="status" aria-live="polite">
             <span className={styles.tipLabel}>{activeTip.label}:</span>{" "}
@@ -466,39 +397,10 @@ export default function SceneInteractivaJardin2({
             </div>
         )}
 
+        {/* Progreso */}
         {discoveredCount > 0 && !unlocked && (
             <div className={styles.progressLine}>
             ¡Bien! Llevás {discoveredCount}/{minUnlock} descubrimientos.
-            </div>
-        )}
-
-        {showUnlockModal && unlocked && (
-            <div className={styles.unlockOverlay} role="dialog" aria-modal="true">
-            <div className={styles.unlockCard}>
-                <div className={styles.unlockTitle}>¡Felicidades! 🌈</div>
-                <div className={styles.unlockSubtitle}>Desbloqueaste el jardín.</div>
-
-                <Button
-                variant="primary"
-                onClick={() => {
-                    setShowUnlockModal(false);
-                    requestAnimationFrame(() => {
-                    onGoToNext?.();
-                    });
-                }}
-                >
-                Seguir descubriendo ↓
-                </Button>
-
-                <button
-                type="button"
-                className={styles.unlockClose}
-                onClick={() => setShowUnlockModal(false)}
-                aria-label="Cerrar"
-                >
-                ✕
-                </button>
-            </div>
             </div>
         )}
         </div>
