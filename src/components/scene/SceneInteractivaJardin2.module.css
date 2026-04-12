@@ -11,7 +11,6 @@
   overflow: hidden;
   border-radius: 18px;
   background: transparent;
-
   aspect-ratio: 2048 / 1447;
   height: auto;
   max-height: calc(100vh - var(--header-h) - 28px - 28px);
@@ -124,10 +123,12 @@
   animation: cloudDrift 1000ms ease-in-out 1;
 }
 
+/* antes: 25px / -25px
+   ahora: proporcional al ancho de la escena */
 @keyframes cloudDrift {
-  0% { transform: translateX(0); }
-  35% { transform: translateX(25px); }
-  65% { transform: translateX(-25px); }
+  0%   { transform: translateX(0); }
+  35%  { transform: translateX(1.22%); }
+  65%  { transform: translateX(-1.22%); }
   100% { transform: translateX(0); }
 }
 
@@ -161,14 +162,24 @@
   animation: leavesDriftFall 2000ms ease-in-out 1 forwards;
 }
 
+/* Mantengo TU recorrido, pero en valores proporcionales al tamaño de escena
+   equivalencias aproximadas desde 2048x1447:
+   10px X  ≈ 0.49%
+   20px Y  ≈ 1.38%
+   40px Y  ≈ 2.76%
+   60px Y  ≈ 4.15%
+   75px Y  ≈ 5.18%
+   90px Y  ≈ 6.22%
+   100px Y ≈ 6.91%
+*/
 @keyframes leavesDriftFall {
-  0%   { transform: translate3d(0px, 0px, 0); opacity: 1; }
-  16%  { transform: translate3d(10px, 20px, 0); opacity: 1; }
-  32%  { transform: translate3d(-10px, 40px, 0); opacity: .95; }
-  48%  { transform: translate3d(10px, 60px, 0); opacity: 1; }
-  64%  { transform: translate3d(-10px, 75px, 0); opacity: .95; }
-  80%  { transform: translate3d(8px, 90px, 0); opacity: .7; }
-  100% { transform: translate3d(0px, 100px, 0); opacity: 0; }
+  0%   { transform: translate3d(0%, 0%, 0); opacity: 1; }
+  16%  { transform: translate3d(0.49%, 1.38%, 0); opacity: 1; }
+  32%  { transform: translate3d(-0.49%, 2.76%, 0); opacity: .95; }
+  48%  { transform: translate3d(0.49%, 4.15%, 0); opacity: 1; }
+  64%  { transform: translate3d(-0.49%, 5.18%, 0); opacity: .95; }
+  80%  { transform: translate3d(0.39%, 6.22%, 0); opacity: .7; }
+  100% { transform: translate3d(0%, 6.91%, 0); opacity: 0; }
 }
 
 /* Gente - anclajes */
@@ -277,19 +288,26 @@
 }
 
 .dog.play .dogBag {
-  animation: dogBagDrop 1400ms cubic-bezier(.24, .82, .28, 1) 1 forwards;
+  animation: dogBagDrop 1000ms cubic-bezier(.24, .82, .28, 1) 1 forwards;
 }
 
 .dog.play .dogTongue {
   animation: dogTonguePant 1500ms ease-in-out 180ms 1 forwards;
 }
 
+/* Mantengo TU comportamiento:
+   baja, queda, vuelca un poco y vuelve.
+   Solo paso los desplazamientos a proporcionales:
+   26px Y ≈ 1.80%
+   31px Y ≈ 2.14%
+   7px X  ≈ 0.34%
+*/
 @keyframes dogBagDrop {
-  0%   { transform: translate(0px, 0px) rotate(0deg); }
-  58%  { transform: translate(0px, 26px) rotate(0deg); }
-  72%  { transform: translate(0px, 26px) rotate(0deg); }
-  99% { transform: translate(-7px, 31px) rotate(-15deg); }
-  100% { transform: translate(0px, 0px) rotate(0deg); }
+  0%   { transform: translate(0%, 0%) rotate(0deg); }
+  58%  { transform: translate(0%, 1.80%) rotate(0deg); }
+  72%  { transform: translate(0%, 1.80%) rotate(0deg); }
+  99%  { transform: translate(-0.34%, 2.18%) rotate(-15deg); }
+  100% { transform: translate(0%, 0%) rotate(0deg); }
 }
 
 @keyframes dogTonguePant {
@@ -383,55 +401,41 @@
   text-decoration: none;
 }
 
+/* ===== DEBUG ANCHORS START ===== */
 
-.scene {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2048 / 1447;
-  overflow: hidden;
-}
-
-.layer {
+.debugAnchorsLayer {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  z-index: 110;
   pointer-events: none;
 }
 
-/* ==============================
-DEBUG START
-============================== */
-
 .debugAnchor {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: red;
-  border-radius: 50%;
   transform: translate(-50%, -50%);
-  z-index: 9999;
+  pointer-events: none;
 }
 
-.debugAnchor span {
+.debugAnchorDot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: red;
+  border: 1px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.debugAnchorLabel {
   position: absolute;
-  top: 14px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 10px;
-
   color: black;
   padding: 2px 4px;
   border-radius: 4px;
+  white-space: nowrap;
 }
 
-.debugFit {
-  position: absolute;
-  border: 2px dashed lime;
-  z-index: 9998;
-}
-
-/* ==============================
-DEBUG END
-============================== */
+/* ===== DEBUG ANCHORS END ===== */
