@@ -127,7 +127,7 @@
    ahora: proporcional al ancho de la escena */
 @keyframes cloudDrift {
   0%   { transform: translateX(0); }
-  35%  { transform: translateX(1.22%); }
+  35%  { transform: translateX(1.32%); }
   65%  { transform: translateX(-1.22%); }
   100% { transform: translateX(0); }
 }
@@ -196,23 +196,23 @@
 }
 
 .people.play .boyArm {
-  animation: waveBoy 900ms ease-in-out 1;
+  animation: waveBoy 1500ms ease-in-out 1;
 }
 
 .people.play .girlRightArm {
-  animation: waveGirlRight 1100ms ease-in-out 1;
+  animation: waveGirlRight 900ms ease-in-out 1;
 }
 
 .people.play .girlLeftArmA {
-  animation: waveGirlLeftA 1000ms ease-in-out 1;
+  animation: waveGirlLeftA 800ms ease-in-out 1;
 }
 
 .people.play .girlLeftArmB {
-  animation: waveGirlLeftB 1150ms ease-in-out 1;
+  animation: waveGirlLeftB 950ms ease-in-out 1;
 }
 
 .people.play .girlLeftArmC {
-  animation: waveGirlLeftC 950ms ease-in-out 1;
+  animation: waveGirlLeftC 750ms ease-in-out 1;
 }
 
 @keyframes waveTeacher {
