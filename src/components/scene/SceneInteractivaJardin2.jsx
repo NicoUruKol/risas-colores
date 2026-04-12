@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Button from "../ui/Button";
 import styles from "./SceneInteractivaJardin2.module.css";
 
-const DEBUG = true; // 👈 apagar cuando termines
+const DEBUG = false; // 👈 apagar cuando termines
 
 /* ==============================
 Imágenes
